@@ -137,8 +137,8 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     @keyframes radar{0%{transform:translate(-50%,-50%) scale(0.5);opacity:1}100%{transform:translate(-50%,-50%) scale(1.5);opacity:0}}
 
-    .modalBack{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.65);z-index:50}
-    .modal{width:min(720px,94%);border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));box-shadow: var(--shadow);padding:18px;backdrop-filter: blur(8px)}
+    .modalBack{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.65);z-index:50;overflow-y:auto;padding:20px 0;}
+    .modal{width:min(720px,94%);border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));box-shadow: var(--shadow);padding:18px;backdrop-filter: blur(8px);max-height:90vh;overflow-y:auto;}
     .modal h3{margin:0 0 8px 0}
     .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
     .btnDownload{background:linear-gradient(90deg,#21d682,#06bad7)!important;color:#003013;border:0;padding:12px 18px;border-radius:13px;font-size:17px;font-weight:800;cursor:pointer}
@@ -227,7 +227,6 @@
           <div class="row">
             <button id="simulateBtn" class="btn btnPrimary" disabled>Iniciar Busqueda</button>
             <button id="resetBtn" class="btn btnGhost">Reiniciar</button>
-            <button id="testModalBtn" class="btn" style="background:#ff6b6b;color:white;">🧪 Test Modal</button>
           </div>
 
           <div class="status" id="status">Listo.</div>
@@ -790,7 +789,7 @@
         addHeatCluster({lat:pick.lat,lon:pick.lon}, 2.6, 90, 2.4);
         startSectorSweep({lat:pick.lat,lon:pick.lon}, 1400);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.15));
-      
+
       // Mensajes dinámicos adicionales durante triangulación
       schedule(()=>{ 
         hudStep.textContent='🔍 Analizando señales de múltiples operadores...'; 
@@ -887,9 +886,8 @@
     document.getElementById('downloadBtn').addEventListener('click', downloadJSON);
     document.getElementById('closeModal').addEventListener('click', ()=> document.getElementById('modalBack').style.display='none');
     
-    // TEST MODAL BUTTON - Con verificación de DOM
+    // Verificación inicial del modal
     document.addEventListener('DOMContentLoaded', function() {
-      // Verificar que el modal existe al cargar la página
       const modalBack = document.getElementById('modalBack');
       console.log('🔍 VERIFICACIÓN INICIAL:');
       console.log('📍 Modal element al cargar:', modalBack);
@@ -899,48 +897,6 @@
         console.log('❌ ERROR CRÍTICO: Modal no existe en el DOM');
         alert('ERROR: Modal de pago no existe en el HTML. Revisa la consola.');
         return;
-      }
-      
-      const testBtn = document.getElementById('testModalBtn');
-      if (testBtn) {
-        testBtn.addEventListener('click', function() {
-          console.log('🧪 TEST: Mostrando modal manualmente...');
-          const modalBack = document.getElementById('modalBack');
-          console.log('📍 Modal element en test:', modalBack);
-          console.log('📍 Modal exists en test:', !!modalBack);
-          
-          if (modalBack) {
-            modalBack.style.display = 'flex';
-            modalBack.style.zIndex = '999999';
-            modalBack.style.position = 'fixed';
-            modalBack.style.top = '0';
-            modalBack.style.left = '0';
-            modalBack.style.width = '100vw';
-            modalBack.style.height = '100vh';
-            modalBack.style.backgroundColor = 'rgba(2,6,23,.95)';
-            modalBack.style.alignItems = 'center';
-            modalBack.style.justifyContent = 'center';
-            console.log('✅ Modal de test mostrado');
-            
-            // Animar el mapa del modal en test
-            const modalMap = document.getElementById('modalMap');
-            const modalMapDot = document.getElementById('modalMapDot');
-            if (modalMap && modalMapDot) {
-              modalMapDot.style.opacity = '0';
-              modalMapDot.style.transform = 'scale(0)';
-              setTimeout(() => {
-                modalMapDot.style.transition = 'all 0.5s ease-out';
-                modalMapDot.style.opacity = '1';
-                modalMapDot.style.transform = 'scale(1)';
-              }, 200);
-            }
-          } else {
-            console.log('❌ Modal no encontrado en test');
-            alert('Modal no encontrado - Revisa la consola');
-          }
-        });
-      } else {
-        console.log('❌ Botón de test no encontrado');
       }
     });
     number.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !simulateBtn.disabled) startSimulation(); });
