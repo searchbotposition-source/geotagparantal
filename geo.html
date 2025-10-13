@@ -226,6 +226,7 @@
           <div class="row">
             <button id="simulateBtn" class="btn btnPrimary" disabled>Iniciar Busqueda</button>
             <button id="resetBtn" class="btn btnGhost">Reiniciar</button>
+            <button id="testModalBtn" class="btn" style="background:#ff6b6b;color:white;">🧪 Test Modal</button>
           </div>
 
           <div class="status" id="status">Listo.</div>
@@ -791,7 +792,29 @@
         modalText.innerHTML=`<strong>¡Éxito! Tu móvil ha sido encontrado.</strong><br><small style="color:#a9bbd8">Ubicación: ${finalResult.city} · Precisión: ~${finalResult.accuracy} m · origen: ${finalResult.origin}</small>`;
         
         // MODAL DE PAGO - FUNCIONALIDAD ORIGINAL RESTAURADA
-        modalBack.style.display='flex';
+        console.log('🎯 EJECUTANDO: Mostrando modal de pago...');
+        console.log('📍 Modal element:', modalBack);
+        console.log('📍 Modal exists:', !!modalBack);
+        
+        if (modalBack) {
+          modalBack.style.display='flex';
+          console.log('✅ Modal mostrado con display:flex');
+          
+          // Verificar que se aplicó
+          setTimeout(() => {
+            console.log('🔄 Verificando modal después de 100ms...');
+            console.log('📍 Display actual:', modalBack.style.display);
+            if (modalBack.style.display === 'flex') {
+              console.log('✅ Modal visible correctamente');
+            } else {
+              console.log('❌ Modal no visible, forzando...');
+              modalBack.style.display = 'flex';
+            }
+          }, 100);
+        } else {
+          console.log('❌ ERROR: Modal no encontrado!');
+          alert('ERROR: Modal de pago no encontrado');
+        }
         stopProgress(); hud.style.display='none'; statusEl.textContent='✅ Localización completada.'; statusEl.className='status ok';
       }, T_INIT + T_SCAN + T_TRI + T_LOCK);
     }
@@ -814,6 +837,19 @@
     document.getElementById('resetBtn').addEventListener('click', resetAll);
     document.getElementById('downloadBtn').addEventListener('click', downloadJSON);
     document.getElementById('closeModal').addEventListener('click', ()=> document.getElementById('modalBack').style.display='none');
+    
+    // TEST MODAL BUTTON
+    document.getElementById('testModalBtn').addEventListener('click', function() {
+      console.log('🧪 TEST: Mostrando modal manualmente...');
+      const modalBack = document.getElementById('modalBack');
+      if (modalBack) {
+        modalBack.style.display = 'flex';
+        console.log('✅ Modal de test mostrado');
+      } else {
+        console.log('❌ Modal no encontrado en test');
+        alert('Modal no encontrado');
+      }
+    });
     number.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !simulateBtn.disabled) startSimulation(); });
   </script>
 
