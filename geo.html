@@ -297,6 +297,35 @@
       return d;
     }
 
+    // Detecta prefijo internacional en el input y ajusta país + limpia prefijo para dejar número local
+    function autodetectCountryFromInput(raw){
+      const s=(raw||'').replace(/\s|-/g,'');
+      // Buscar por prefijos conocidos (COUNTRIES.prefix)
+      for(const c of COUNTRIES){
+        const p=c.prefix.replace(/\D/g,'');
+        if(!p) continue;
+        const sDigits=s.replace(/\D/g,'');
+        if(s.startsWith(c.prefix) || sDigits.startsWith(p)){
+          // Cambia selector de país si es distinto
+          const idx=COUNTRIES.findIndex(x=>x.code===c.code);
+          if(idx>=0 && String(country.value)!==String(idx)){
+            country.value=String(idx);
+          }
+          // Devuelve número sin prefijo para el input
+          const cleaned=sDigits.slice(p.length);
+          return cleaned;
+        }
+      }
+      return null;
+    }
+
+    // Hook a input para auto-detección de prefijo pegado
+    number.addEventListener('input', function(){
+      const auto = autodetectCountryFromInput(number.value);
+      if(auto!==null){ number.value = auto; }
+      validateDigits();
+    });
+
     // Actualiza validación de dígitos con normalización
     function validateDigits(){
       const idx=+country.value||0, selCountry=COUNTRIES[idx];
