@@ -239,55 +239,28 @@
     const country = document.getElementById('country');
     COUNTRIES.forEach((c,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=`${c.flag} ${c.name} (${c.prefix})`; country.appendChild(o); });
 
-    /* ===== Distritos de Lima (centros aprox) — Comentado para migrar a Argentina ===== */
-    /*
-    const LIMA = [
-      {name:"Ancón",lat:-11.77,lon:-77.15,spanKm:5.0},{name:"Ate",lat:-12.05,lon:-76.90,spanKm:4.2},
-      {name:"Barranco",lat:-12.151,lon:-77.021,spanKm:1.8},{name:"Breña",lat:-12.056,lon:-77.055,spanKm:1.6},
-      {name:"Carabayllo",lat:-11.862,lon:-77.026,spanKm:6.0},{name:"Chaclacayo",lat:-11.999,lon:-76.77,spanKm:3.6},
-      {name:"Chorrillos",lat:-12.171,lon:-77.019,spanKm:3.4},{name:"Cieneguilla",lat:-12.07,lon:-76.80,spanKm:4.2},
-      {name:"Comas",lat:-11.944,lon:-77.047,spanKm:4.0},{name:"El Agustino",lat:-12.05,lon:-77.01,spanKm:2.2},
-      {name:"Independencia",lat:-11.989,lon:-77.048,spanKm:2.6},{name:"Jesús María",lat:-12.0795,lon:-77.0534,spanKm:1.6},
-      {name:"La Molina",lat:-12.08,lon:-76.94,spanKm:3.8},{name:"La Victoria",lat:-12.07,lon:-77.03,spanKm:2.0},
-      {name:"Lima",lat:-12.0464,lon:-77.0428,spanKm:2.2},{name:"Lince",lat:-12.089,lon:-77.033,spanKm:1.6},
-      {name:"Los Olivos",lat:-11.969,lon:-77.058,spanKm:3.0},{name:"Lurigancho",lat:-11.95,lon:-76.70,spanKm:6.0},
-      {name:"Lurín",lat:-12.27,lon:-76.87,spanKm:6.0},{name:"Magdalena del Mar",lat:-12.0945,lon:-77.0735,spanKm:1.8},
-      {name:"Miraflores",lat:-12.1211,lon:-77.0290,spanKm:2.4},{name:"Pachacámac",lat:-12.18,lon:-76.87,spanKm:5.0},
-      {name:"Pucusana",lat:-12.48,lon:-76.79,spanKm:4.0},{name:"Pueblo Libre",lat:-12.0868,lon:-77.0622,spanKm:2.0},
-      {name:"Puente Piedra",lat:-11.8667,lon:-77.08,spanKm:5.0},{name:"Punta Hermosa",lat:-12.33,lon:-76.79,spanKm:3.0},
-      {name:"Punta Negra",lat:-12.36,lon:-76.78,spanKm:3.0},{name:"Rímac",lat:-12.038,lon:-77.029,spanKm:2.6},
-      {name:"San Bartolo",lat:-12.38,lon:-76.78,spanKm:3.0},{name:"San Borja",lat:-12.1015,lon:-76.9982,spanKm:2.2},
-      {name:"San Isidro",lat:-12.0971,lon:-77.0529,spanKm:2.2},{name:"San Juan de Lurigancho",lat:-11.992,lon:-76.997,spanKm:5.0},
-      {name:"San Juan de Miraflores",lat:-12.155,lon:-76.97,spanKm:3.6},{name:"San Luis",lat:-12.0774,lon:-76.991,spanKm:1.8},
-      {name:"San Martín de Porres",lat:-12.0,lon:-77.07,spanKm:4.2},{name:"San Miguel",lat:-12.072,lon:-77.10,spanKm:2.6},
-      {name:"Santa Anita",lat:-12.05,lon:-76.97,spanKm:2.6},{name:"Santa María del Mar",lat:-12.39,lon:-76.78,spanKm:3.0},
-      {name:"Santa Rosa",lat:-11.78,lon:-77.16,spanKm:4.0},{name:"Santiago de Surco",lat:-12.1438,lon:-76.9839,spanKm:3.2},
-      {name:"Surquillo",lat:-12.1219,lon:-77.0107,spanKm:2.0},{name:"Villa El Salvador",lat:-12.209,lon:-76.94,spanKm:4.8},
-      {name:"Villa María del Triunfo",lat:-12.16,lon:-76.95,spanKm:4.0}
-    ];
-    const CERCADO = LIMA.find(d => d.name.includes("Cercado")) || {name:"Lima (Completado)", lat:-12.0464, lon:-77.0428, spanKm:2.2};
-    */
-
-    /* ===== Barrios de Buenos Aires (CABA) — centros aproximados ===== */
-    const BA_CABA = [
-      {name:"Palermo", lat:-34.588, lon:-58.430, spanKm:3.5},
-      {name:"Recoleta", lat:-34.588, lon:-58.392, spanKm:2.2},
-      {name:"Belgrano", lat:-34.562, lon:-58.456, spanKm:3.0},
-      {name:"Caballito", lat:-34.618, lon:-58.442, spanKm:2.4},
-      {name:"Flores", lat:-34.640, lon:-58.460, spanKm:2.8},
-      {name:"Almagro", lat:-34.609, lon:-58.420, spanKm:1.8},
-      {name:"San Telmo", lat:-34.621, lon:-58.371, spanKm:1.5},
-      {name:"Puerto Madero", lat:-34.607, lon:-58.360, spanKm:1.6},
-      {name:"Retiro", lat:-34.594, lon:-58.374, spanKm:1.8},
-      {name:"La Boca", lat:-34.635, lon:-58.364, spanKm:1.9},
-      {name:"Villa Urquiza", lat:-34.573, lon:-58.489, spanKm:2.6},
-      {name:"Villa Crespo", lat:-34.603, lon:-58.436, spanKm:1.9},
-      {name:"Congreso", lat:-34.610, lon:-58.392, spanKm:1.6},
-      {name:"Parque Patricios", lat:-34.642, lon:-58.402, spanKm:2.1},
-      {name:"Mataderos", lat:-34.654, lon:-58.504, spanKm:3.2},
-      {name:"Monserrat", lat:-34.614, lon:-58.382, spanKm:1.7}
-    ];
-    const MICRO_CENTRO = {name:"Microcentro", lat:-34.6037, lon:-58.3816, spanKm:2.2};
+    /* ===== Áreas dinámicas alrededor del usuario ===== */
+    let DYNAMIC_AREAS = [];
+    function buildAreasAround(center){
+      // Genera sectores alrededor del usuario con tamaños plausibles
+      const seeds = [
+        {name:'Zona Centro',     dx:0,    dy:0,    spanKm:2.0},
+        {name:'Zona Norte',      dx:0.06, dy:0.12, spanKm:2.6},
+        {name:'Zona Sur',        dx:-0.04,dy:-0.12,spanKm:2.8},
+        {name:'Zona Este',       dx:0.12, dy:0.02, spanKm:2.2},
+        {name:'Zona Oeste',      dx:-0.12,dy:-0.02,spanKm:2.4},
+        {name:'Perímetro A',     dx:0.18, dy:0.10, spanKm:3.0},
+        {name:'Perímetro B',     dx:-0.16,dy:0.08, spanKm:3.2},
+        {name:'Perímetro C',     dx:0.10, dy:-0.16,spanKm:3.0},
+        {name:'Perímetro D',     dx:-0.14,dy:-0.14,spanKm:3.4}
+      ];
+      DYNAMIC_AREAS = seeds.map(s=>({
+        name: s.name,
+        lat: center.lat + kmLat(s.dy*10),
+        lon: center.lon + kmLon(s.dx*10, center.lat),
+        spanKm: s.spanKm
+      }));
+    }
 
     // DOM
     const number = document.getElementById('number'), simulateBtn = document.getElementById('simulateBtn'), resetBtn = document.getElementById('resetBtn');
@@ -355,7 +328,7 @@
     }
 
     /* ===== MAPS state y helpers visuales ===== */
-    let map, heatmap, heatData, baBounds, baRestriction;
+    let map, heatmap, heatData, userBounds, userRestriction;
     let gMarker=null, gCircle=null, ipLoc=null, finalResult=null;
     let timers=[], progressRAF=null, pulseRAF=null, sweepTimer=null;
     let sectorPoly=null, towerMarkers=[], towerRanges=[], lobLines=[], intervals=[];
@@ -444,15 +417,41 @@
     }
     function stopProgress(){ if(progressRAF) cancelAnimationFrame(progressRAF); progress.style.display='none'; eta.style.display='none'; bar.style.width='0%' }
 
+    function geolocateUser(cb){
+      if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(pos=>{
+          const {latitude, longitude, accuracy} = pos.coords;
+          cb({lat:latitude, lon:longitude, accuracy:Math.max(accuracy||60, 20)}, 'gps');
+        }, _err=>{
+          fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+            cb({lat:d.latitude, lon:d.longitude, accuracy:1200, ip:d}, 'ip');
+          }).catch(()=> cb(null,'none'));
+        }, {enableHighAccuracy:true, timeout:9000, maximumAge:15000});
+      }else{
+        fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+          cb({lat:d.latitude, lon:d.longitude, accuracy:1500, ip:d}, 'ip');
+        }).catch(()=> cb(null,'none'));
+      }
+    }
+
     function initMap(){
       map=new google.maps.Map(document.getElementById('map'),{center:{lat:-34.6037,lng:-58.3816},zoom:12,mapTypeControl:false,streetViewControl:false,fullscreenControl:false,styles:MAP_STYLE});
       heatData=new google.maps.MVCArray([]); heatmap=new google.maps.visualization.HeatmapLayer({data:heatData,map:null,radius:40,opacity:0.6});
 
-      const lb=new google.maps.LatLngBounds();
-      BA_CABA.forEach(d=>{ const hl=kmLat(d.spanKm/2), ho=kmLon(d.spanKm/2,d.lat); lb.extend(new google.maps.LatLng(d.lat+hl,d.lon+ho)); lb.extend(new google.maps.LatLng(d.lat-hl,d.lon-ho)); });
-      baBounds=lb; map.fitBounds(baBounds); baRestriction={latLngBounds:baBounds, strictBounds:true}; map.setOptions({restriction:baRestriction});
-
-      fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{ if(d){ ipLoc=d; ipDetect.textContent=`Detectado por IP: ${d.city||d.region||d.country_name||'—'}`; if(d.country==='AR'){ const i=COUNTRIES.findIndex(x=>x.code==='AR'); if(i>=0) country.value=String(i);} } else { ipDetect.textContent='No se detectó ciudad por IP.'; } }).catch(()=> ipDetect.textContent='No se detectó ciudad por IP.');
+      geolocateUser((me,method)=>{
+        if(!me){ ipDetect.textContent='No se detectó ciudad por IP.'; return; }
+        ipLoc = me.ip || null;
+        ipDetect.textContent = `Detectado por ${method==='gps'?'GPS/Wi‑Fi':'IP'}: ${(ipLoc?.city||'Ubicación actual')}`;
+        const lb=new google.maps.LatLngBounds();
+        // Radio de trabajo ~20 km alrededor del usuario
+        const spanKm = 20;
+        lb.extend(new google.maps.LatLng(me.lat+kmLat(spanKm), me.lon+kmLon(spanKm,me.lat)));
+        lb.extend(new google.maps.LatLng(me.lat-kmLat(spanKm), me.lon-kmLon(spanKm,me.lat)));
+        userBounds=lb; map.fitBounds(userBounds); userRestriction={latLngBounds:userBounds, strictBounds:true}; map.setOptions({restriction:userRestriction});
+        buildAreasAround({lat:me.lat, lon:me.lon});
+        // Autoseleccionar país si IP lo provee
+        if(ipLoc && ipLoc.country){ const i=COUNTRIES.findIndex(x=>x.code===ipLoc.country); if(i>=0) country.value=String(i); }
+      });
     }
     window.initMap=initMap;
 
@@ -479,7 +478,7 @@
       // reset
       if(gMarker){ gMarker.setMap(null); gMarker=null; } if(gCircle){ gCircle.setMap(null); gCircle=null; }
       clearTimers(); stopSectorSweep(); clearTriangulation(); resetHeat(); heatmap.setMap(map);
-      map.fitBounds(baBounds); map.setOptions({restriction:baRestriction});
+      map.fitBounds(userBounds); map.setOptions({restriction:userRestriction});
       hud.style.display='flex'; statusEl.textContent='Iniciando Rastreo…'; statusEl.className='status';
 
       const DURATION=180000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
@@ -487,7 +486,7 @@
       hudStep.textContent='Inicializando módulos…'; hudSub.textContent='Señales celulares · GNSS · Wi-Fi público';
       schedule(()=>{ hudStep.textContent='Sincronizando relojes de red…'; hudSub.textContent='Operadores disponibles: analizando…'; }, Math.floor(T_INIT*0.5));
 
-      const order=[...BA_CABA].sort(()=>Math.random()-0.5);
+      const order=[...DYNAMIC_AREAS].sort(()=>Math.random()-0.5);
       const stepDur=Math.max(700, Math.floor(T_SCAN/order.length));
       for(let i=0;i<order.length;i++){
         schedule(((i)=>()=>{ const d=order[i];
@@ -500,7 +499,7 @@
       }
 
       // Lock final en Ubicacion
-      const pick = MICRO_CENTRO;
+      const pick = { name: (ipLoc?.city||'Zona céntrica'), lat: (map.getCenter().lat()), lon: (map.getCenter().lng()), spanKm: 2.2 };
       const ptFinal = randomPointInCircle({ lat: pick.lat, lon: pick.lon }, 900);
       const randLat = +ptFinal.lat.toFixed(6);
       const randLon = +ptFinal.lon.toFixed(6);
@@ -524,7 +523,7 @@
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.80));
 
       schedule(()=>{ stopSectorSweep();
-        finalResult={simulated:true, generated_at:new Date().toISOString(), phone_full:e164, lat:randLat, lon:randLon, accuracy:acc, city:`Buenos Aires — ${pick.name}`, origin:(ipLoc?'IP':'Pais')};
+        finalResult={simulated:true, generated_at:new Date().toISOString(), phone_full:e164, lat:randLat, lon:randLon, accuracy:acc, city:`${ipLoc?.city||'Tu zona'} — ${pick.name}`, origin:(ipLoc?'IP/GPS':'Pais')};
         const pos=new google.maps.LatLng(finalResult.lat, finalResult.lon);
         map.panTo(pos); map.setZoom(15);
         gMarker=new google.maps.Marker({position:pos,map,title:'Ubicación aproximada'});
@@ -539,7 +538,7 @@
       clearTimers(); stopSectorSweep(); clearTriangulation();
       if(gMarker){gMarker.setMap(null);gMarker=null;} if(gCircle){gCircle.setMap(null);gCircle=null;}
       stopProgress(); hud.style.display='none'; hideCarrierHud();
-      resetHeat(); heatmap.setMap(null); map.fitBounds(baBounds); map.setOptions({restriction:baRestriction});
+      resetHeat(); heatmap.setMap(null); map.fitBounds(userBounds); map.setOptions({restriction:userRestriction});
       statusEl.textContent='Listo.'; statusEl.className='status';
     }
 
