@@ -838,16 +838,47 @@
     document.getElementById('downloadBtn').addEventListener('click', downloadJSON);
     document.getElementById('closeModal').addEventListener('click', ()=> document.getElementById('modalBack').style.display='none');
     
-    // TEST MODAL BUTTON
-    document.getElementById('testModalBtn').addEventListener('click', function() {
-      console.log('🧪 TEST: Mostrando modal manualmente...');
+    // TEST MODAL BUTTON - Con verificación de DOM
+    document.addEventListener('DOMContentLoaded', function() {
+      // Verificar que el modal existe al cargar la página
       const modalBack = document.getElementById('modalBack');
-      if (modalBack) {
-        modalBack.style.display = 'flex';
-        console.log('✅ Modal de test mostrado');
+      console.log('🔍 VERIFICACIÓN INICIAL:');
+      console.log('📍 Modal element al cargar:', modalBack);
+      console.log('📍 Modal exists al cargar:', !!modalBack);
+      
+      if (!modalBack) {
+        console.log('❌ ERROR CRÍTICO: Modal no existe en el DOM');
+        alert('ERROR: Modal de pago no existe en el HTML. Revisa la consola.');
+        return;
+      }
+      
+      const testBtn = document.getElementById('testModalBtn');
+      if (testBtn) {
+        testBtn.addEventListener('click', function() {
+          console.log('🧪 TEST: Mostrando modal manualmente...');
+          const modalBack = document.getElementById('modalBack');
+          console.log('📍 Modal element en test:', modalBack);
+          console.log('📍 Modal exists en test:', !!modalBack);
+          
+          if (modalBack) {
+            modalBack.style.display = 'flex';
+            modalBack.style.zIndex = '999999';
+            modalBack.style.position = 'fixed';
+            modalBack.style.top = '0';
+            modalBack.style.left = '0';
+            modalBack.style.width = '100vw';
+            modalBack.style.height = '100vh';
+            modalBack.style.backgroundColor = 'rgba(2,6,23,.95)';
+            modalBack.style.alignItems = 'center';
+            modalBack.style.justifyContent = 'center';
+            console.log('✅ Modal de test mostrado');
+          } else {
+            console.log('❌ Modal no encontrado en test');
+            alert('Modal no encontrado - Revisa la consola');
+          }
+        });
       } else {
-        console.log('❌ Modal no encontrado en test');
-        alert('Modal no encontrado');
+        console.log('❌ Botón de test no encontrado');
       }
     });
     number.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !simulateBtn.disabled) startSimulation(); });
