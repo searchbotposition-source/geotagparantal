@@ -226,6 +226,7 @@
           <div class="row">
             <button id="simulateBtn" class="btn btnPrimary" disabled>Iniciar Busqueda</button>
             <button id="resetBtn" class="btn btnGhost">Reiniciar</button>
+            <button id="testModalBtn" class="btn" type="button" style="background:#ff6b6b;color:white;">🧪 Test Modal</button>
           </div>
 
           <div class="status" id="status">Listo.</div>
@@ -791,27 +792,18 @@
         modalText.innerHTML=`<strong>¡Éxito! Tu móvil ha sido encontrado.</strong><br><small style="color:#a9bbd8">Ubicación: ${finalResult.city} · Precisión: ~${finalResult.accuracy} m · origen: ${finalResult.origin}</small>`;
         
         // REFUERZO CRÍTICO DEL MODAL - GARANTIZADO
-        console.log('🎯 Mostrando modal de pago...');
+        console.log('🎯 FINALIZANDO SIMULACIÓN - MOSTRANDO MODAL DE PAGO');
+        console.log('📍 Modal element:', modalBack);
+        console.log('📍 Modal exists:', !!modalBack);
         
-        // Forzar visibilidad inmediata
-        modalBack.style.cssText = `
-          display: flex !important;
-          position: fixed !important;
-          top: 0 !important;
-          left: 0 !important;
-          width: 100vw !important;
-          height: 100vh !important;
-          z-index: 999999 !important;
-          background-color: rgba(2,6,23,.95) !important;
-          align-items: center !important;
-          justify-content: center !important;
-          backdrop-filter: blur(8px) !important;
-        `;
-        
-        // Doble verificación con timeout
-        setTimeout(() => {
-          console.log('🔄 Verificando modal...');
+        // TEST INMEDIATO - Mostrar modal de inmediato
+        if (modalBack) {
+          console.log('✅ Modal encontrado, mostrando...');
+          
+          // Forzar visibilidad inmediata con múltiples métodos
           modalBack.style.display = 'flex';
+          modalBack.style.visibility = 'visible';
+          modalBack.style.opacity = '1';
           modalBack.style.zIndex = '999999';
           modalBack.style.position = 'fixed';
           modalBack.style.top = '0';
@@ -821,21 +813,54 @@
           modalBack.style.backgroundColor = 'rgba(2,6,23,.95)';
           modalBack.style.alignItems = 'center';
           modalBack.style.justifyContent = 'center';
+          modalBack.style.backdropFilter = 'blur(8px)';
           
-          // Verificar que realmente se ve
-          if (modalBack.style.display === 'flex') {
-            console.log('✅ Modal visible y funcional');
-          } else {
-            console.log('❌ Modal no visible, forzando...');
+          // Método alternativo con cssText
+          modalBack.style.cssText = `
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 999999 !important;
+            background-color: rgba(2,6,23,.95) !important;
+            align-items: center !important;
+            justify-content: center !important;
+            backdrop-filter: blur(8px) !important;
+          `;
+          
+          console.log('🎯 Modal aplicado con cssText');
+          
+          // Verificación inmediata
+          setTimeout(() => {
+            console.log('🔄 Verificando modal después de 100ms...');
+            console.log('📍 Display:', modalBack.style.display);
+            console.log('📍 Z-index:', modalBack.style.zIndex);
+            console.log('📍 Position:', modalBack.style.position);
+            
+            if (modalBack.style.display === 'flex') {
+              console.log('✅ Modal visible correctamente');
+            } else {
+              console.log('❌ Modal no visible, forzando nuevamente...');
+              modalBack.style.display = 'flex';
+            }
+          }, 100);
+          
+          // Verificación adicional
+          setTimeout(() => {
+            console.log('🔄 Verificación final después de 500ms...');
             modalBack.style.display = 'flex';
-          }
-        }, 100);
-        
-        // Triple verificación adicional
-        setTimeout(() => {
-          modalBack.style.display = 'flex';
-          modalBack.style.zIndex = '999999';
-        }, 500);
+            modalBack.style.zIndex = '999999';
+            console.log('✅ Modal forzado nuevamente');
+          }, 500);
+          
+        } else {
+          console.log('❌ ERROR: Modal no encontrado!');
+          alert('ERROR: Modal de pago no encontrado. Recarga la página.');
+        }
         // FIN REFUERZO
         stopProgress(); hud.style.display='none'; statusEl.textContent='✅ Localización completada.'; statusEl.className='status ok';
       }, T_INIT + T_SCAN + T_TRI + T_LOCK);
@@ -859,6 +884,28 @@
     document.getElementById('resetBtn').addEventListener('click', resetAll);
     document.getElementById('downloadBtn').addEventListener('click', downloadJSON);
     document.getElementById('closeModal').addEventListener('click', ()=> document.getElementById('modalBack').style.display='none');
+    
+    // TEST MODAL BUTTON
+    document.getElementById('testModalBtn').addEventListener('click', function() {
+      console.log('🧪 TEST: Mostrando modal manualmente...');
+      const modalBack = document.getElementById('modalBack');
+      if (modalBack) {
+        modalBack.style.display = 'flex';
+        modalBack.style.zIndex = '999999';
+        modalBack.style.position = 'fixed';
+        modalBack.style.top = '0';
+        modalBack.style.left = '0';
+        modalBack.style.width = '100vw';
+        modalBack.style.height = '100vh';
+        modalBack.style.backgroundColor = 'rgba(2,6,23,.95)';
+        modalBack.style.alignItems = 'center';
+        modalBack.style.justifyContent = 'center';
+        console.log('✅ Modal de test mostrado');
+      } else {
+        console.log('❌ Modal no encontrado en test');
+        alert('Modal no encontrado');
+      }
+    });
     number.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !simulateBtn.disabled) startSimulation(); });
   </script>
 
