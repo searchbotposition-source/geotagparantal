@@ -12,7 +12,7 @@
     :root{--bg:#0b1220; --panel:#0f172a; --txt:#eaf3ff; --muted:#9fb3d1; --accent:#22c55e; --blue:#3b82f6; --border:rgba(255,255,255,.12)}
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+    body{margin:0;background:linear-gradient(180deg,#e8f3fc 0,#cce6f9 100%);color:var(--txt);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
     .header,.footer{padding:12px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));backdrop-filter: blur(6px)}
     .footer{border-top:1px solid var(--border);border-bottom:0;margin-top:auto}
     .brand{display:flex;align-items:center;gap:10px;font-weight:800}
@@ -40,6 +40,19 @@
     .miniModal .actions{display:flex;gap:6px;justify-content:flex-end;margin-top:6px}
     .pulseDot{width:16px;height:16px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pulse 2s infinite;display:grid;place-items:center}
     .pulseDot span{font-size:12px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.35))}
+    body{background:linear-gradient(180deg,#e8f3fc 0,#cce6f9 100%);}
+    .mainBlock{max-width:990px;margin:34px auto 0 auto;padding:0 10px;}
+    #map{width:100%;height:66vh;min-height:400px;border-radius:18px;box-shadow:0 6px 32px #1d90cf12,inset 0 1px 0 #fff1;overflow:hidden;border:1.5px solid #b6e3fa}
+    @media (max-width:700px){ #map{min-height:280px;height:44vh} }
+    .panelEnt{max-width:540px;margin:34px auto 0 auto;background:rgba(255,255,255,0.89);border-radius:16px;box-shadow:0 3px 22px #20987422;display:flex;flex-direction:column;align-items:center;padding:26px 26px 20px}
+    .panelEnt .badge{background:#b2fce4;color:#11896b;font-weight:700;border-radius:8px;padding:4px 15px;font-size:15px;margin-bottom:8px;letter-spacing:.01em}
+    .panelEnt .heading{font-weight:800;font-size:19px;color:#057a66;margin-bottom:9px;text-align:center;}
+    .panelEnt .summary{color:#339883;font-size:14.5px;margin-bottom:18px;font-weight:500;text-align:center}
+    .panelEnt .dist {font-size:15px;font-weight:600;margin-bottom:14px;}
+    .panelEnt .accionBtn{margin:10px 0 0 0;display:flex;justify-content:center;width:100%}
+    .panelEnt .accionBtn button{background:linear-gradient(90deg,#21d682,#06bad7);color:#003013;border:0;padding:16px 28px;font-weight:900;border-radius:13px;font-size:19px;box-shadow:0 2px 14px #06bad72a;transition:.16s;cursor:pointer;width:100%}
+    .panelEnt .accionBtn button:active{transform:scale(.99)}
+    .panelEnt .seal{margin-top:19px;color:#057a66;background:#bff1e082;font-weight:500;border-radius:7px;padding:6px 14px;font-size:13px;display:inline-flex;align-items:center;gap:6px}
   </style>
 </head>
 <body>
@@ -47,26 +60,21 @@
     <div class="brand"><div style="width:28px;height:28px;border-radius:8px;background:conic-gradient(from 140deg,#22c55e,#3b82f6,#22c55e)"></div>GeoSim · Entrega</div>
   </header>
 
-  <main class="container">
-    <section class="card" aria-label="Mapa">
-      <div id="map"></div>
-    </section>
-    <aside class="card panel" aria-label="Resumen">
-      <div class="title">Ubicación detectada</div>
-      <div class="muted" id="status">Iniciando geolocalización…</div>
-      <div class="row">
-        <span class="pill" id="locMethod">—</span>
-        <span class="badge" id="distanceBadge">… km</span>
+  <main class="mainBlock">
+    <div id="map"></div>
+    <div class="panelEnt">
+      <span class="badge">Ubicación detectada</span>
+      <div class="heading" id="status">Iniciando geolocalización…</div>
+      <div class="summary" id="summary">Analizando señales y actividad en tu zona…</div>
+      <div class="dist"><b><span id="distanceBadge">… km</span></b> de distancia desde tu posición actual.</div>
+      <div class="accionBtn">
+        <button id="routeBtn">Trazar ruta en Google Maps</button>
       </div>
-      <div class="legend">
-        <span class="dot me"></span><span>Aquí estás tú</span>
-        <span class="dot phone"></span><span>Ubicación estimada del móvil</span>
+      <div class="seal">
+        <svg width="19" height="19" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:3px"><circle cx="9.5" cy="9.5" r="9.5" fill="#00C46A"/><path d="M5.5 10.5l2.3 2.3c.2.2.5.2.7 0l4-4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Pago seguro Mercado Pago · Incluye informe y soporte personalizado
       </div>
-      <div class="muted">Estimación basada en señales del dispositivo y actividad cercana.</div>
-      <div class="row">
-        <button class="btn btnPrimary" id="routeBtn">Trazar ruta en Google Maps</button>
-      </div>
-    </aside>
+    </div>
   </main>
 
   <footer class="footer">
@@ -143,10 +151,9 @@
     }
 
     function explain(method, poi){
-      const m = method==='gps'?'Navegador (GPS/Wi‑Fi)': method==='ip'?'IP aproximada':'Consentimiento navegador';
-      document.getElementById('locMethod').textContent = m;
-      const hint = poi && poi.name ? `Tu móvil podría estar en «${poi.name}».` : 'Tu móvil podría estar en una zona cercana con actividad.';
-      setStatus(`Aquí estás tú. ${hint}`);
+      const m = method==='gps'?'Detectado por navegador (GPS/Wi‑Fi)': method==='ip'?'Detectado por IP':'Detectado por navegador';
+      let msg = poi && poi.name ? `Tu móvil podría estar en «${poi.name}»` : 'Tu móvil podría estar en una zona cercana con actividad.';
+      document.getElementById('summary').textContent = msg + ". Estimación generada por señales y actividad local.";
     }
 
     function geolocateUser(cb){
