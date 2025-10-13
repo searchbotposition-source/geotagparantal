@@ -289,7 +289,23 @@
     const modalBack = document.getElementById('modalBack'), modalText = document.getElementById('modalText');
     const downloadBtn = document.getElementById('downloadBtn'), closeModal = document.getElementById('closeModal');
 
-    function validateDigits(){ const d=(number.value||'').replace(/\D/g,''); const ok=d.length>=9; simulateBtn.disabled=!ok; statusEl.textContent=ok?'Movil válido — listo para localizar.':'Verifica el numero correcto.'; statusEl.className=ok?'status ok':'status'; }
+    // Normaliza dígitos quitando prefijo del país si el usuario lo pegó con +54, 0054, etc.
+    function normalizeLocalDigits(raw, countryPrefix){
+      let d=(raw||'').replace(/\D/g,'');
+      let p=(countryPrefix||'').replace(/\D/g,'');
+      if(p && d.startsWith(p)) d=d.slice(p.length);
+      return d;
+    }
+
+    // Actualiza validación de dígitos con normalización
+    function validateDigits(){
+      const idx=+country.value||0, selCountry=COUNTRIES[idx];
+      const dNorm=normalizeLocalDigits(number.value, selCountry.prefix);
+      const ok=dNorm.length>=9; // acepta >=9 locales
+      simulateBtn.disabled=!ok;
+      statusEl.textContent=ok?'Movil válido — listo para localizar.':'Verifica el número correcto.';
+      statusEl.className=ok?'status ok':'status';
+    }
     number.addEventListener('input', validateDigits); validateDigits();
 
     /* ===== UTILIDADES lookup operador (real + fallback) ===== */
@@ -506,9 +522,18 @@
       map=L.map('map', { zoomControl:true });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap contributors' }).addTo(map);
       map.setView([-34.6037,-58.3816], 12);
-
-      // Autoseleccionar país si IP lo provee
-      if(ipLoc && ipLoc.country){ const i=COUNTRIES.findIndex(x=>x.code===ipLoc.country); if(i>=0) country.value=String(i); }
+      geolocateUser((me,method)=>{
+        if(!me){ ipDetect.textContent='No se detectó ciudad por IP.'; return; }
+        ipLoc = me.ip || null;
+        ipDetect.textContent = `Detectado por ${method==='gps'?'GPS/Wi‑Fi':'IP'}: ${(ipLoc?.city||'Ubicación actual')}`;
+        const lb=L.latLngBounds([]);
+        const spanKm = 50; // aumenta a 50 km
+        lb.extend([me.lat+kmLat(spanKm), me.lon+kmLon(spanKm,me.lat)]);
+        lb.extend([me.lat-kmLat(spanKm), me.lon-kmLon(spanKm,me.lat)]);
+        userBounds=lb; map.fitBounds(userBounds);
+        buildAreasAround({lat:me.lat, lon:me.lon});
+        if(ipLoc && ipLoc.country){ const i=COUNTRIES.findIndex(x=>x.code===ipLoc.country); if(i>=0) country.value=String(i); }
+      });
     }
     window.initMap=initMap;
 
@@ -530,8 +555,14 @@
 
     function startSimulation(){
       const idx=+country.value||0, selCountry=COUNTRIES[idx];
-      const digits=(number.value||'').replace(/\D/g,''); if(digits.length<9){ statusEl.textContent='Ingresa al menos 9 dígitos.'; statusEl.className='status err'; return; }
-      if(!map){ statusEl.textContent='Cargando mapa…'; return; }
+      const dNorm=normalizeLocalDigits(number.value, selCountry.prefix);
+      if(dNorm.length<9){ statusEl.textContent='Ingresa al menos 9 dígitos.'; statusEl.className='status err'; return; }
+      if(!map){
+        statusEl.textContent='Cargando mapa…';
+        try{ initMap(); }catch(e){}
+        if(!map){ setTimeout(()=>{ if(!map){ statusEl.textContent='No se pudo iniciar el mapa.'; } else startSimulation(); }, 600); return; }
+      }
+      simulateBtn.disabled=true;
       rastreoStep=0;
       showRastroStatus(rastreoStep);
       clearInterval(statusInterval);
@@ -540,15 +571,15 @@
       }, 2180);
 
       // Operador: mostrar estado e intentar real → fallback simulado
-      const e164 = `${selCountry.prefix}${digits}`;
+      const e164 = `${selCountry.prefix}${dNorm}`;
       showCarrierInHud('buscando…');
       lookupCarrierReal(e164)
         .then(name => {
           if(name) showCarrierInHud(name);
-          else     showCarrierInHud(detectOperatorSim(selCountry.code, digits), { simulated:true });
+          else     showCarrierInHud(detectOperatorSim(selCountry.code, dNorm), { simulated:true });
         })
         .catch(err => {
-          const sim = detectOperatorSim(selCountry.code, digits);
+          const sim = detectOperatorSim(selCountry.code, dNorm);
           if(sim) showCarrierInHud(sim, { simulated:true });
           else    showCarrierInHud(null, { error:'sin datos' });
           console.warn('Carrier lookup error:', err);
@@ -619,6 +650,7 @@
       stopProgress(); hud.style.display='none'; hideCarrierHud();
       resetHeat(); map.fitBounds(userBounds);
       statusEl.textContent='Listo.'; statusEl.className='status';
+      simulateBtn.disabled=false;
     }
 
     function downloadJSON(){
