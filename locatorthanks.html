@@ -104,7 +104,13 @@
 
     function drawPulseAt(position){
       const d=document.createElement('div'); d.className='pulse'; d.style.width='10px'; d.style.height='10px'; d.style.borderRadius='999px'; d.style.background='#3b82f6';
-      return new google.maps.marker.AdvancedMarkerElement({ map:STATE.map, position, content:d });
+      // Fallback si la librería 'marker' no está disponible
+      if (google.maps.marker && google.maps.marker.AdvancedMarkerElement){
+        return new google.maps.marker.AdvancedMarkerElement({ map:STATE.map, position, content:d });
+      }
+      return new google.maps.Marker({ map:STATE.map, position, icon:{
+        path:google.maps.SymbolPath.CIRCLE, scale:6, fillColor:'#3b82f6', fillOpacity:1, strokeColor:'#1e3a8a', strokeWeight:1
+      }});
     }
 
     function storeCachedTarget(obj){ try{ localStorage.setItem(SKEY, JSON.stringify(obj)); }catch(_e){} }
@@ -256,7 +262,7 @@
     (function(){
       fetch('/api/env').then(r=>r.ok?r.json():Promise.reject()).then(cfg=>{
         var k = cfg.googleMapsApiKey || '';
-        var src = 'https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(k)+'&libraries=geometry,places&v=weekly&callback=initMap';
+        var src = 'https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(k)+'&libraries=geometry,places,marker&v=weekly&callback=initMap';
         var s = document.createElement('script'); s.src=src; s.async=true; s.defer=true; document.body.appendChild(s);
       }).catch(function(){
         const t=document.getElementById('toast'); t.textContent='Error cargando Google Maps. Revisa variables en Vercel.'; t.style.display='block';
