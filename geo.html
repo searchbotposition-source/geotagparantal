@@ -72,16 +72,16 @@
     .modal h3{margin:0 0 8px 0}
     .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
     .btnDownload{background:linear-gradient(90deg,#21d682,#06bad7)!important;color:#003013;border:0;padding:12px 18px;border-radius:13px;font-size:17px;font-weight:800;cursor:pointer}
-    body{background:#f2f6fc!important; color:#232e3e;}
-    .shell,.panel,.mapWrap{background:#fff!important;border-radius:16px!important;border:1px solid #e0e8ef!important;box-shadow:0 2px 10px #2193e01e}
-    .footer,.topbar{background:#f7fafc!important;color:#41526a;border:none}
+    body{background:#0a1422!important;color:#eaf6ff;}
+    .shell,.panel,.mapWrap{background:rgba(24,37,68,0.96)!important;border-radius:17px!important;border:1px solid #223157!important;box-shadow:0 2px 18px #1170e41b; color:#eaf6ff;}
+    .footer,.topbar{background:#16223a; color:#9db3c9; border:none;}
     h1,h2,h3,h4{color:#22334a}
-    .btnPrimary,.btnDownload{background:linear-gradient(90deg,#16c371 70%,#2493e3 100%)!important;color:#153422!important;border-radius:13px;font-size:18px;}
-    .btn,.btnGhost{background:#e8f9ee!important;color:#1b4d2c!important}
-    input,select{background:#f5fbfc;color:#232e3e;font-weight:500}
-    .brand{color:#13b187!important}
-    .status,.muted,.hint{color:#344e61!important}
-    .badge{background:#c3fbe4!important;color:#0e8460;font-weight:600;border-radius:7px;}
+    .btnPrimary,.btnDownload{background:linear-gradient(90deg,#10ee8e 70%,#4ddbef 100%)!important;color:#072f13!important;border-radius:13px!important;font-size:17px;font-weight:800}
+    .btn,.btnGhost{background:#1c2a3c!important;color:#abffea!important;}
+    input,select{background:#142940;color:#eaf6ff; font-weight:500}
+    .brand{color:#32cfae!important;}
+    .status,.muted,.hint{color:#c8e1fb!important}
+    .badge{background:#163544!important;color:#b2fbe9!important;}
   </style>
 
   <!-- Meta Pixel Code (ID: 2587292611639407) -->
@@ -362,9 +362,21 @@
     function clearTimers(){ timers.forEach(clearTimeout); timers=[]; if(progressRAF) cancelAnimationFrame(progressRAF); if(pulseRAF) cancelAnimationFrame(pulseRAF); if(sweepTimer) clearInterval(sweepTimer); clearIntervals(); }
     function clearIntervals(){ intervals.forEach(clearInterval); intervals=[]; }
     let heatLayers=[];
-    function resetHeat(){ heatLayers.forEach(l=>map.removeLayer(l)); heatLayers=[]; }
-    function addHeat(lat,lon,w=1){ const c=L.circle([lat,lon],{radius:120*w, color:'#4f9fff', weight:0, fillColor:'#4f9fff', fillOpacity:0.18}); c.addTo(map); heatLayers.push(c); }
-    function addHeatCluster(center,spanKm,count,baseW=1){ const {lat,lon}=center; const hl=kmLat(spanKm/2),ho=kmLon(spanKm/2,lat); for(let i=0;i<count;i++){ addHeat(lat+(Math.random()*2-1)*hl, lon+(Math.random()*2-1)*ho, baseW*(0.7+Math.random()*0.6)); } }
+    function resetHeat(){ heatLayers.forEach(l=>{try{map.removeLayer(l);}catch{}}); heatLayers=[]; }
+    function addHeat(lat,lon,w=1){
+      // Heatmap térmico vivo (azul a rojo)
+      let fp=w<0.5?'#23aaff':w<1?'#6fff77':w<1.3?'#ffe447':'#fe5456';
+      let opa=w<1.2?0.33:0.62;
+      const c=L.circle([lat,lon],{radius:110*w,color:fp,weight:0,fillColor:fp,fillOpacity:opa});
+      c.addTo(map);heatLayers.push(c);
+    }
+    function addHeatCluster(center,spanKm,count,baseW=1){
+      const {lat,lon}=center; const hl=kmLat(spanKm/2),ho=kmLon(spanKm/2,lat);
+      for(let i=0;i<count;i++){
+        let randW=baseW*(0.7+Math.random()*0.7);
+        addHeat(lat+(Math.random()*2-1)*hl, lon+(Math.random()*2-1)*ho, randW);
+      }
+    }
     function randomPointInCircle(center, radiusM){
       const ang=Math.random()*2*Math.PI, r=Math.sqrt(Math.random())*radiusM;
       const dLat=(r/1000)/111, dLon=(r/1000)/(111*Math.cos(center.lat*Math.PI/180));
