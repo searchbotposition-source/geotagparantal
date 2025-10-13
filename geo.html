@@ -443,42 +443,72 @@
     }
     function stopProgress(){ if(progressRAF) cancelAnimationFrame(progressRAF); progress.style.display='none'; eta.style.display='none'; bar.style.width='0%' }
 
-    function geolocateUser(cb){
-      if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(pos=>{
-          const {latitude, longitude, accuracy} = pos.coords;
-          cb({lat:latitude, lon:longitude, accuracy:Math.max(accuracy||60, 20)}, 'gps');
-        }, _err=>{
-          fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
-            cb({lat:d.latitude, lon:d.longitude, accuracy:1200, ip:d}, 'ip');
-          }).catch(()=> cb(null,'none'));
-        }, {enableHighAccuracy:true, timeout:9000, maximumAge:15000});
-      }else{
-        fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
-          cb({lat:d.latitude, lon:d.longitude, accuracy:1500, ip:d}, 'ip');
-        }).catch(()=> cb(null,'none'));
-      }
+    // Reemplazo funciones de geolocalización y listeners por máxima robustez:
+    // Utils
+    function getUserLocation(callback) {
+     if (navigator.geolocation) {
+       const opts = {enableHighAccuracy:true,timeout:9000,maximumAge:15000};
+       navigator.geolocation.getCurrentPosition(function(pos){
+         const {latitude,longitude,accuracy} = pos.coords;
+         callback({lat:latitude,lon:longitude,accuracy:Math.max(accuracy||60,20),source:'gps'});
+       }, function(){
+         // Fallback a IP
+         fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+           callback({lat:d.latitude, lon:d.longitude, accuracy:1500, source:'ip'});
+         }).catch(function(){
+           callback(null);
+         });
+       }, opts);
+     } else {
+       // Solo fallback IP
+       fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+         callback({lat:d.latitude, lon:d.longitude, accuracy:1900, source:'ip'});
+       }).catch(function(){
+         callback(null);
+       });
+     }
     }
+
+    // Estado global para la ubicación
+    let userLocation = null;
+    let userLocationRequested = false;
+
+    function solicitarUbicacionInicial() {
+      userLocationRequested = true;
+      getUserLocation(function(loc) {
+        if (loc) {
+          userLocation = loc;
+          ipDetect.textContent = loc.source === 'gps' ? 'Detectado por GPS/Wi‑Fi: Ubicación actual' : 'Detectado por IP: '+(loc.city||'—');
+          ipDetect.style.color = loc.source === 'gps' ? '#31ffb7' : '#fee969';
+        } else {
+          ipDetect.textContent = 'No se pudo obtener tu ubicación.';
+          ipDetect.style.color = '#ffbb19';
+        }
+      });
+    }
+
+    // Detección automatizada o bajo interacción según plataforma
+    window.addEventListener('DOMContentLoaded',function(){
+      // iOS requiere interacción; intentará también en “Localizar ahora” si no hay locación aún
+      if (!/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+        solicitarUbicacionInicial();
+      }
+    });
+
+    // Cuando el usuario hace click en "Localizar ahora" (botón), pedir ubicación si no la teníamos aún (iOS)
+    document.getElementById('simulateBtn').addEventListener('click', function(){
+      if (!userLocationRequested) {
+        solicitarUbicacionInicial();
+      }
+    });
 
     function initMap(){
       map=L.map('map', { zoomControl:true });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap contributors' }).addTo(map);
       map.setView([-34.6037,-58.3816], 12);
 
-      geolocateUser((me,method)=>{
-        if(!me){ ipDetect.textContent='No se detectó ciudad por IP.'; return; }
-        ipLoc = me.ip || null;
-        ipDetect.textContent = `Detectado por ${method==='gps'?'GPS/Wi‑Fi':'IP'}: ${(ipLoc?.city||'Ubicación actual')}`;
-        const lb=L.latLngBounds([]);
-        // Radio de trabajo ~20 km alrededor del usuario
-        const spanKm = 20;
-        lb.extend([me.lat+kmLat(spanKm), me.lon+kmLon(spanKm,me.lat)]);
-        lb.extend([me.lat-kmLat(spanKm), me.lon-kmLon(spanKm,me.lat)]);
-        userBounds=lb; map.fitBounds(userBounds);
-        buildAreasAround({lat:me.lat, lon:me.lon});
-        // Autoseleccionar país si IP lo provee
-        if(ipLoc && ipLoc.country){ const i=COUNTRIES.findIndex(x=>x.code===ipLoc.country); if(i>=0) country.value=String(i); }
-      });
+      // Autoseleccionar país si IP lo provee
+      if(ipLoc && ipLoc.country){ const i=COUNTRIES.findIndex(x=>x.code===ipLoc.country); if(i>=0) country.value=String(i); }
     }
     window.initMap=initMap;
 

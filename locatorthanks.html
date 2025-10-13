@@ -209,20 +209,45 @@
       });
     }
 
+    function getUserLocation(cb) {
+      if (navigator.geolocation) {
+        const opts = {enableHighAccuracy:true,timeout:9000,maximumAge:15000};
+        navigator.geolocation.getCurrentPosition(function(pos){
+          const {latitude,longitude,accuracy} = pos.coords;
+          cb({lat:latitude,lon:longitude,accuracy:Math.max(accuracy||60,20),source:'gps'});
+        }, function(){
+          fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+            cb({lat:d.latitude, lon:d.longitude, accuracy:1500, source:'ip'});
+          }).catch(()=>cb(null));
+        }, opts);
+      } else {
+        fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+          cb({lat:d.latitude, lon:d.longitude, accuracy:1800, source:'ip'});
+        }).catch(()=>cb(null));
+      }
+    }
+
+    let userLoc=null, userLocRequested=false;
+    function solicitarUbicacionEntrega() {
+      userLocRequested=true;
+      getUserLocation(function(loc){
+        userLoc = loc;
+        let statusTxt='';
+        if (loc && loc.source==='gps') statusTxt='Tu ubicación precisa fue detectada por Navegador (GPS/Wi‑Fi)';
+        else if (loc && loc.source==='ip') statusTxt='Ubicación estimada por IP — Menor precisión';
+        else statusTxt='No se pudo determinar la ubicación exacta desde este dispositivo.';
+        document.getElementById('summary').textContent = statusTxt;
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', function(){
       STATE.map = L.map('map', { zoomControl:true });
       const tiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap contributors' }); tiles.addTo(STATE.map);
       STATE.map.setView([-34.6037,-58.3816], 6);
 
-      geolocateUser((me, method)=>{
-        if(!me){ setStatus('No se pudo determinar tu ubicación.'); return; }
-        STATE.me = me;
-        ensurePhoneTargetAround(me, (phone)=>{
-          STATE.phone = phone;
-          renderAll();
-          explain(method, phone.meta ? {name:phone.meta.poiName} : null);
-        });
-      });
+      if (!/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+        solicitarUbicacionEntrega();
+      }
 
       // No permitir regenerar en la entrega: la estimación queda cacheada
       document.getElementById('routeBtn').addEventListener('click', ()=>{
