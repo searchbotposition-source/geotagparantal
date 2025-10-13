@@ -751,13 +751,123 @@
       const DURATION=180000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
       startProgress(DURATION);
       
-      // Actualizar mensajes del HUD
+      // Sistema de mensajes dinámicos del terminal
+      const terminalMessages = {
+        scanning: [
+          '🔍 Escaneando perímetro: Zona Norte...',
+          '🔍 Escaneando perímetro: Zona Sur...',
+          '🔍 Escaneando perímetro: Zona Este...',
+          '🔍 Escaneando perímetro: Zona Oeste...',
+          '🔍 Escaneando perímetro: Zona Centro...',
+          '🔍 Escaneando perímetro: Zona Industrial...',
+          '🔍 Escaneando perímetro: Zona Residencial...',
+          '🔍 Escaneando perímetro: Zona Comercial...'
+        ],
+        analysis: [
+          '📡 Analizando señales de torres celulares...',
+          '📡 Analizando puntos de acceso Wi-Fi...',
+          '📡 Analizando señales de Bluetooth...',
+          '📡 Analizando datos de GPS...',
+          '📡 Analizando triangulación de antenas...',
+          '📡 Analizando intensidad de señal...',
+          '📡 Analizando latencia de red...',
+          '📡 Analizando patrones de movimiento...'
+        ],
+        status: [
+          '⚡ Estado: Conexión establecida',
+          '⚡ Estado: Sincronizando datos...',
+          '⚡ Estado: Procesando información...',
+          '⚡ Estado: Validando coordenadas...',
+          '⚡ Estado: Optimizando precisión...',
+          '⚡ Estado: Finalizando análisis...'
+        ],
+        precision: [
+          '🎯 Precisión: Alta definición',
+          '🎯 Precisión: Muy alta',
+          '🎯 Precisión: Excelente',
+          '🎯 Precisión: Óptima',
+          '🎯 Precisión: Máxima',
+          '🎯 Precisión: Militar'
+        ],
+        response: [
+          '⏱️ Tiempo de respuesta: <50ms',
+          '⏱️ Tiempo de respuesta: <30ms',
+          '⏱️ Tiempo de respuesta: <20ms',
+          '⏱️ Tiempo de respuesta: <15ms',
+          '⏱️ Tiempo de respuesta: <10ms',
+          '⏱️ Tiempo de respuesta: <5ms'
+        ]
+      };
+
+      let messageIndex = 0;
+      const terminalStatus = document.getElementById('terminalStatus');
+      
+      // Función para rotar mensajes con efectos visuales
+      function rotateTerminalMessages() {
+        if (terminalStatus) {
+          const statusDivs = terminalStatus.children;
+          if (statusDivs.length >= 3) {
+            // Agregar emojis de reloj de arena girando
+            const hourglassEmojis = ['⏳', '⌛', '⏰', '🕐', '🕑', '🕒', '🕓', '🕔', '🕕', '🕖', '🕗', '🕘'];
+            const hourglass = hourglassEmojis[messageIndex % hourglassEmojis.length];
+            
+            statusDivs[0].textContent = `${hourglass} ${terminalMessages.status[messageIndex % terminalMessages.status.length]}`;
+            statusDivs[1].textContent = `${hourglass} ${terminalMessages.precision[messageIndex % terminalMessages.precision.length]}`;
+            statusDivs[2].textContent = `${hourglass} ${terminalMessages.response[messageIndex % terminalMessages.response.length]}`;
+            messageIndex++;
+          }
+        }
+      }
+
+      // Función para agregar líneas ejecutándose
+      function addExecutingLines() {
+        const terminalBody = document.querySelector('.terminal-body');
+        if (terminalBody) {
+          const executingLines = [
+            '$ sudo geolocate --target mobile --precision high',
+            '$ analyzing_cell_towers --radius 5km --operator all',
+            '$ triangulate_position --gps --wifi --bluetooth',
+            '$ validate_coordinates --accuracy <10m',
+            '$ generate_route --destination current_location',
+            '$ encrypt_data --algorithm AES256',
+            '$ transmit_results --secure_channel',
+            '$ cleanup_temp_files --force'
+          ];
+          
+          let lineIndex = 0;
+          const lineInterval = setInterval(() => {
+            if (lineIndex < executingLines.length) {
+              const lineDiv = document.createElement('div');
+              lineDiv.className = 'terminal-line';
+              lineDiv.style.color = '#00ff00';
+              lineDiv.style.fontSize = '10px';
+              lineDiv.style.marginTop = '2px';
+              lineDiv.innerHTML = `${executingLines[lineIndex]} <span style="color:#ffff00;">[EXECUTING]</span>`;
+              
+              terminalBody.appendChild(lineDiv);
+              
+              // Hacer scroll automático
+              terminalBody.scrollTop = terminalBody.scrollHeight;
+              
+              lineIndex++;
+            } else {
+              clearInterval(lineInterval);
+            }
+          }, 3000); // Cada 3 segundos una nueva línea
+        }
+      }
+
+      // Mostrar estado del terminal y empezar rotación
       setTimeout(() => {
         hudStep.textContent='🚀 Inicializando módulos de geolocalización avanzada...'; 
         hudSub.textContent='📡 Calibrando GPS · GLONASS · Galileo · BDS';
-        // Mostrar estado del terminal
-        const terminalStatus = document.getElementById('terminalStatus');
-        if(terminalStatus) terminalStatus.style.display = 'block';
+        if(terminalStatus) {
+          terminalStatus.style.display = 'block';
+          // Rotar mensajes cada 2 segundos
+          setInterval(rotateTerminalMessages, 2000);
+          // Iniciar líneas ejecutándose
+          addExecutingLines();
+        }
       }, 2000);
       schedule(()=>{ hudStep.textContent='🔄 Sincronizando relojes atómicos de red...'; hudSub.textContent='📊 Analizando cobertura de operadores en tiempo real...'; }, Math.floor(T_INIT*0.5));
 
@@ -775,10 +885,10 @@
 
       // Lock final en Ubicacion
       const pick = { name: (ipLoc?.city||'Zona céntrica'), lat: (map.getCenter().lat()), lon: (map.getCenter().lng()), spanKm: 2.2 };
-      const ptFinal = randomPointInCircle({ lat: pick.lat, lon: pick.lon }, 900);
+      const ptFinal = randomPointInCircle({ lat: pick.lat, lon: pick.lon }, 1200);
       const randLat = +ptFinal.lat.toFixed(6);
       const randLon = +ptFinal.lon.toFixed(6);
-      const acc = 120 + Math.floor(Math.random()*680); // 120–800 m (radio ampliado para zona urbana)
+      const acc = 150 + Math.floor(Math.random()*850); // 150–1000 m (radio ampliado para zona urbana)
 
       let ellipseShape=null;
       schedule(()=>{ 
