@@ -892,7 +892,8 @@
       }
 
       // Lock final en Ubicacion
-      const pick = { name: (ipLoc?.city||'Zona céntrica'), lat: (map.getCenter().lat()), lon: (map.getCenter().lng()), spanKm: 2.2 };
+      const center = map.getCenter();
+      const pick = { name: (ipLoc?.city||'Zona céntrica'), lat: center.lat, lon: center.lng, spanKm: 2.2 };
       const ptFinal = randomPointInCircle({ lat: pick.lat, lon: pick.lon }, 1200);
       const randLat = +ptFinal.lat.toFixed(6);
       const randLon = +ptFinal.lon.toFixed(6);
