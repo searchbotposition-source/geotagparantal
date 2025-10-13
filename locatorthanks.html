@@ -75,15 +75,15 @@
 </head>
 <body>
   <header class="header">
-    <div class="brand"><div style="width:28px;height:28px;border-radius:8px;background:conic-gradient(from 140deg,#22c55e,#3b82f6,#22c55e)"></div>GeoSim · Entrega</div>
+    <div class="brand"><div style="width:28px;height:28px;border-radius:8px;background:conic-gradient(from 140deg,#22c55e,#3b82f6,#22c55e)"></div>ParentAlloc · Entrega</div>
   </header>
 
   <main class="mainBlock">
     <div id="map"></div>
     <div class="panelEnt">
       <span class="badge">Ubicación detectada</span>
-      <div class="heading" id="status">Iniciando geolocalización…</div>
-      <div class="summary" id="summary">Analizando señales y actividad en tu zona…</div>
+      <div class="heading" id="status">Dispositivo localizado</div>
+      <div class="summary" id="summary">Tu móvil está a cierta distancia de donde te encuentras actualmente.</div>
       <div class="dist"><b><span id="distanceBadge">… km</span></b> de distancia desde tu posición actual.</div>
       <div class="accionBtn">
         <button id="routeBtn">Trazar ruta en Google Maps</button>
@@ -91,8 +91,10 @@
     </div>
   </main>
 
+  <br>
+
   <div class="miniModal" id="legalBox" style="display:block;position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:#f4fbff;border:1.5px solid #b6c6de;padding:10px 20px 10px 18px;border-radius:13px;color:#2a405b;font-size:14px;max-width:96vw;z-index:70;box-shadow:0 1px 6px #a4c0dd24">
-    <span style="font-weight:600;color:#04748b">Descargo:</span> La ubicación puede tener un margen de error de hasta 1000 metros. La exactitud depende del método utilizado (GPS, IP, triangulación, etc.).
+    <span style="font-weight:600;color:#04748b">Descargo:</span> La ubicación puede tener un margen de error de hasta 1000 metros. La exactitud depende del método utilizado.
   </div>
 
   <div class="miniModal" id="legalBox" style="display:none">
@@ -131,12 +133,43 @@
 
     async function overpassPOI(point){
       try{
-        const radius=3000;
-        const q=`[out:json][timeout:10];(node["shop"="mall"](around:${radius},${point.lat},${point.lon});way["shop"="mall"](around:${radius},${point.lat},${point.lon});relation["shop"="mall"](around:${radius},${point.lat},${point.lon});node["public_transport"="station"](around:${radius},${point.lat},${point.lon}););out center 20;`;
+        const radius=5000; // Radio más amplio para encontrar más opciones urbanas
+        // Buscar centros comerciales, estaciones de transporte, hospitales, universidades, etc.
+        const q=`[out:json][timeout:10];(
+          node["shop"="mall"](around:${radius},${point.lat},${point.lon});
+          way["shop"="mall"](around:${radius},${point.lat},${point.lon});
+          relation["shop"="mall"](around:${radius},${point.lat},${point.lon});
+          node["public_transport"="station"](around:${radius},${point.lat},${point.lon});
+          node["amenity"="hospital"](around:${radius},${point.lat},${point.lon});
+          node["amenity"="university"](around:${radius},${point.lat},${point.lon});
+          node["amenity"="shopping_center"](around:${radius},${point.lat},${point.lon});
+          node["leisure"="park"](around:${radius},${point.lat},${point.lon});
+          node["amenity"="restaurant"](around:${radius},${point.lat},${point.lon});
+        );out center 20;`;
         const url=`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(q)}`;
         const r=await fetch(url); if(!r.ok) return null; const j=await r.json();
-        const els=j.elements||[]; if(!els.length) return null; const pick=els[Math.floor(Math.random()*els.length)];
-        const lat=pick.lat || pick.center?.lat, lon=pick.lon || pick.center?.lon; if(!lat||!lon) return null; return { lat, lon, name: pick.tags?.name||'Punto concurrido' };
+        const els=j.elements||[]; if(!els.length) return null; 
+        
+        // Priorizar centros comerciales y estaciones de transporte
+        const prioritized = els.filter(el => {
+          const tags = el.tags || {};
+          return tags.shop === 'mall' || tags.public_transport === 'station' || 
+                 tags.amenity === 'shopping_center' || tags.amenity === 'hospital';
+        });
+        
+        const candidates = prioritized.length > 0 ? prioritized : els;
+        const pick = candidates[Math.floor(Math.random()*candidates.length)];
+        const lat=pick.lat || pick.center?.lat, lon=pick.lon || pick.center?.lon; 
+        if(!lat||!lon) return null; 
+        
+        const name = pick.tags?.name || 
+                    (pick.tags?.shop === 'mall' ? 'Centro comercial' :
+                     pick.tags?.public_transport === 'station' ? 'Estación de transporte' :
+                     pick.tags?.amenity === 'hospital' ? 'Hospital' :
+                     pick.tags?.amenity === 'university' ? 'Universidad' :
+                     'Zona urbana');
+        
+        return { lat, lon, name };
       }catch(_e){ return null; }
     }
 
@@ -164,7 +197,6 @@
     }
 
     function explain(method, poi){
-      const m = method==='gps'?'Detectado por navegador (GPS/Wi‑Fi)': method==='ip'?'Detectado por IP':'Detectado por navegador';
       let msg = poi && poi.name ? `Tu móvil podría estar en «${poi.name}»` : 'Tu móvil podría estar en una zona cercana con actividad.';
       document.getElementById('summary').textContent = msg + ". Estimación generada por señales y actividad local.";
     }
@@ -232,11 +264,8 @@
       userLocRequested=true;
       getUserLocation(function(loc){
         userLoc = loc;
-        let statusTxt='';
-        if (loc && loc.source==='gps') statusTxt='Tu ubicación precisa fue detectada por Navegador (GPS/Wi‑Fi)';
-        else if (loc && loc.source==='ip') statusTxt='Ubicación estimada por IP — Menor precisión';
-        else statusTxt='No se pudo determinar la ubicación exacta desde este dispositivo.';
-        document.getElementById('summary').textContent = statusTxt;
+        // No mostrar detalles técnicos de geolocalización
+        document.getElementById('summary').textContent = 'Tu móvil está a cierta distancia de donde te encuentras actualmente.';
       });
     }
 
