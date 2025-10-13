@@ -483,7 +483,7 @@
 
       const DURATION=180000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
       startProgress(DURATION);
-      hudStep.textContent='Inicializando módulos…'; hudSub.textContent='Señales celulares · GNSS · Wi-Fi público';
+      hudStep.textContent='Inicializando módulos…'; hudSub.textContent='Señales celulares · GNSS · Wi‑Fi';
       schedule(()=>{ hudStep.textContent='Sincronizando relojes de red…'; hudSub.textContent='Operadores disponibles: analizando…'; }, Math.floor(T_INIT*0.5));
 
       const order=[...DYNAMIC_AREAS].sort(()=>Math.random()-0.5);
