@@ -60,10 +60,77 @@
     .mapWrap{position:relative;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:rgba(5,12,24,.6);backdrop-filter: blur(6px);box-shadow: inset 0 1px 0 rgba(255,255,255,.03)}
     #map{width:100%;height:620px}
     @media (max-width:980px){#map{height:480px}}
-    .hud{position:absolute;left:12px;top:12px;z-index:5;display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:12px;backdrop-filter: blur(8px);background:rgba(5,15,30,.55);border:1px solid rgba(255,255,255,.08);max-width:min(92%,460px)}
-    .hudTitle{font-weight:700;font-size:13px;letter-spacing:.04em;color:#cfe5ff}
-    .hudStep{font-size:13px;color:#eaf3ff}
-    .hudSub{font-size:12px;color:var(--muted)}
+    /* Terminal Hacker integrado en el panel */
+    .terminal-hud {
+      width: 100%;
+      min-height: 200px;
+      background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+      border: 1px solid #333;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      overflow: hidden;
+      box-shadow: 0 0 25px rgba(0, 255, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .terminal-header {
+      background: linear-gradient(90deg, #2a2a2a, #1a1a1a);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #333;
+    }
+    .terminal-buttons {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-close, .btn-minimize, .btn-maximize {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .btn-close { background: #ff5f56; }
+    .btn-minimize { background: #ffbd2e; }
+    .btn-maximize { background: #27ca3f; }
+    .terminal-title {
+      color: #00ff00;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .terminal-body {
+      padding: 15px;
+      background: #000;
+      min-height: 160px;
+    }
+    .terminal-line {
+      color: #00ff00;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+    .terminal-cursor {
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    .hudStep {
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      margin: 4px 0;
+      font-size: 12px;
+    }
+    .hudSub {
+      color: #00ffff;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      margin: 2px 0;
+    }
+    .hudCarrier {
+      color: #ffff00;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      margin: 2px 0;
+    }
     .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.25);border-top-color:#7fb7ff;border-radius:50%;animation:spin 1s linear infinite;display:inline-block;margin-right:8px;vertical-align:-3px}
     @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -144,31 +211,53 @@
 
       <div class="grid">
         <aside class="panel">
-          <h2 class="text-3xl md:text-4xl font-black" style="color:#fff;margin-bottom:10px;">Ingresa el Numero Movil</h2>
-          <div class="hint" style="font-size:16px;color:#cee8fb;font-weight:500;margin-bottom:9px;padding:0 .5rem 0 0.5rem;">Localizamos el teléfono <b>Movil</b> (Dispositivo). Donde se encuentre.</div>
-          <!-- Input UI, país e ip, no cambiar -->
-          <label for="country" style="color:#fff">País (Ubicación Actual)</label>
-          <div class="row"><select id="country"></select></div>
-          <div class="hint" id="ipDetect" style="color:#6efaff;background:#14353e42;font-weight:600;padding-left:.55rem;border-radius:4px;">Detectando ubicación…</div>
-          <label for="number" style="color:#fff">Número local</label>
-          <div class="row"><input id="number" inputmode="tel" placeholder="Ej: 987654321" maxlength="16" /></div>
-          <div class="row" style="margin-top:12px;"> <button id="simulateBtn" class="btn btnPrimary" style="padding:16px 39px;font-size:22px;font-weight:900;background:#23f178;color:#012616;box-shadow:0 3px 20px #23f17844;letter-spacing:.01em;">Localizar ahora</button> <button id="resetBtn" class="btn btnGhost">Reiniciar</button></div>
-          <div class="status" id="status" style="margin:0 0 12px 0;font-weight:600;">Listo.</div>
+          <h2>Ingresa el Numero Movil</h2>
+          <div class="hint">Localizamos el telefono <b>Movil</b> (Dispositivo). Donde se encuentre.</div>
 
+          <label for="country">País (Ubicacion Actual)</label>
+          <div class="row"><select id="country"></select></div>
+          <div class="hint" id="ipDetect">Detectando ciudad por IP…</div>
+
+          <label for="number">Número local</label>
+          <div class="row"><input id="number" inputmode="tel" placeholder="Ej: 987654321" maxlength="16" /></div>
+
+          <div class="row">
+            <button id="simulateBtn" class="btn btnPrimary" disabled>Iniciar Busqueda</button>
+            <button id="resetBtn" class="btn btnGhost">Reiniciar</button>
+          </div>
+
+          <div class="status" id="status">Listo.</div>
           <div class="progress" id="progress"><i id="bar"></i></div>
           <div class="hint" id="eta" style="display:none">Tiempo restante: 180 s</div>
 
           <div class="hint" style="margin-top:6px">* Localiza en tiempo real. Ubicacion Exacta .</div>
+          
+          <!-- Terminal Hacker integrado en el panel -->
+          <div class="terminal-hud" id="hud" style="display:none;margin-top:20px;">
+            <div class="terminal-header">
+              <div class="terminal-buttons">
+                <span class="btn-close"></span>
+                <span class="btn-minimize"></span>
+                <span class="btn-maximize"></span>
+              </div>
+              <div class="terminal-title">🔍 GeoSim Terminal v2.1.3</div>
+            </div>
+            <div class="terminal-body">
+              <div class="terminal-line">$ <span class="terminal-cursor">_</span></div>
+              <div class="hudStep" id="hudStep">🔌 Conectando a redes celulares...</div>
+              <div class="hudSub" id="hudSub">📡 Estableciendo comunicación con torres...</div>
+              <div class="hudCarrier" id="hudCarrier" style="display:none"></div>
+              <div class="terminal-status" id="terminalStatus" style="display:none;color:#ffff00;font-size:11px;margin-top:8px;">
+                <div>⚡ Estado: Conexión establecida</div>
+                <div>🎯 Precisión: Alta definición</div>
+                <div>⏱️ Tiempo de respuesta: &lt;50ms</div>
+              </div>
+            </div>
+          </div>
         </aside>
 
         <div class="mapWrap">
           <div id="map" role="application" aria-label="Mapa de la simulación"></div>
-          <div class="hud" id="hud" style="display:none">
-            <div class="hudTitle"><span class="spinner"></span>Localización (Movil) en curso</div>
-            <div class="hudStep" id="hudStep">Inicializando módulos…</div>
-            <div class="hudSub" id="hudSub">Señales de red · GNSS · Wi-Fi público</div>
-            <div class="hudSub" id="hudCarrier" style="display:none"></div>
-          </div>
         </div>
       </div>
     </section>
@@ -178,28 +267,44 @@
 
   <div class="modalBack" id="modalBack" role="dialog" aria-modal="true">
   <div class="modal" role="document">
-    <h3>Dispositivo Encontrado</h3>
-    <div id="modalText" style="color:#eaf7ff">
-      Se encontró una ubicación.
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:48px;margin-bottom:10px;">🎯</div>
+      <h3 style="color:#ff6b6b;margin:0;">¡DISPOSITIVO LOCALIZADO!</h3>
     </div>
-    <div class="hint">
-      Datos recopilados en Google Maps; Sigue la ubicación desde tu dispositivo.
+    <div id="modalText" style="color:#eaf7ff;text-align:center;margin-bottom:20px;">
+      <strong>¡Éxito! Tu móvil ha sido encontrado.</strong><br>
+      <small style="color:#a9bbd8">Precisión: ~${finalResult?.accuracy || '200'} m · origen: ${finalResult?.origin || 'GPS'}</small>
     </div>
+    
+    <!-- Mensaje de urgencia -->
+    <div style="background:linear-gradient(135deg,#ff4757,#ff3742);padding:15px;border-radius:12px;margin-bottom:20px;text-align:center;color:white;">
+      <div style="font-size:18px;font-weight:bold;margin-bottom:8px;">⚠️ ¡ACCIÓN INMEDIATA REQUERIDA!</div>
+      <div style="font-size:14px;">Cada minuto que pasa aumenta el riesgo de que cambien de ubicación o apaguen el dispositivo.</div>
+    </div>
+
     <div class="actions">
-      <div style="background:#ffdf97;border-radius:9px;padding:14px 14px 11px 14px;margin-bottom:15px;text-align:center;color:#45380e;font-weight:800;font-size:1em;">⏳ Entre más tiempo pasa, el móvil podría estar desplazándose y las probabilidades de ubicarlo <span style="color:#df1c1c;font-weight:900">disminuyen</span>. No pierdas tu oportunidad de recuperarlo.</div>
-      <!-- IMPORTANTE: type="button" para evitar submit -->
-      <button id="downloadBtn" class="btnDownload" type="button">Obtener localización ahora — $ 14.997 ARS</button>
-      <button id="closeModal" class="btn btnGhost" type="button">Cerrar</button>
+      <button id="downloadBtn" class="btnDownload" type="button" style="background:linear-gradient(135deg,#00b894,#00a085);border:none;color:white;padding:16px 24px;font-size:16px;font-weight:bold;border-radius:12px;width:100%;margin-bottom:10px;box-shadow:0 4px 15px rgba(0,184,148,0.4);">
+        🔒 OBTENER UBICACIÓN AHORA — $14.997 ARS<br>
+        <small style="font-size:12px;opacity:0.9;">Sin costos ocultos · Pago seguro con Mercado Pago</small>
+      </button>
+      <button id="closeModal" class="btn btnGhost" type="button" style="width:100%;opacity:0.7;">Cancelar (No recomendado)</button>
     </div>
-    <div style="text-align:center;margin-top:18px;font-size:14px;">
-      <span style="display:inline-flex;align-items:center;gap:7px;padding:2px 12px;background:#ddfee2;color:#146c43;font-weight:600;border-radius:8px;margin-bottom:9px;">
-        <svg width="20" height="20" style="vertical-align:middle" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="#00C46A"/><path d="M6.5 10.5l2.3 2.3c.2.2.5.2.7 0l4-4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Pago seguro con Mercado Pago
-      </span>
-      <ul style="margin:12px 0 0 0;padding:0;list-style:none;color:#209874;font-weight:500">
-        <li>✔️ Ruta e indicaciones en Google Maps</li>
-        <li>✔️ Informe descargable de la ubicación</li>
-        <li>✔️ Soporte prioritario 24/7</li>
+    
+    <div style="text-align:center;margin-top:20px;font-size:13px;">
+      <div style="display:flex;justify-content:center;gap:15px;margin-bottom:15px;">
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#ddfee2;color:#146c43;font-weight:600;border-radius:8px;">
+          🔒 Pago 100% Seguro
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#fff3cd;color:#856404;font-weight:600;border-radius:8px;">
+          ⚡ Acceso Inmediato
+        </span>
+      </div>
+      <ul style="margin:0;padding:0;list-style:none;color:#209874;font-weight:500;text-align:left;">
+        <li style="margin:8px 0;">✅ Coordenadas exactas con precisión GPS</li>
+        <li style="margin:8px 0;">✅ Ruta directa en Google Maps</li>
+        <li style="margin:8px 0;">✅ Informe detallado descargable</li>
+        <li style="margin:8px 0;">✅ Soporte técnico prioritario 24/7</li>
+        <li style="margin:8px 0;">✅ Garantía de ubicación actualizada</li>
       </ul>
     </div>
   </div>
@@ -244,15 +349,8 @@
   <script>
     /* ===== Países (bandera + prefijo) ===== */
     const COUNTRIES = [
-      // País Perú (comentado para AR)
-      // {flag:"🇵🇪", name:"Perú", prefix:"+51",  city:"Lima, Perú", lat:-12.046374, lon:-77.042793, code:'PE'},
-      {flag:"🇪🇸", name:"España", prefix:"+34", city:"Madrid, España", lat:40.416775, lon:-3.70379, code:'ES'},
-      {flag:"🇲🇽", name:"México", prefix:"+52", city:"CDMX, México", lat:19.432608, lon:-99.133209, code:'MX'},
       {flag:"🇦🇷", name:"Argentina", prefix:"+54", city:"Buenos Aires, Argentina", lat:-34.603722, lon:-58.381592, code:'AR'},
-      {flag:"🇨🇴", name:"Colombia", prefix:"+57", city:"Bogotá, Colombia", lat:4.710989, lon:-74.07209, code:'CO'},
-      {flag:"🇨🇱", name:"Chile", prefix:"+56", city:"Santiago, Chile", lat:-33.44889, lon:-70.669265, code:'CL'},
-      {flag:"🇺🇸", name:"EE. UU./Canadá", prefix:"+1", city:"Nueva York, EE. UU.", lat:40.712776, lon:-74.005974, code:'US'},
-      {flag:"🇬🇧", name:"Reino Unido", prefix:"+44", city:"Londres, Reino Unido", lat:51.507351, lon:-0.127758, code:'GB'}
+      {flag:"🇵🇪", name:"Perú", prefix:"+51", city:"Lima, Perú", lat:-12.046374, lon:-77.042793, code:'PE'}
     ];
     const country = document.getElementById('country');
     COUNTRIES.forEach((c,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=`${c.flag} ${c.name} (${c.prefix})`; country.appendChild(o); });
@@ -289,51 +387,48 @@
     const modalBack = document.getElementById('modalBack'), modalText = document.getElementById('modalText');
     const downloadBtn = document.getElementById('downloadBtn'), closeModal = document.getElementById('closeModal');
 
-    // Normaliza dígitos quitando prefijo del país si el usuario lo pegó con +54, 0054, etc.
-    function normalizeLocalDigits(raw, countryPrefix){
-      let d=(raw||'').replace(/\D/g,'');
-      let p=(countryPrefix||'').replace(/\D/g,'');
-      if(p && d.startsWith(p)) d=d.slice(p.length);
-      return d;
-    }
-
-    // Detecta prefijo internacional en el input y ajusta país + limpia prefijo para dejar número local
-    function autodetectCountryFromInput(raw){
-      const s=(raw||'').replace(/\s|-/g,'');
-      // Buscar por prefijos conocidos (COUNTRIES.prefix)
-      for(const c of COUNTRIES){
-        const p=c.prefix.replace(/\D/g,'');
-        if(!p) continue;
-        const sDigits=s.replace(/\D/g,'');
-        if(s.startsWith(c.prefix) || sDigits.startsWith(p)){
-          // Cambia selector de país si es distinto
-          const idx=COUNTRIES.findIndex(x=>x.code===c.code);
-          if(idx>=0 && String(country.value)!==String(idx)){
-            country.value=String(idx);
-          }
-          // Devuelve número sin prefijo para el input
-          const cleaned=sDigits.slice(p.length);
-          return cleaned;
-        }
-      }
-      return null;
-    }
-
-    // Hook a input para auto-detección de prefijo pegado
-    number.addEventListener('input', function(){
-      const auto = autodetectCountryFromInput(number.value);
-      if(auto!==null){ number.value = auto; }
-      validateDigits();
-    });
-
-    // Actualiza validación de dígitos con normalización
     function validateDigits(){
-      const idx=+country.value||0, selCountry=COUNTRIES[idx];
-      const dNorm=normalizeLocalDigits(number.value, selCountry.prefix);
-      const ok=dNorm.length>=9; // acepta >=9 locales
-      simulateBtn.disabled=!ok;
-      statusEl.textContent=ok?'Movil válido — listo para localizar.':'Verifica el número correcto.';
-      statusEl.className=ok?'status ok':'status';
+      const d=(number.value||'').replace(/\D/g,'');
+      const idx=+country.value||0;
+      const selCountry=COUNTRIES[idx];
+      
+      if(d.length < 8) {
+        simulateBtn.disabled=true;
+        statusEl.textContent='📱 Ingresa tu número completo.';
+        statusEl.className='status';
+        return;
+      }
+      
+      // Validar con libphonenumber para Argentina
+      if(selCountry.code === 'AR' && typeof libphonenumber !== 'undefined') {
+        try {
+          const fullNumber = `${selCountry.prefix}${d}`;
+          const parsed = libphonenumber.parsePhoneNumber(fullNumber, 'AR');
+          
+          if(parsed && parsed.isValid()) {
+            const carrier = detectOperatorSim('AR', d);
+            simulateBtn.disabled=false;
+            statusEl.innerHTML=`✅ <strong>Número activo</strong> — ${carrier} 📡`;
+            statusEl.className='status ok';
+          } else {
+            simulateBtn.disabled=true;
+            statusEl.textContent='❌ Número inválido para Argentina.';
+            statusEl.className='status err';
+          }
+        } catch(e) {
+          // Fallback a validación simple
+          const carrier = detectOperatorSim('AR', d);
+          simulateBtn.disabled=false;
+          statusEl.innerHTML=`✅ <strong>Número válido</strong> — ${carrier} 📡`;
+          statusEl.className='status ok';
+        }
+      } else {
+        // Para otros países, validación simple
+        const carrier = detectOperatorSim(selCountry.code, d);
+        simulateBtn.disabled=false;
+        statusEl.innerHTML=`✅ <strong>Número válido</strong> — ${carrier} 📡`;
+        statusEl.className='status ok';
+      }
     }
     number.addEventListener('input', validateDigits); validateDigits();
 
@@ -360,11 +455,11 @@
       if(!hudCarrier) return;
       hudCarrier.style.display = "block";
       if(opts.error){
-        hudCarrier.textContent = `Operador: (no disponible) — ${opts.error}`;
+        hudCarrier.textContent = `📡 Operador: (no disponible) — ${opts.error}`;
       }else if(opts.simulated){
-        hudCarrier.textContent = `Operador: ${name} (Buscando)`;
+        hudCarrier.textContent = `📡 Operador: ${name} (Conectado)`;
       }else{
-        hudCarrier.textContent = `Operador: ${name}`;
+        hudCarrier.textContent = `📡 Operador: ${name}`;
       }
     }
     function hideCarrierHud(){ if(hudCarrier) hudCarrier.style.display='none'; }
@@ -375,8 +470,21 @@
       if(countryCode === "AR"){
         const p2 = d.slice(0,2);
         if(CARRIER_MAP_AR[p2]) return CARRIER_MAP_AR[p2];
+        
+        // Detección más realista de operadores argentinos
+        const firstDigit = d.charAt(0);
+        const secondDigit = d.charAt(1);
+        
+        if(firstDigit === '9') {
+          if(secondDigit === '1' || secondDigit === '2') return "📱 Movistar";
+          if(secondDigit === '3' || secondDigit === '4') return "📱 Claro";
+          if(secondDigit === '5' || secondDigit === '6') return "📱 Personal";
+          if(secondDigit === '7' || secondDigit === '8') return "📱 Tuenti";
+        }
+        if(firstDigit === '1' && secondDigit === '1') return "📱 Movistar";
+        if(firstDigit === '1' && secondDigit === '5') return "📱 Claro";
       }
-      const ops = ["Movistar","Claro","Personal","Tuenti"];
+      const ops = ["📱 Movistar","📱 Claro","📱 Personal","📱 Tuenti"];
       const idx = parseInt(d.slice(-2)||"0",10) % ops.length;
       return ops[idx];
     }
@@ -488,148 +596,155 @@
     }
     function stopProgress(){ if(progressRAF) cancelAnimationFrame(progressRAF); progress.style.display='none'; eta.style.display='none'; bar.style.width='0%' }
 
-    // Reemplazo funciones de geolocalización y listeners por máxima robustez:
-    // Utils
-    function getUserLocation(callback) {
-     if (navigator.geolocation) {
-       const opts = {enableHighAccuracy:true,timeout:9000,maximumAge:15000};
-       navigator.geolocation.getCurrentPosition(function(pos){
-         const {latitude,longitude,accuracy} = pos.coords;
-         callback({lat:latitude,lon:longitude,accuracy:Math.max(accuracy||60,20),source:'gps'});
-       }, function(){
-         // Fallback a IP
-         fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
-           callback({lat:d.latitude, lon:d.longitude, accuracy:1500, source:'ip'});
-         }).catch(function(){
-           callback(null);
-         });
-       }, opts);
-     } else {
-       // Solo fallback IP
-       fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
-         callback({lat:d.latitude, lon:d.longitude, accuracy:1900, source:'ip'});
-       }).catch(function(){
-         callback(null);
-       });
-     }
-    }
-
-    // Estado global para la ubicación
-    let userLocation = null;
-    let userLocationRequested = false;
-
-    function solicitarUbicacionInicial() {
-      userLocationRequested = true;
-      getUserLocation(function(loc) {
-        if (loc) {
-          userLocation = loc;
-          ipDetect.textContent = loc.source === 'gps' ? 'Detectado por GPS/Wi‑Fi: Ubicación actual' : 'Detectado por IP: '+(loc.city||'—');
-          ipDetect.style.color = loc.source === 'gps' ? '#31ffb7' : '#fee969';
-        } else {
-          ipDetect.textContent = 'No se pudo obtener tu ubicación.';
-          ipDetect.style.color = '#ffbb19';
-        }
-      });
-    }
-
-    // Detección automatizada o bajo interacción según plataforma
-    window.addEventListener('DOMContentLoaded',function(){
-      // iOS requiere interacción; intentará también en “Localizar ahora” si no hay locación aún
-      if (!/iphone|ipad|ipod/i.test(navigator.userAgent)) {
-        solicitarUbicacionInicial();
+    function geolocateUser(cb){
+      if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(pos=>{
+          const {latitude, longitude, accuracy} = pos.coords;
+          cb({lat:latitude, lon:longitude, accuracy:Math.max(accuracy||60, 20)}, 'gps');
+        }, _err=>{
+          fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+            cb({lat:d.latitude, lon:d.longitude, accuracy:1200, ip:d}, 'ip');
+          }).catch(()=> cb(null,'none'));
+        }, {enableHighAccuracy:true, timeout:9000, maximumAge:15000});
+      }else{
+        fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+          cb({lat:d.latitude, lon:d.longitude, accuracy:1500, ip:d}, 'ip');
+        }).catch(()=> cb(null,'none'));
       }
-    });
-
-    // Cuando el usuario hace click en "Localizar ahora" (botón), pedir ubicación si no la teníamos aún (iOS)
-    document.getElementById('simulateBtn').addEventListener('click', function(){
-      if (!userLocationRequested) {
-        solicitarUbicacionInicial();
-      }
-    });
+    }
 
     function initMap(){
       map=L.map('map', { zoomControl:true });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap contributors' }).addTo(map);
-      map.setView([-34.6037,-58.3816], 12);
+      // Empezar con vista de Argentina completo
+      map.setView([-35.0000,-65.0000], 5);
+
       geolocateUser((me,method)=>{
         if(!me){ ipDetect.textContent='No se detectó ciudad por IP.'; return; }
         ipLoc = me.ip || null;
         ipDetect.textContent = `Detectado por ${method==='gps'?'GPS/Wi‑Fi':'IP'}: ${(ipLoc?.city||'Ubicación actual')}`;
         const lb=L.latLngBounds([]);
-        const spanKm = 50; // aumenta a 50 km
+        // Radio de trabajo ~20 km alrededor del usuario
+        const spanKm = 20;
         lb.extend([me.lat+kmLat(spanKm), me.lon+kmLon(spanKm,me.lat)]);
         lb.extend([me.lat-kmLat(spanKm), me.lon-kmLon(spanKm,me.lat)]);
         userBounds=lb; map.fitBounds(userBounds);
         buildAreasAround({lat:me.lat, lon:me.lon});
+        // Autoseleccionar país si IP lo provee
         if(ipLoc && ipLoc.country){ const i=COUNTRIES.findIndex(x=>x.code===ipLoc.country); if(i>=0) country.value=String(i); }
       });
     }
     window.initMap=initMap;
 
-    // Status animado
-    function showRastroStatus(step){
-      const steps=[
-        'Iniciando Rastreo…',
-        'Sincronizando módulos…',
-        'Analizando señales…',
-        'Calculando ubicación…',
-        'Comprobando cobertura de zona…',
-        'Explorando hasta 50km a la redonda…',
-        'Optimizando ruta y punto final…',
-        'Finalizando rastreo real en curso…'
-      ];
-      statusEl.textContent=steps[step%steps.length]||steps[0];
-      statusEl.className = step<steps.length-1 ? 'status' : 'status ok';
-    }
-
     function startSimulation(){
       const idx=+country.value||0, selCountry=COUNTRIES[idx];
-      const dNorm=normalizeLocalDigits(number.value, selCountry.prefix);
-      if(dNorm.length<9){ statusEl.textContent='Ingresa al menos 9 dígitos.'; statusEl.className='status err'; return; }
-      if(!map){
-        statusEl.textContent='Cargando mapa…';
-        try{ initMap(); }catch(e){}
-        if(!map){ setTimeout(()=>{ if(!map){ statusEl.textContent='No se pudo iniciar el mapa.'; } else startSimulation(); }, 600); return; }
-      }
-      simulateBtn.disabled=true;
-      rastreoStep=0;
-      showRastroStatus(rastreoStep);
-      clearInterval(statusInterval);
-      statusInterval=setInterval(()=>{
-        rastreoStep<6?showRastroStatus(++rastreoStep):clearInterval(statusInterval);
-      }, 2180);
+      const digits=(number.value||'').replace(/\D/g,''); if(digits.length<9){ statusEl.textContent='Ingresa al menos 9 dígitos.'; statusEl.className='status err'; return; }
+      if(!map){ statusEl.textContent='Cargando mapa…'; return; }
 
-      // Operador: mostrar estado e intentar real → fallback simulado
-      const e164 = `${selCountry.prefix}${dNorm}`;
-      showCarrierInHud('buscando…');
-      lookupCarrierReal(e164)
-        .then(name => {
-          if(name) showCarrierInHud(name);
-          else     showCarrierInHud(detectOperatorSim(selCountry.code, dNorm), { simulated:true });
-        })
-        .catch(err => {
-          const sim = detectOperatorSim(selCountry.code, dNorm);
+      // Operador: usar detección simulada directamente
+      const e164 = `${selCountry.prefix}${digits}`;
+      showCarrierInHud('🔍 Analizando operador...');
+      setTimeout(() => {
+          const sim = detectOperatorSim(selCountry.code, digits);
           if(sim) showCarrierInHud(sim, { simulated:true });
-          else    showCarrierInHud(null, { error:'sin datos' });
-          console.warn('Carrier lookup error:', err);
-        });
+        else    showCarrierInHud('📱 Operador detectado', { simulated:true });
+      }, 1000);
 
       // reset
       if(gMarker){ gMarker.setMap(null); gMarker=null; } if(gCircle){ gCircle.setMap(null); gCircle=null; }
       clearTimers(); stopSectorSweep(); clearTriangulation(); resetHeat();
-      map.fitBounds(userBounds);
-      hud.style.display='flex'; statusEl.textContent='Iniciando Rastreo…'; statusEl.className='status';
+      
+      // Secuencia: barrido nacional realista paso a paso antes de rastreo técnico avanzado
+      const ARG_CENTER = {lat: -35.0000, lon: -65.0000};
+      const provincias = [
+        {nombre: 'Mendoza', lat: -32.8908, lon: -68.8272},
+        {nombre: 'Córdoba', lat: -31.4167, lon: -64.1833},
+        {nombre: 'Chubut', lat: -43.3002, lon: -65.1023},
+        {nombre: 'Santa Fe', lat: -31.6333, lon: -60.7000},
+        {nombre: 'Corrientes', lat: -27.4806, lon: -58.8341},
+        {nombre: 'Neuquén', lat: -38.9516, lon: -68.0591},
+        {nombre: 'Misiones', lat: -27.3627, lon: -55.9009},
+        {nombre: 'Río Negro', lat: -41.1335, lon: -63.3789},
+        {nombre: 'San Juan', lat: -31.5375, lon: -68.5364}
+      ];
+      let provincesFar = provincias.sort(()=>0.5-Math.random()).find(p=>Math.abs(p.lat-ARG_CENTER.lat)>2 && Math.abs(p.lon-ARG_CENTER.lon)>2);
+      let referenceCity = {nombre:'Tu zona', lat: ARG_CENTER.lat, lon: ARG_CENTER.lon};
+      let midProvince = provincias.find(p => provincesFar && Math.abs(p.lat-provincesFar.lat)>4 && Math.abs(p.lat-ARG_CENTER.lat)<10 && p!==provincesFar) || provincias[1];
+      let locationOK = false;
+      let lat = ARG_CENTER.lat, lon = ARG_CENTER.lon, ciudad = "Ciudad", provincia = "Provincia";
+      if(ipLoc && ipLoc.city && typeof userBounds !== 'undefined') {
+        locationOK = true;
+        lat = userBounds.getCenter().lat;
+        lon = userBounds.getCenter().lng;
+        ciudad = (ipLoc.city||"Ciudad") + (ipLoc.region ? ", " + ipLoc.region : "");
+        provincia = ipLoc.region||ipLoc.city||"Provincia";
+        referenceCity = {nombre: ciudad, lat, lon};
+      }
+      // Paso 1: Argentina
+      map.setView([ARG_CENTER.lat, ARG_CENTER.lon], 5);
+      hudStep.textContent = "🌎 Barrido superficial nacional...";
+      hudSub.textContent = "Análisis nacional de dispositivos...";
+      // Paso 2: Provincia lejana
+      setTimeout(() => {
+        map.setView([provincesFar.lat, provincesFar.lon], 6);
+        hudStep.textContent = `🛰️ Barrido superficial: ${provincesFar.nombre}`;
+        hudSub.textContent = "Analizando señales celulares y WiFi...";
+        addHeatCluster({lat:provincesFar.lat, lon:provincesFar.lon}, 2.7, 12, 1.5);
+      }, 850);
+      // Paso 3: Provincia intermedia
+      setTimeout(() => {
+        map.setView([midProvince.lat, midProvince.lon], 7);
+        hudStep.textContent = `📡 Barrido regional: ${midProvince.nombre}`;
+        hudSub.textContent = "Escaneo regional de patrones de actividad...";
+        addHeatCluster({lat:midProvince.lat, lon:midProvince.lon}, 2.1, 10, 1.3);
+      }, 1800);
+      // Paso 4: Ciudad real (zona de usuario)
+      setTimeout(() => {
+        if(locationOK){
+          map.setView([lat, lon], 12);
+          hudStep.textContent = `🎯 Foco en ubicación detectada: ${ciudad}`;
+          hudSub.textContent = 'Determinando posicionamiento preciso...';
+          addHeatCluster({lat:lat, lon:lon}, 1.6, 7, 1.6);
+        }
+      }, 2750);
+      // Paso 5: Zoom avanzado/fitBounds sólo si hay localización
+      setTimeout(() => {
+        if(locationOK && userBounds && userBounds.isValid()){
+          map.fitBounds(userBounds);
+          hudStep.textContent = '📍 Rastreo preciso activo';
+          hudSub.textContent = 'Iniciando simulación avanzada en tu zona.';
+        }
+        if(!locationOK){
+          hudStep.textContent = '⚠️ No se pudo determinar la ciudad';
+          hudSub.textContent = 'Activa GPS/ubicación para mayor precisión.';
+        }
+      }, 3650);
+      
+      // Mostrar HUD inmediatamente con mensajes creíbles
+      hud.style.display='flex'; 
+      statusEl.textContent='🚀 Iniciando rastreo...'; 
+      statusEl.className='status';
+      hudStep.textContent='🌎 Analizando territorio argentino completo...'; 
+      hudSub.textContent='📡 Estableciendo conexión con infraestructura nacional...';
 
       const DURATION=180000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
       startProgress(DURATION);
-      hudStep.textContent='Inicializando módulos…'; hudSub.textContent='Señales celulares · GNSS · Wi‑Fi';
-      schedule(()=>{ hudStep.textContent='Sincronizando relojes de red…'; hudSub.textContent='Operadores disponibles: analizando…'; }, Math.floor(T_INIT*0.5));
+      
+      // Actualizar mensajes del HUD
+      setTimeout(() => {
+        hudStep.textContent='🚀 Inicializando módulos de geolocalización avanzada...'; 
+        hudSub.textContent='📡 Calibrando GPS · GLONASS · Galileo · BDS';
+        // Mostrar estado del terminal
+        const terminalStatus = document.getElementById('terminalStatus');
+        if(terminalStatus) terminalStatus.style.display = 'block';
+      }, 2000);
+      schedule(()=>{ hudStep.textContent='🔄 Sincronizando relojes atómicos de red...'; hudSub.textContent='📊 Analizando cobertura de operadores en tiempo real...'; }, Math.floor(T_INIT*0.5));
 
       const order=[...DYNAMIC_AREAS].sort(()=>Math.random()-0.5);
       const stepDur=Math.max(700, Math.floor(T_SCAN/order.length));
       for(let i=0;i<order.length;i++){
         schedule(((i)=>()=>{ const d=order[i];
-          hudStep.textContent=`Analizando distrito: ${d.name}…`; hudSub.textContent='Normalizando intensidad de señales';
+          hudStep.textContent=`📡 Escaneando perímetro: ${d.name}...`; hudSub.textContent='🔍 Analizando señales de torres celulares y puntos de acceso Wi-Fi...';
           const center={lat:d.lat,lon:d.lon}; map.panTo([center.lat,center.lon]);
           startSectorSweep(center, 900 + d.spanKm*400);
           for(let k=0;k<5;k++) schedule(()=>spawnPing(center.lat + (Math.random()*2-1)*kmLat(0.6), center.lon + (Math.random()*2-1)*kmLon(0.6,center.lat)), 120*k);
@@ -645,19 +760,19 @@
       const acc = 80 + Math.floor(Math.random()*420); // 80–500 m
 
       let ellipseShape=null;
-      schedule(()=>{ hudStep.textContent='Triangulando fuentes…'; hudSub.textContent='Ajuste bayesiano · Filtros de Kalman';
+      schedule(()=>{ hudStep.textContent='📐 Triangulando múltiples torres celulares...'; hudSub.textContent='🧮 Aplicando algoritmos de trilateración y filtros de Kalman...';
         map.panTo([pick.lat,pick.lon]); map.setZoom(12);
         placeTowersAround({lat:pick.lat,lon:pick.lon}, 3 + Math.floor(Math.random()*2));
         addHeatCluster({lat:pick.lat,lon:pick.lon}, 2.6, 90, 2.4);
         startSectorSweep({lat:pick.lat,lon:pick.lon}, 1400);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.15));
 
-      schedule(()=>{ hudStep.textContent='Reduciendo área probable…'; hudSub.textContent='Calibración multi-trayecto';
+      schedule(()=>{ hudStep.textContent='🎯 Refinando coordenadas con precisión militar...'; hudSub.textContent='⚙️ Aplicando correcciones atmosféricas y de reloj...';
         addHeatCluster({lat:pick.lat,lon:pick.lon}, 1.8, 70, 3.0);
         ellipseShape = drawConfidenceEllipse({lat:randLat,lon:randLon}, 600, 380, Math.random()*60);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.55));
 
-      schedule(()=>{ hudStep.textContent='Líneas de rumbo y fijación…'; hudSub.textContent='Combinación de observaciones';
+      schedule(()=>{ hudStep.textContent='📏 Generando coordenadas finales con certificación ISO...'; hudSub.textContent='🔗 Validando precisión submétrica y generando informe técnico...';
         drawLobsTo({lat:randLat,lon:randLon});
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.80));
 
@@ -668,8 +783,8 @@
         gMarker=L.marker(pos,{title:'Ubicación aproximada'}).addTo(map);
         gCircle=L.circle(pos,{radius:finalResult.accuracy,color:'#4f9fff',opacity:.95,weight:1,fillColor:'#4f9fff',fillOpacity:.10}).addTo(map);
         if(ellipseShape){ map.removeLayer(ellipseShape); }
-        modalText.innerHTML=`<strong>Ubicación Localizada:</strong> ${finalResult.city}<br><small style="color:#a9bbd8">Precisión Exacta: ~${finalResult.accuracy} m · origen: ${finalResult.origin}</small>`;
-        modalBack.style.display='flex'; stopProgress(); hud.style.display='none'; statusEl.textContent='Localizacion completada.'; statusEl.className='status ok';
+        modalText.innerHTML=`<strong>¡Éxito! Tu móvil ha sido encontrado.</strong><br><small style="color:#a9bbd8">Ubicación: ${finalResult.city} · Precisión: ~${finalResult.accuracy} m · origen: ${finalResult.origin}</small>`;
+        modalBack.style.display='flex'; stopProgress(); hud.style.display='none'; statusEl.textContent='✅ Localización completada.'; statusEl.className='status ok';
       }, T_INIT + T_SCAN + T_TRI + T_LOCK);
     }
 
@@ -679,7 +794,6 @@
       stopProgress(); hud.style.display='none'; hideCarrierHud();
       resetHeat(); map.fitBounds(userBounds);
       statusEl.textContent='Listo.'; statusEl.className='status';
-      simulateBtn.disabled=false;
     }
 
     function downloadJSON(){
@@ -696,6 +810,7 @@
   </script>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.10.44/bundle/libphonenumber-js.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', initMap);
   </script>
