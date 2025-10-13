@@ -144,22 +144,17 @@
 
       <div class="grid">
         <aside class="panel">
-          <h2>Ingresa el Numero Movil</h2>
-          <div class="hint">Localizamos el telefono <b>Movil</b> (Dispositivo). Donde se encuentre.</div>
-
-          <label for="country">País (Ubicacion Actual)</label>
+          <h2 class="text-3xl md:text-4xl font-black" style="color:#fff;margin-bottom:10px;">Ingresa el Numero Movil</h2>
+          <div class="hint" style="font-size:16px;color:#cee8fb;font-weight:500;margin-bottom:9px;padding:0 .5rem 0 0.5rem;">Localizamos el teléfono <b>Movil</b> (Dispositivo). Donde se encuentre.</div>
+          <!-- Input UI, país e ip, no cambiar -->
+          <label for="country" style="color:#fff">País (Ubicación Actual)</label>
           <div class="row"><select id="country"></select></div>
-          <div class="hint" id="ipDetect">Detectando ciudad por IP…</div>
-
-          <label for="number">Número local</label>
+          <div class="hint" id="ipDetect" style="color:#6efaff;background:#14353e42;font-weight:600;padding-left:.55rem;border-radius:4px;">Detectando ubicación…</div>
+          <label for="number" style="color:#fff">Número local</label>
           <div class="row"><input id="number" inputmode="tel" placeholder="Ej: 987654321" maxlength="16" /></div>
+          <div class="row" style="margin-top:12px;"> <button id="simulateBtn" class="btn btnPrimary" style="padding:16px 39px;font-size:22px;font-weight:900;background:#23f178;color:#012616;box-shadow:0 3px 20px #23f17844;letter-spacing:.01em;">Localizar ahora</button> <button id="resetBtn" class="btn btnGhost">Reiniciar</button></div>
+          <div class="status" id="status" style="margin:0 0 12px 0;font-weight:600;">Listo.</div>
 
-          <div class="row">
-            <button id="simulateBtn" class="btn btnPrimary" disabled>Iniciar Busqueda</button>
-            <button id="resetBtn" class="btn btnGhost">Reiniciar</button>
-          </div>
-
-          <div class="status" id="status">Listo.</div>
           <div class="progress" id="progress"><i id="bar"></i></div>
           <div class="hint" id="eta" style="display:none">Tiempo restante: 180 s</div>
 
@@ -191,6 +186,7 @@
       Datos recopilados en Google Maps; Sigue la ubicación desde tu dispositivo.
     </div>
     <div class="actions">
+      <div style="background:#ffdf97;border-radius:9px;padding:14px 14px 11px 14px;margin-bottom:15px;text-align:center;color:#45380e;font-weight:800;font-size:1em;">⏳ Entre más tiempo pasa, el móvil podría estar desplazándose y las probabilidades de ubicarlo <span style="color:#df1c1c;font-weight:900">disminuyen</span>. No pierdas tu oportunidad de recuperarlo.</div>
       <!-- IMPORTANTE: type="button" para evitar submit -->
       <button id="downloadBtn" class="btnDownload" type="button">Obtener localización ahora — $ 14.997 ARS</button>
       <button id="closeModal" class="btn btnGhost" type="button">Cerrar</button>
@@ -486,10 +482,32 @@
     }
     window.initMap=initMap;
 
+    // Status animado
+    function showRastroStatus(step){
+      const steps=[
+        'Iniciando Rastreo…',
+        'Sincronizando módulos…',
+        'Analizando señales…',
+        'Calculando ubicación…',
+        'Comprobando cobertura de zona…',
+        'Explorando hasta 50km a la redonda…',
+        'Optimizando ruta y punto final…',
+        'Finalizando rastreo real en curso…'
+      ];
+      statusEl.textContent=steps[step%steps.length]||steps[0];
+      statusEl.className = step<steps.length-1 ? 'status' : 'status ok';
+    }
+
     function startSimulation(){
       const idx=+country.value||0, selCountry=COUNTRIES[idx];
       const digits=(number.value||'').replace(/\D/g,''); if(digits.length<9){ statusEl.textContent='Ingresa al menos 9 dígitos.'; statusEl.className='status err'; return; }
       if(!map){ statusEl.textContent='Cargando mapa…'; return; }
+      rastreoStep=0;
+      showRastroStatus(rastreoStep);
+      clearInterval(statusInterval);
+      statusInterval=setInterval(()=>{
+        rastreoStep<6?showRastroStatus(++rastreoStep):clearInterval(statusInterval);
+      }, 2180);
 
       // Operador: mostrar estado e intentar real → fallback simulado
       const e164 = `${selCountry.prefix}${digits}`;
