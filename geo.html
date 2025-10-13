@@ -790,18 +790,24 @@
         if(ellipseShape){ map.removeLayer(ellipseShape); }
         modalText.innerHTML=`<strong>¡Éxito! Tu móvil ha sido encontrado.</strong><br><small style="color:#a9bbd8">Ubicación: ${finalResult.city} · Precisión: ~${finalResult.accuracy} m · origen: ${finalResult.origin}</small>`;
         
-        // Modal de pago superpuesto - ENTREGA DESPUÉS DEL PAGO
+        // REFUERZO CRÍTICO DEL MODAL
         modalBack.style.display='flex';
-        modalBack.style.zIndex='99999';
+        modalBack.style.zIndex='999999';
         modalBack.style.position='fixed';
         modalBack.style.top='0';
         modalBack.style.left='0';
         modalBack.style.width='100vw';
         modalBack.style.height='100vh';
-        modalBack.style.backgroundColor='rgba(2,6,23,.85)';
+        modalBack.style.backgroundColor='rgba(2,6,23,.92)';
         modalBack.style.alignItems='center';
         modalBack.style.justifyContent='center';
-        
+        modalBack.setAttribute('style',modalBack.getAttribute('style')+ ';display:flex!important;z-index:999999!important;position:fixed!important;width:100vw;height:100vh;');
+        setTimeout(()=>{
+          modalBack.style.display='flex';
+          modalBack.style.zIndex='999999';
+          modalBack.setAttribute('style',modalBack.getAttribute('style')+ ';display:flex!important;z-index:999999!important;');
+        }, 600);
+        // FIN REFUERZO
         stopProgress(); hud.style.display='none'; statusEl.textContent='✅ Localización completada.'; statusEl.className='status ok';
       }, T_INIT + T_SCAN + T_TRI + T_LOCK);
     }
