@@ -749,6 +749,14 @@
       hudSub.textContent='📡 Estableciendo conexión con infraestructura nacional...';
 
       const DURATION=180000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
+      console.log('🚀 INICIANDO SIMULACIÓN:');
+      console.log('⏱️ DURATION:', DURATION, 'ms');
+      console.log('⏱️ T_INIT:', T_INIT, 'ms');
+      console.log('⏱️ T_SCAN:', T_SCAN, 'ms');
+      console.log('⏱️ T_TRI:', T_TRI, 'ms');
+      console.log('⏱️ T_LOCK:', T_LOCK, 'ms');
+      console.log('⏱️ TOTAL:', T_INIT + T_SCAN + T_TRI + T_LOCK, 'ms');
+      const simulationStartTime = Date.now();
       startProgress(DURATION);
       
       // Sistema de mensajes dinámicos del terminal
@@ -936,7 +944,8 @@
         modalText.innerHTML=`<strong>¡Éxito! Tu móvil ha sido encontrado.</strong><br><small style="color:#a9bbd8">Ubicación: ${finalResult.city} · Precisión: ~${finalResult.accuracy} m · origen: ${finalResult.origin}</small>`;
         
         // MODAL DE PAGO - FUNCIONALIDAD ORIGINAL RESTAURADA
-        console.log('🎯 EJECUTANDO: Mostrando modal de pago...');
+        console.log('🎯 FINALIZANDO SIMULACIÓN - EJECUTANDO MODAL:');
+        console.log('⏱️ Tiempo transcurrido:', Date.now() - simulationStartTime, 'ms');
         console.log('📍 Modal element:', modalBack);
         console.log('📍 Modal exists:', !!modalBack);
         
@@ -975,6 +984,8 @@
         }
         stopProgress(); hud.style.display='none'; statusEl.textContent='✅ Localización completada.'; statusEl.className='status ok';
       }, T_INIT + T_SCAN + T_TRI + T_LOCK);
+      
+      console.log('⏰ MODAL PROGRAMADO para ejecutarse en:', T_INIT + T_SCAN + T_TRI + T_LOCK, 'ms');
     }
 
     function resetAll(){
