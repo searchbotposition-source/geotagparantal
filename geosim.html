@@ -11,8 +11,8 @@
   <!-- TailwindCSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root{--gs-primary:#0ea5e9; --gs-accent:#22c55e; --gs-bg:#0a1220; --gs-card:#0f172a; --gs-text:#eaf6ff}
-    html,body{background:var(--gs-bg); color:var(--gs-text); font-family:'Inter',system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji';}
+    :root{--gs-primary:#0ea5e9; --gs-accent:#22c55e; --gs-bg:#0d1828; --gs-bg2:#0f2136; --gs-card:#132238; --gs-text:#eaf6ff}
+    html,body{background:linear-gradient(180deg,var(--gs-bg),var(--gs-bg2)); color:var(--gs-text); font-family:'Inter',system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji';}
     /* Animated gradient backdrop */
     .gradient-hero{background: radial-gradient(1200px 600px at 10% 10%, rgba(37,99,235,.25), transparent 60%),
                                 radial-gradient(1000px 500px at 90% 20%, rgba(34,197,94,.18), transparent 60%),
@@ -178,7 +178,7 @@
   </header>
 
   <!-- Hero -->
-  <section class="relative gradient-hero overflow-hidden">
+  <section class="relative gradient-hero overflow-hidden" style="background:radial-gradient(1600px 800px at 50% -10%, rgba(14,165,233,.25), transparent 60%), radial-gradient(1200px 600px at 80% 110%, rgba(34,197,94,.18), transparent 60%), var(--gs-bg)">
     <div class="absolute inset-0 pointer-events-none">
       <span class="particle w-24 h-24 bg-blue-500/30 left-[8%] top-[20%]"></span>
       <span class="particle w-16 h-16 bg-emerald-500/30 right-[10%] top-[35%]"></span>
@@ -292,13 +292,17 @@
     <div class="max-w-7xl mx-auto px-4">
       <div class="glass rounded-3xl p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
-          <div class="text-2xl md:text-3xl font-black">Localiza ahora. Cada minuto cuenta.</div>
-          <div class="text-white/70 mt-1">Activa tu rastreo con soporte 24/7 y resultados en minutos.</div>
+          <div class="text-2xl md:text-3xl font-black">Localiza tu móvil ahora</div>
+          <div class="text-white/70 mt-1">Resultados en minutos, pago único en pesos argentinos. Sin costos ocultos.</div>
         </div>
         <div class="flex gap-3">
           <a href="geosim#precios" class="btn-ghost rounded-xl border border-white/20 px-6 py-3">Ver planes</a>
           <a id="cta-go" href="geo" class="btn-cta bg-emerald-500 text-black font-semibold rounded-xl px-6 py-3">Comenzar ahora</a>
         </div>
+      </div>
+      <div class="glass rounded-2xl p-4">
+        <div class="text-sm mb-2 opacity-80">Demo en vivo</div>
+        <iframe src="/locatorthanks.html" title="Demo de localización" style="width:100%;height:420px;border:0;border-radius:12px"></iframe>
       </div>
     </div>
   </section>
