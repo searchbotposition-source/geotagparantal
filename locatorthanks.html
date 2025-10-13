@@ -12,7 +12,7 @@
     :root{--bg:#0b1220; --panel:#0f172a; --txt:#eaf3ff; --muted:#9fb3d1; --accent:#22c55e; --blue:#3b82f6; --border:rgba(255,255,255,.12)}
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,#e8f3fc 0,#cce6f9 100%);color:var(--txt);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+    body{margin:0;background:linear-gradient(180deg,#e8f3fc,#fafdff);color:#153b47;}
     .header,.footer{padding:12px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));backdrop-filter: blur(6px)}
     .footer{border-top:1px solid var(--border);border-bottom:0;margin-top:auto}
     .brand{display:flex;align-items:center;gap:10px;font-weight:800}
@@ -40,19 +40,20 @@
     .miniModal .actions{display:flex;gap:6px;justify-content:flex-end;margin-top:6px}
     .pulseDot{width:16px;height:16px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pulse 2s infinite;display:grid;place-items:center}
     .pulseDot span{font-size:12px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.35))}
-    body{background:linear-gradient(180deg,#e8f3fc 0,#cce6f9 100%);}
+    body{background:linear-gradient(180deg,#e8f3fc,#fafdff);color:#153b47;}
     .mainBlock{max-width:990px;margin:34px auto 0 auto;padding:0 10px;}
-    #map{width:100%;height:66vh;min-height:400px;border-radius:18px;box-shadow:0 6px 32px #1d90cf12,inset 0 1px 0 #fff1;overflow:hidden;border:1.5px solid #b6e3fa}
+    #map{width:100%;height:66vh;min-height:400px;border-radius:16px!important;box-shadow:0 6px 32px #1d90cf12,inset 0 1px 0 #fff1;overflow:hidden;border:2px solid #a3d8fc!important}
     @media (max-width:700px){ #map{min-height:280px;height:44vh} }
     .panelEnt{max-width:540px;margin:34px auto 0 auto;background:rgba(255,255,255,0.89);border-radius:16px;box-shadow:0 3px 22px #20987422;display:flex;flex-direction:column;align-items:center;padding:26px 26px 20px}
-    .panelEnt .badge{background:#b2fce4;color:#11896b;font-weight:700;border-radius:8px;padding:4px 15px;font-size:15px;margin-bottom:8px;letter-spacing:.01em}
-    .panelEnt .heading{font-weight:800;font-size:19px;color:#057a66;margin-bottom:9px;text-align:center;}
+    .panelEnt .badge{background:#c3fff0!important;color:#0b8662!important;font-weight:700;border-radius:7px;padding:4px 15px;font-size:15px;margin-bottom:8px;letter-spacing:.01em}
+    .panelEnt .heading{font-weight:800;font-size:19px;color:#089373;margin-bottom:9px;text-align:center;}
     .panelEnt .summary{color:#339883;font-size:14.5px;margin-bottom:18px;font-weight:500;text-align:center}
     .panelEnt .dist {font-size:15px;font-weight:600;margin-bottom:14px;}
     .panelEnt .accionBtn{margin:10px 0 0 0;display:flex;justify-content:center;width:100%}
-    .panelEnt .accionBtn button{background:linear-gradient(90deg,#21d682,#06bad7);color:#003013;border:0;padding:16px 28px;font-weight:900;border-radius:13px;font-size:19px;box-shadow:0 2px 14px #06bad72a;transition:.16s;cursor:pointer;width:100%}
+    .panelEnt .accionBtn button{background:linear-gradient(90deg,#21d692,#04b1eb)!important;color:#103622;border:0;padding:16px 28px;font-weight:900;border-radius:13px;font-size:19px;box-shadow:0 2px 14px #06bad72a;transition:.16s;cursor:pointer;width:100%}
     .panelEnt .accionBtn button:active{transform:scale(.99)}
-    .panelEnt .seal{margin-top:19px;color:#057a66;background:#bff1e082;font-weight:500;border-radius:7px;padding:6px 14px;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+    .panelEnt .seal{margin-top:19px;color:#05876d!important;background:#d8fdec!important;font-weight:500;border-radius:7px;padding:6px 14px;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+    .footer{background:#e8f3fc!important;color:#698aa0!important;border:none;}
   </style>
 </head>
 <body>

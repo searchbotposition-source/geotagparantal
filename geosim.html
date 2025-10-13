@@ -12,7 +12,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root{--gs-primary:#0ea5e9; --gs-accent:#22c55e; --gs-bg:#0d1828; --gs-bg2:#0f2136; --gs-card:#132238; --gs-text:#eaf6ff}
-    html,body{background:linear-gradient(180deg,var(--gs-bg),var(--gs-bg2)); color:var(--gs-text); font-family:'Inter',system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji';}
+    html,body{background:linear-gradient(180deg,#e8f3fc,#fafdff);color:#193044;}
     /* Animated gradient backdrop */
     .gradient-hero{background: radial-gradient(1200px 600px at 10% 10%, rgba(37,99,235,.25), transparent 60%),
                                 radial-gradient(1000px 500px at 90% 20%, rgba(34,197,94,.18), transparent 60%),
@@ -43,6 +43,12 @@
     summary::-webkit-details-marker{display:none}
     /* Glass cards */
     .glass{background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); backdrop-filter: blur(6px)}
+    body{background:linear-gradient(180deg,#e8f3fc,#fafdff);color:#193044;}
+    .glass,.card,.step,.carousel,.btn-cta,.btn-ghost{background:#fff!important;color:#193044!important;box-shadow:0 2px 12px #7eceef19;}
+    .btn-cta{background:linear-gradient(90deg,#19e497 60%,#15b0ee 100%)!important;color:#104029!important;}
+    .footer,.topbar{background:#e8f3fc!important;color:#5e7e9a!important;}
+    .carousel-inner blockquote{color:#035869!important;}
+    .brand,.word{color:#13b187!important;}
   </style>
 
   <!-- Splash styles (mapa + texto animado GEOSIM) -->
