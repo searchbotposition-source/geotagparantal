@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <style>
     :root{
       --bg-img: url("https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000&auto=format&fit=crop");
@@ -339,8 +340,9 @@
     function schedule(fn,ms){ const id=setTimeout(fn,ms); timers.push(id); }
     function clearTimers(){ timers.forEach(clearTimeout); timers=[]; if(progressRAF) cancelAnimationFrame(progressRAF); if(pulseRAF) cancelAnimationFrame(pulseRAF); if(sweepTimer) clearInterval(sweepTimer); clearIntervals(); }
     function clearIntervals(){ intervals.forEach(clearInterval); intervals=[]; }
-    function resetHeat(){ heatData=new google.maps.MVCArray([]); heatmap.setData(heatData); }
-    function addHeat(lat,lon,w=1){ heatData.push({location:new google.maps.LatLng(lat,lon), weight:w}); }
+    let heatLayers=[];
+    function resetHeat(){ heatLayers.forEach(l=>map.removeLayer(l)); heatLayers=[]; }
+    function addHeat(lat,lon,w=1){ const c=L.circle([lat,lon],{radius:120*w, color:'#4f9fff', weight:0, fillColor:'#4f9fff', fillOpacity:0.18}); c.addTo(map); heatLayers.push(c); }
     function addHeatCluster(center,spanKm,count,baseW=1){ const {lat,lon}=center; const hl=kmLat(spanKm/2),ho=kmLon(spanKm/2,lat); for(let i=0;i<count;i++){ addHeat(lat+(Math.random()*2-1)*hl, lon+(Math.random()*2-1)*ho, baseW*(0.7+Math.random()*0.6)); } }
     function randomPointInCircle(center, radiusM){
       const ang=Math.random()*2*Math.PI, r=Math.sqrt(Math.random())*radiusM;
@@ -349,52 +351,47 @@
     }
 
     function spawnPing(lat,lon){
-      const c=new google.maps.Circle({map,center:{lat,lng:lon},radius:40,strokeColor:'#7fb7ff',strokeOpacity:.9,strokeWeight:1.5,fillColor:'#7fb7ff',fillOpacity:.18});
-      let t0=null;
-      function step(ts){ if(!t0)t0=ts; const e=(ts-t0); const f=Math.min(1,e/800); c.setRadius(40+f*900); c.setOptions({fillOpacity:.18*(1-f),strokeOpacity:.9*(1-f)}); if(f<1) pulseRAF=requestAnimationFrame(step); else c.setMap(null); }
-      pulseRAF=requestAnimationFrame(step);
+      const c=L.circle([lat,lon],{radius:40,color:'#7fb7ff',opacity:.9,weight:1.5,fillColor:'#7fb7ff',fillOpacity:.18}).addTo(map);
+      let r=40; const baseOpacity=.18; const id=setInterval(()=>{ r+=90; const f=Math.min(1,(r-40)/900); c.setStyle({fillOpacity:baseOpacity*(1-f), opacity:.9*(1-f)}); c.setRadius(r); if(f>=1){ clearInterval(id); map.removeLayer(c);} }, 80);
     }
 
     function sectorPath(center,radiusM,a0,a1,steps=32){
-      const {lat,lon}=center; const path=[new google.maps.LatLng(lat,lon)];
+      const {lat,lon}=center; const path=[[lat,lon]];
       for(let i=0;i<=steps;i++){ const ang=toRad(a0+(a1-a0)*(i/steps));
         const dLat=(radiusM/1000)/111, dLon=(radiusM/1000)/(111*Math.cos(lat*Math.PI/180));
-        const y=lat + Math.sin(ang)*dLat, x=lon + Math.cos(ang)*dLon; path.push(new google.maps.LatLng(y,x)); }
+        const y=lat + Math.sin(ang)*dLat, x=lon + Math.cos(ang)*dLon; path.push([y,x]); }
       return path;
     }
     function startSectorSweep(center, radiusM){
       stopSectorSweep();
       let ang=Math.floor(Math.random()*360), span=55;
-      sectorPoly=new google.maps.Polygon({map,paths:sectorPath(center,radiusM,ang,ang+span),strokeColor:'#6fb5ff',strokeOpacity:.8,strokeWeight:1,fillColor:'#6fb5ff',fillOpacity:.08});
-      sweepTimer=setInterval(()=>{ ang=(ang+8)%360; sectorPoly.setPaths(sectorPath(center,radiusM,ang,ang+span)); }, 80);
+      sectorPoly=L.polygon(sectorPath(center,radiusM,ang,ang+span),{color:'#6fb5ff',opacity:.8,weight:1,fillColor:'#6fb5ff',fillOpacity:.08}).addTo(map);
+      sweepTimer=setInterval(()=>{ ang=(ang+8)%360; sectorPoly.setLatLngs(sectorPath(center,radiusM,ang,ang+span)); }, 80);
     }
-    function stopSectorSweep(){ if(sweepTimer) clearInterval(sweepTimer); sweepTimer=null; if(sectorPoly){ sectorPoly.setMap(null); sectorPoly=null; } }
+    function stopSectorSweep(){ if(sweepTimer) clearInterval(sweepTimer); sweepTimer=null; if(sectorPoly){ map.removeLayer(sectorPoly); sectorPoly=null; } }
 
     function clearTriangulation(){
-      towerMarkers.forEach(m=>m.setMap(null)); towerMarkers=[];
-      towerRanges.forEach(c=>c.setMap(null)); towerRanges=[];
-      lobLines.forEach(l=>l.setMap(null)); lobLines=[];
+      towerMarkers.forEach(m=>map.removeLayer(m)); towerMarkers=[];
+      towerRanges.forEach(c=>map.removeLayer(c)); towerRanges=[];
+      lobLines.forEach(l=>map.removeLayer(l)); lobLines=[];
       clearIntervals();
     }
-    function makeTowerIcon(){ return {path:"M12 2L6 22h3l1.2-4h5.6L17 22h3L14 2h-2zm-1.2 14 1.2-4 1.2 4h-2.4z",fillColor:"#a3d3ff",fillOpacity:0.95,strokeColor:"#458ad6",strokeWeight:1,scale:1.2,anchor:new google.maps.Point(12,22)}; }
+    function makeTowerIcon(){ return L.divIcon({className:'', html:'<div style="width:14px;height:14px;border-radius:4px;background:#a3d3ff;border:1px solid #458ad6"></div>', iconSize:[14,14]}); }
     function placeTowersAround(center,count=3){
       clearTriangulation();
       for(let i=0;i<count;i++){
         const distKm=2+Math.random()*4, angle=Math.random()*360;
         const tlat=center.lat + Math.sin(toRad(angle))*kmLat(distKm);
         const tlon=center.lon + Math.cos(toRad(angle))*kmLon(distKm,center.lat);
-        const m=new google.maps.Marker({map,position:{lat:tlat,lng:tlon},icon:makeTowerIcon(),title:'Antena simulada'});
-        const c=new google.maps.Circle({map,center:{lat:tlat,lng:tlon},radius:800+Math.random()*1200,strokeColor:'#4fa6ff',strokeOpacity:.6,strokeWeight:1,fillColor:'#4fa6ff',fillOpacity:.06});
+        const m=L.marker([tlat,tlon],{icon:makeTowerIcon(), title:'Antena simulada'}).addTo(map);
+        const c=L.circle([tlat,tlon],{radius:800+Math.random()*1200,color:'#4fa6ff',opacity:.6,weight:1,fillColor:'#4fa6ff',fillOpacity:.06}).addTo(map);
         towerMarkers.push(m); towerRanges.push(c);
-        let grow=true; const base=c.getRadius(); const id=setInterval(()=>{ c.setRadius(grow?base*1.08:base*0.92); grow=!grow; }, 900);
+        let grow=true; const base=c.getRadius?c.getRadius():c.options.radius; const id=setInterval(()=>{ const r=grow?base*1.08:base*0.92; c.setRadius(r); grow=!grow; }, 900);
         intervals.push(id);
       }
     }
     function drawLobsTo(target){
-      towerMarkers.forEach(m=>{
-        const l=new google.maps.Polyline({map,path:[m.getPosition(), new google.maps.LatLng(target.lat,target.lon)],strokeColor:'#7fd1a8',strokeOpacity:.9,strokeWeight:1,icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:1,scale:3},offset:'0',repeat:'10px'}]});
-        lobLines.push(l);
-      });
+      towerMarkers.forEach(m=>{ const p=m.getLatLng?m.getLatLng():m._latlng; const l=L.polyline([p,[target.lat,target.lon]],{color:'#7fd1a8',opacity:.9,weight:1,dashArray:'4 6'}).addTo(map); lobLines.push(l); });
     }
     function drawConfidenceEllipse(center,rx_m=500,ry_m=300,rotDeg=20,steps=64){
       const pts=[];
@@ -404,9 +401,9 @@
         const yr=x*Math.sin(toRad(rotDeg)) + y*Math.cos(toRad(rotDeg));
         const lat=center.lat + (yr/1000)/111;
         const lon=center.lon + (xr/1000)/(111*Math.cos(center.lat*Math.PI/180));
-        pts.push(new google.maps.LatLng(lat,lon));
+        pts.push([lat,lon]);
       }
-      return new google.maps.Polygon({map,paths:pts,strokeColor:'#4f9fff',strokeOpacity:.8,strokeWeight:1,fillColor:'#4f9fff',fillOpacity:.06});
+      return L.polygon(pts,{color:'#4f9fff',opacity:.8,weight:1,fillColor:'#4f9fff',fillOpacity:.06}).addTo(map);
     }
 
     function startProgress(durationMs){
@@ -435,19 +432,20 @@
     }
 
     function initMap(){
-      map=new google.maps.Map(document.getElementById('map'),{center:{lat:-34.6037,lng:-58.3816},zoom:12,mapTypeControl:false,streetViewControl:false,fullscreenControl:false,styles:MAP_STYLE});
-      heatData=new google.maps.MVCArray([]); heatmap=new google.maps.visualization.HeatmapLayer({data:heatData,map:null,radius:40,opacity:0.6});
+      map=L.map('map', { zoomControl:true });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap contributors' }).addTo(map);
+      map.setView([-34.6037,-58.3816], 12);
 
       geolocateUser((me,method)=>{
         if(!me){ ipDetect.textContent='No se detectó ciudad por IP.'; return; }
         ipLoc = me.ip || null;
         ipDetect.textContent = `Detectado por ${method==='gps'?'GPS/Wi‑Fi':'IP'}: ${(ipLoc?.city||'Ubicación actual')}`;
-        const lb=new google.maps.LatLngBounds();
+        const lb=L.latLngBounds([]);
         // Radio de trabajo ~20 km alrededor del usuario
         const spanKm = 20;
-        lb.extend(new google.maps.LatLng(me.lat+kmLat(spanKm), me.lon+kmLon(spanKm,me.lat)));
-        lb.extend(new google.maps.LatLng(me.lat-kmLat(spanKm), me.lon-kmLon(spanKm,me.lat)));
-        userBounds=lb; map.fitBounds(userBounds); userRestriction={latLngBounds:userBounds, strictBounds:true}; map.setOptions({restriction:userRestriction});
+        lb.extend([me.lat+kmLat(spanKm), me.lon+kmLon(spanKm,me.lat)]);
+        lb.extend([me.lat-kmLat(spanKm), me.lon-kmLon(spanKm,me.lat)]);
+        userBounds=lb; map.fitBounds(userBounds);
         buildAreasAround({lat:me.lat, lon:me.lon});
         // Autoseleccionar país si IP lo provee
         if(ipLoc && ipLoc.country){ const i=COUNTRIES.findIndex(x=>x.code===ipLoc.country); if(i>=0) country.value=String(i); }
@@ -458,7 +456,7 @@
     function startSimulation(){
       const idx=+country.value||0, selCountry=COUNTRIES[idx];
       const digits=(number.value||'').replace(/\D/g,''); if(digits.length<9){ statusEl.textContent='Ingresa al menos 9 dígitos.'; statusEl.className='status err'; return; }
-      if(!map){ statusEl.textContent='Cargando Google Maps…'; return; }
+      if(!map){ statusEl.textContent='Cargando mapa…'; return; }
 
       // Operador: mostrar estado e intentar real → fallback simulado
       const e164 = `${selCountry.prefix}${digits}`;
@@ -477,8 +475,8 @@
 
       // reset
       if(gMarker){ gMarker.setMap(null); gMarker=null; } if(gCircle){ gCircle.setMap(null); gCircle=null; }
-      clearTimers(); stopSectorSweep(); clearTriangulation(); resetHeat(); heatmap.setMap(map);
-      map.fitBounds(userBounds); map.setOptions({restriction:userRestriction});
+      clearTimers(); stopSectorSweep(); clearTriangulation(); resetHeat();
+      map.fitBounds(userBounds);
       hud.style.display='flex'; statusEl.textContent='Iniciando Rastreo…'; statusEl.className='status';
 
       const DURATION=180000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
@@ -491,7 +489,7 @@
       for(let i=0;i<order.length;i++){
         schedule(((i)=>()=>{ const d=order[i];
           hudStep.textContent=`Analizando distrito: ${d.name}…`; hudSub.textContent='Normalizando intensidad de señales';
-          const center={lat:d.lat,lon:d.lon}; map.panTo({lat:center.lat,lng:center.lon});
+          const center={lat:d.lat,lon:d.lon}; map.panTo([center.lat,center.lon]);
           startSectorSweep(center, 900 + d.spanKm*400);
           for(let k=0;k<5;k++) schedule(()=>spawnPing(center.lat + (Math.random()*2-1)*kmLat(0.6), center.lon + (Math.random()*2-1)*kmLon(0.6,center.lat)), 120*k);
           addHeatCluster(center, Math.max(1.8,d.spanKm), 20, 1.1);
@@ -507,7 +505,7 @@
 
       let ellipseShape=null;
       schedule(()=>{ hudStep.textContent='Triangulando fuentes…'; hudSub.textContent='Ajuste bayesiano · Filtros de Kalman';
-        map.panTo({lat:pick.lat,lng:pick.lon}); map.setZoom(12);
+        map.panTo([pick.lat,pick.lon]); map.setZoom(12);
         placeTowersAround({lat:pick.lat,lon:pick.lon}, 3 + Math.floor(Math.random()*2));
         addHeatCluster({lat:pick.lat,lon:pick.lon}, 2.6, 90, 2.4);
         startSectorSweep({lat:pick.lat,lon:pick.lon}, 1400);
@@ -524,11 +522,11 @@
 
       schedule(()=>{ stopSectorSweep();
         finalResult={simulated:true, generated_at:new Date().toISOString(), phone_full:e164, lat:randLat, lon:randLon, accuracy:acc, city:`${ipLoc?.city||'Tu zona'} — ${pick.name}`, origin:(ipLoc?'IP/GPS':'Pais')};
-        const pos=new google.maps.LatLng(finalResult.lat, finalResult.lon);
+        const pos=[finalResult.lat, finalResult.lon];
         map.panTo(pos); map.setZoom(15);
-        gMarker=new google.maps.Marker({position:pos,map,title:'Ubicación aproximada'});
-        gCircle=new google.maps.Circle({map,center:pos,radius:finalResult.accuracy,strokeColor:'#4f9fff',strokeOpacity:.95,strokeWeight:1,fillColor:'#4f9fff',fillOpacity:.10});
-        if(ellipseShape){ ellipseShape.setMap(null); }
+        gMarker=L.marker(pos,{title:'Ubicación aproximada'}).addTo(map);
+        gCircle=L.circle(pos,{radius:finalResult.accuracy,color:'#4f9fff',opacity:.95,weight:1,fillColor:'#4f9fff',fillOpacity:.10}).addTo(map);
+        if(ellipseShape){ map.removeLayer(ellipseShape); }
         modalText.innerHTML=`<strong>Ubicación Localizada:</strong> ${finalResult.city}<br><small style="color:#a9bbd8">Precisión Exacta: ~${finalResult.accuracy} m · origen: ${finalResult.origin}</small>`;
         modalBack.style.display='flex'; stopProgress(); hud.style.display='none'; statusEl.textContent='Localizacion completada.'; statusEl.className='status ok';
       }, T_INIT + T_SCAN + T_TRI + T_LOCK);
@@ -536,9 +534,9 @@
 
     function resetAll(){
       clearTimers(); stopSectorSweep(); clearTriangulation();
-      if(gMarker){gMarker.setMap(null);gMarker=null;} if(gCircle){gCircle.setMap(null);gCircle=null;}
+      if(gMarker){map.removeLayer(gMarker);gMarker=null;} if(gCircle){map.removeLayer(gCircle);gCircle=null;}
       stopProgress(); hud.style.display='none'; hideCarrierHud();
-      resetHeat(); heatmap.setMap(null); map.fitBounds(userBounds); map.setOptions({restriction:userRestriction});
+      resetHeat(); map.fitBounds(userBounds);
       statusEl.textContent='Listo.'; statusEl.className='status';
     }
 
@@ -555,17 +553,9 @@
     number.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !simulateBtn.disabled) startSimulation(); });
   </script>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
-    // Carga dinámica de Maps desde env expuestos por Vercel
-    (function(){
-      fetch('/api/env').then(r=>r.ok?r.json():Promise.reject()).then(cfg=>{
-        var k = cfg.googleMapsApiKey || '';
-        var src = 'https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(k)+'&libraries=geometry,visualization&v=weekly&callback=initMap';
-        var s = document.createElement('script'); s.src=src; s.async=true; s.defer=true; document.body.appendChild(s);
-      }).catch(function(){
-        alert('No se pudo cargar Google Maps. Revisa la configuración de variables en Vercel.');
-      });
-    })();
+    document.addEventListener('DOMContentLoaded', initMap);
   </script>
 </body>
 </html>
