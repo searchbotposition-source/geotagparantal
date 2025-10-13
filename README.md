@@ -1,5 +1,5 @@
-GeoTag Parantal
-================
+ParentAlloc
+===========
 
 Proyecto estático con páginas `geo.html`, `geosim.html` y `locatorthanks.html`. Preparado para Vercel con endpoint `/api/env` que expone variables públicas.
 
@@ -31,23 +31,23 @@ cd /Users/macos/Desktop/Geo
 git init
 git branch -M main
 git add .
-git commit -m "feat: proyecto geotagparantal inicial"
+git commit -m "feat: proyecto parentalloc inicial"
 
 # Con GitHub CLI (recomendado)
-gh repo create geotagparantal --public --source=. --remote=origin --push
+gh repo create parentalloc --public --source=. --remote=origin --push
 ```
 
 Requisitos: tener `git` y `gh` (GitHub CLI) autenticado (`gh auth login`). Si prefieres manual: crea el repo en GitHub y luego:
 
 ```
-git remote add origin https://github.com/<tu-usuario>/geotagparantal.git
+git remote add origin https://github.com/<tu-usuario>/parentalloc.git
 git push -u origin main
 ```
 
 Despliegue en Vercel
 --------------------
 
-1. Entra a Vercel y "New Project" → importa desde tu repo `geotagparantal`.
+1. Entra a Vercel y "New Project" → importa desde tu repo `parentalloc`.
 2. En "Environment Variables" agrega `GOOGLE_MAPS_API_KEY` y `API_BASE` (si aplica).
 3. Deploy. Vercel servirá `/api/env` y las páginas estáticas.
 

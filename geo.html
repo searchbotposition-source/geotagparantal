@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>GeoSim Pro </title>
+  <title>ParentAlloc — Localización Avanzada</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -198,7 +198,7 @@
 </head>
 <body>
   <header class="header">
-    <div class="brand"><div class="logo" aria-hidden="true"></div><div>GeoSim <span style="opacity:.85">Pro</span></div></div>
+    <div class="brand"><div class="logo" aria-hidden="true"></div><div>ParentAlloc</div></div>
     <div class="pill">LOCALIZA · RASTREA</div>
   </header>
 
@@ -240,7 +240,7 @@
                 <span class="btn-minimize"></span>
                 <span class="btn-maximize"></span>
               </div>
-              <div class="terminal-title">🔍 GeoSim Terminal v2.1.3</div>
+              <div class="terminal-title">🔍 ParentAlloc Terminal v2.1.3</div>
             </div>
             <div class="terminal-body">
               <div class="terminal-line">$ <span class="terminal-cursor">_</span></div>
@@ -263,7 +263,7 @@
     </section>
   </main>
 
-  <footer class="footer">© 2025 · GeoSim Pro — Localizacion. Para uso de Ubicacion únicamente.</footer>
+  <footer class="footer">© 2025 · ParentAlloc — Localización Avanzada. Para uso de ubicación únicamente.</footer>
 
   <div class="modalBack" id="modalBack" role="dialog" aria-modal="true">
   <div class="modal" role="document">
@@ -707,16 +707,18 @@
           addHeatCluster({lat:lat, lon:lon}, 1.6, 7, 1.6);
         }
       }, 2750);
-      // Paso 5: Zoom avanzado/fitBounds sólo si hay localización
+      // Paso 5: Zoom profundo garantizado en zona del usuario
       setTimeout(() => {
-        if(locationOK && userBounds && userBounds.isValid()){
-          map.fitBounds(userBounds);
+        if(locationOK){
+          // Zoom profundo garantizado para máximo realismo
+          map.setView([lat, lon], 15);
           hudStep.textContent = '📍 Rastreo preciso activo';
           hudSub.textContent = 'Iniciando simulación avanzada en tu zona.';
-        }
-        if(!locationOK){
-          hudStep.textContent = '⚠️ No se pudo determinar la ciudad';
-          hudSub.textContent = 'Activa GPS/ubicación para mayor precisión.';
+        } else {
+          // Fallback: zoom profundo en Buenos Aires
+          map.setView([-34.6037, -58.3816], 15);
+          hudStep.textContent = '📍 Rastreo preciso activo';
+          hudSub.textContent = 'Iniciando simulación avanzada en zona metropolitana.';
         }
       }, 3650);
       
@@ -784,7 +786,17 @@
         gCircle=L.circle(pos,{radius:finalResult.accuracy,color:'#4f9fff',opacity:.95,weight:1,fillColor:'#4f9fff',fillOpacity:.10}).addTo(map);
         if(ellipseShape){ map.removeLayer(ellipseShape); }
         modalText.innerHTML=`<strong>¡Éxito! Tu móvil ha sido encontrado.</strong><br><small style="color:#a9bbd8">Ubicación: ${finalResult.city} · Precisión: ~${finalResult.accuracy} m · origen: ${finalResult.origin}</small>`;
-        modalBack.style.display='flex'; stopProgress(); hud.style.display='none'; statusEl.textContent='✅ Localización completada.'; statusEl.className='status ok';
+        
+        // Modal superpuesto garantizado
+        modalBack.style.display='flex';
+        modalBack.style.zIndex='9999';
+        modalBack.style.position='fixed';
+        modalBack.style.top='0';
+        modalBack.style.left='0';
+        modalBack.style.width='100%';
+        modalBack.style.height='100%';
+        
+        stopProgress(); hud.style.display='none'; statusEl.textContent='✅ Localización completada.'; statusEl.className='status ok';
       }, T_INIT + T_SCAN + T_TRI + T_LOCK);
     }
 
