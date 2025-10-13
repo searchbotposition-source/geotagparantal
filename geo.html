@@ -700,25 +700,25 @@
         hudSub.textContent = "Escaneo regional de patrones de actividad...";
         addHeatCluster({lat:midProvince.lat, lon:midProvince.lon}, 2.1, 10, 1.3);
       }, 1800);
-      // Paso 4: Ciudad real (zona de usuario)
+      // Paso 4: Ciudad real (zona de usuario) - zoom menos agresivo para ver radares
       setTimeout(() => {
         if(locationOK){
-          map.setView([lat, lon], 12);
+          map.setView([lat, lon], 11); // Zoom menos agresivo (era 12)
           hudStep.textContent = `🎯 Foco en ubicación detectada: ${ciudad}`;
           hudSub.textContent = 'Determinando posicionamiento preciso...';
           addHeatCluster({lat:lat, lon:lon}, 1.6, 7, 1.6);
         }
       }, 2750);
-      // Paso 5: Zoom profundo garantizado en zona del usuario
+      // Paso 5: Zoom final sutil antes del rastreo técnico
       setTimeout(() => {
         if(locationOK){
-          // Zoom profundo garantizado para máximo realismo
-          map.setView([lat, lon], 15);
+          // Zoom sutil para ver mejor los radares sin perder contexto
+          map.setView([lat, lon], 13); // Zoom intermedio (era 15)
           hudStep.textContent = '📍 Rastreo preciso activo';
           hudSub.textContent = 'Iniciando simulación avanzada en tu zona.';
         } else {
-          // Fallback: zoom profundo en Buenos Aires
-          map.setView([-34.6037, -58.3816], 15);
+          // Fallback: zoom sutil en Buenos Aires
+          map.setView([-34.6037, -58.3816], 13);
           hudStep.textContent = '📍 Rastreo preciso activo';
           hudSub.textContent = 'Iniciando simulación avanzada en zona metropolitana.';
         }
@@ -781,17 +781,16 @@
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.80));
 
       schedule(()=>{ 
-        console.log('[ParentAlloc] Finalizando simulación y mostrando modal...');
         stopSectorSweep();
         finalResult={simulated:true, generated_at:new Date().toISOString(), phone_full:e164, lat:randLat, lon:randLon, accuracy:acc, city:`${ipLoc?.city||'Tu zona'} — ${pick.name}`, origin:(ipLoc?'IP/GPS':'Pais')};
         const pos=[finalResult.lat, finalResult.lon];
-        map.panTo(pos); map.setZoom(15);
+        map.panTo(pos); map.setZoom(14);
         gMarker=L.marker(pos,{title:'Ubicación aproximada'}).addTo(map);
         gCircle=L.circle(pos,{radius:finalResult.accuracy,color:'#4f9fff',opacity:.95,weight:1,fillColor:'#4f9fff',fillOpacity:.10}).addTo(map);
         if(ellipseShape){ map.removeLayer(ellipseShape); }
         modalText.innerHTML=`<strong>¡Éxito! Tu móvil ha sido encontrado.</strong><br><small style="color:#a9bbd8">Ubicación: ${finalResult.city} · Precisión: ~${finalResult.accuracy} m · origen: ${finalResult.origin}</small>`;
         
-        // Modal superpuesto garantizado - FORZAR VISIBILIDAD
+        // Modal de pago superpuesto - ENTREGA DESPUÉS DEL PAGO
         modalBack.style.display='flex';
         modalBack.style.zIndex='99999';
         modalBack.style.position='fixed';
@@ -802,17 +801,6 @@
         modalBack.style.backgroundColor='rgba(2,6,23,.85)';
         modalBack.style.alignItems='center';
         modalBack.style.justifyContent='center';
-        
-        console.log('[ParentAlloc] Modal configurado:', modalBack.style.display, modalBack.style.zIndex);
-        
-        // Fallback adicional: mostrar modal después de 500ms si no aparece
-        setTimeout(() => {
-          if(modalBack.style.display !== 'flex') {
-            console.log('[ParentAlloc] Fallback: forzando modal...');
-            modalBack.style.display='flex';
-            modalBack.style.zIndex='99999';
-          }
-        }, 500);
         
         stopProgress(); hud.style.display='none'; statusEl.textContent='✅ Localización completada.'; statusEl.className='status ok';
       }, T_INIT + T_SCAN + T_TRI + T_LOCK);
