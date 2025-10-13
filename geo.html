@@ -306,7 +306,7 @@
                 <li style="margin:8px 0;">✅ Coordenadas exactas con precisión GPS</li>
                 <li style="margin:8px 0;">✅ Ruta directa en Google Maps</li>
                 <li style="margin:8px 0;">✅ Informe detallado descargable</li>
-                <li style="margin:8px 0;">⚠️ Sin soporte humano - acción inmediata requerida</li>
+                <li style="margin:8px 0;">⚡ Acceso inmediato tras el pago</li>
                 <li style="margin:8px 0;">🚨 Última oportunidad antes de que se pierda</li>
               </ul>
     </div>
@@ -762,15 +762,33 @@
       const ptFinal = randomPointInCircle({ lat: pick.lat, lon: pick.lon }, 900);
       const randLat = +ptFinal.lat.toFixed(6);
       const randLon = +ptFinal.lon.toFixed(6);
-      const acc = 80 + Math.floor(Math.random()*420); // 80–500 m
+      const acc = 120 + Math.floor(Math.random()*680); // 120–800 m (radio ampliado para zona urbana)
 
       let ellipseShape=null;
-      schedule(()=>{ hudStep.textContent='📐 Triangulando múltiples torres celulares...'; hudSub.textContent='🧮 Aplicando algoritmos de trilateración y filtros de Kalman...';
+      schedule(()=>{ 
+        hudStep.textContent='📐 Triangulando múltiples torres celulares...'; 
+        hudSub.textContent='🧮 Aplicando algoritmos de trilateración y filtros de Kalman...';
         map.panTo([pick.lat,pick.lon]); map.setZoom(12);
         placeTowersAround({lat:pick.lat,lon:pick.lon}, 3 + Math.floor(Math.random()*2));
         addHeatCluster({lat:pick.lat,lon:pick.lon}, 2.6, 90, 2.4);
         startSectorSweep({lat:pick.lat,lon:pick.lon}, 1400);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.15));
+      
+      // Mensajes dinámicos adicionales durante triangulación
+      schedule(()=>{ 
+        hudStep.textContent='🔍 Analizando señales de múltiples operadores...'; 
+        hudSub.textContent='📊 Cross-referencing con bases de datos de torres celulares...';
+      }, T_INIT + T_SCAN + Math.floor(T_TRI*0.35));
+      
+      schedule(()=>{ 
+        hudStep.textContent='⚡ Procesando datos de intensidad de señal...'; 
+        hudSub.textContent='🎯 Calculando punto de intersección más probable...';
+      }, T_INIT + T_SCAN + Math.floor(T_TRI*0.55));
+      
+      schedule(()=>{ 
+        hudStep.textContent='🔄 Refinando coordenadas con algoritmos avanzados...'; 
+        hudSub.textContent='📡 Validando precisión con múltiples fuentes...';
+      }, T_INIT + T_SCAN + Math.floor(T_TRI*0.75));
 
       schedule(()=>{ hudStep.textContent='🎯 Refinando coordenadas con precisión militar...'; hudSub.textContent='⚙️ Aplicando correcciones atmosféricas y de reloj...';
         addHeatCluster({lat:pick.lat,lon:pick.lon}, 1.8, 70, 3.0);
