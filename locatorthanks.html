@@ -7,6 +7,7 @@
   <meta name="description" content="Mapa en tiempo real: ubicación del visitante y estimación plausible del móvil extraviado, priorizando zonas concurridas." />
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <style>
     :root{--bg:#0b1220; --panel:#0f172a; --txt:#eaf3ff; --muted:#9fb3d1; --accent:#22c55e; --blue:#3b82f6; --border:rgba(255,255,255,.12)}
     *{box-sizing:border-box}
@@ -37,6 +38,7 @@
     .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--border);font-size:12px;color:var(--muted)}
     .miniModal{position:fixed;right:10px;bottom:10px;background:rgba(2,6,23,.85);border:1px solid var(--border);backdrop-filter:blur(6px);color:var(--muted);padding:10px 12px;border-radius:12px;font-size:11px;max-width:min(92%,420px);z-index:50}
     .miniModal .actions{display:flex;gap:6px;justify-content:flex-end;margin-top:6px}
+    .pulseDot{width:12px;height:12px;border-radius:999px;background:#3b82f6;box-shadow:0 0 0 0 rgba(59,130,246,.6);animation:pulse 2s infinite}
   </style>
 </head>
 <body>
@@ -82,107 +84,68 @@
 
   <div class="toast" id="toast"></div>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
     const SKEY = 'lt_cached_target_v1';
-    const STATE = { map:null, me:null, phone:null, meMarker:null, phoneMarker:null, phonePulse:null, meAccCircle:null, line:null, places:null };
+    const STATE = { map:null, me:null, phone:null, meMarker:null, phoneMarker:null, meAccCircle:null, line:null };
 
     function metersToKm(m){ return (m/1000).toFixed(1); }
     function toRad(d){ return d*Math.PI/180; }
-    function toDeg(r){ return r*180/Math.PI; }
+    function haversine(a,b){
+      const R=6371000; const dLat=toRad(b.lat-a.lat), dLon=toRad(b.lon-a.lon);
+      const s1=Math.sin(dLat/2), s2=Math.sin(dLon/2);
+      const aa=s1*s1 + Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*s2*s2; return 2*R*Math.asin(Math.sqrt(aa));
+    }
     function destPoint(lat, lon, bearingDeg, distanceKm){
       const R=6371; const brng=toRad(bearingDeg); const d=distanceKm/R;
       const lat1=toRad(lat), lon1=toRad(lon);
       const lat2=Math.asin(Math.sin(lat1)*Math.cos(d)+Math.cos(lat1)*Math.sin(d)*Math.cos(brng));
       const lon2=lon1+Math.atan2(Math.sin(brng)*Math.sin(d)*Math.cos(lat1), Math.cos(d)-Math.sin(lat1)*Math.sin(lat2));
-      return { lat:+toDeg(lat2).toFixed(6), lon:+toDeg(lon2).toFixed(6) };
+      return { lat:+(lat2*180/Math.PI).toFixed(6), lon:+(lon2*180/Math.PI).toFixed(6) };
     }
-
     function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(t._id); t._id=setTimeout(()=>t.style.display='none', 2400); }
-
-    function kmLat(km){ return km/111; }
-    function kmLon(km,lat){ return km/(111*Math.cos(lat*Math.PI/180)); }
-
-    function drawPulseAt(position){
-      const d=document.createElement('div'); d.className='pulse'; d.style.width='10px'; d.style.height='10px'; d.style.borderRadius='999px'; d.style.background='#3b82f6';
-      // Fallback si la librería 'marker' no está disponible
-      if (google.maps.marker && google.maps.marker.AdvancedMarkerElement){
-        return new google.maps.marker.AdvancedMarkerElement({ map:STATE.map, position, content:d });
-      }
-      return new google.maps.Marker({ map:STATE.map, position, icon:{
-        path:google.maps.SymbolPath.CIRCLE, scale:6, fillColor:'#3b82f6', fillOpacity:1, strokeColor:'#1e3a8a', strokeWeight:1
-      }});
-    }
-
     function storeCachedTarget(obj){ try{ localStorage.setItem(SKEY, JSON.stringify(obj)); }catch(_e){} }
     function readCachedTarget(){ try{ const v=localStorage.getItem(SKEY); return v?JSON.parse(v):null; }catch(_e){ return null; } }
+    function computeRandomTargetAround(center){ const distKm=1+Math.random()*49; const bearing=Math.random()*360; return { ...destPoint(center.lat,center.lon,bearing,distKm), distKm }; }
 
-    function computeRandomTargetAround(center){
-      const distKm = 1 + Math.random()*49; // 1–50 km
-      const bearing = Math.random()*360;
-      const p = destPoint(center.lat, center.lon, bearing, distKm);
-      return { lat:p.lat, lon:p.lon, distKm };
-    }
-
-    function preferBusyPOIsAround(point, cb){
-      if(!STATE.places){ cb(null); return; }
-      const loc=new google.maps.LatLng(point.lat, point.lon);
-      const svc=new google.maps.places.PlacesService(STATE.map);
-      const request = { location: loc, radius: 3000, type: ['shopping_mall'] };
-      svc.nearbySearch(request, (results, status)=>{
-        if(status===google.maps.places.PlacesServiceStatus.OK && results && results.length){
-          const r = results[Math.floor(Math.random()*results.length)];
-          cb({ lat:r.geometry.location.lat(), lon:r.geometry.location.lng(), name:r.name, place_id:r.place_id, category:'shopping_mall' });
-        }else{
-          // fallback a estaciones o rutas
-          const req2 = { location: loc, radius: 3000, type: ['transit_station'] };
-          svc.nearbySearch(req2, (res2, st2)=>{
-            if(st2===google.maps.places.PlacesServiceStatus.OK && res2 && res2.length){
-              const r2 = res2[Math.floor(Math.random()*res2.length)];
-              cb({ lat:r2.geometry.location.lat(), lon:r2.geometry.location.lng(), name:r2.name, place_id:r2.place_id, category:'transit_station' });
-            }else{
-              cb(null);
-            }
-          });
-        }
-      });
+    async function overpassPOI(point){
+      try{
+        const radius=3000;
+        const q=`[out:json][timeout:10];(node["shop"="mall"](around:${radius},${point.lat},${point.lon});way["shop"="mall"](around:${radius},${point.lat},${point.lon});relation["shop"="mall"](around:${radius},${point.lat},${point.lon});node["public_transport"="station"](around:${radius},${point.lat},${point.lon}););out center 20;`;
+        const url=`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(q)}`;
+        const r=await fetch(url); if(!r.ok) return null; const j=await r.json();
+        const els=j.elements||[]; if(!els.length) return null; const pick=els[Math.floor(Math.random()*els.length)];
+        const lat=pick.lat || pick.center?.lat, lon=pick.lon || pick.center?.lon; if(!lat||!lon) return null; return { lat, lon, name: pick.tags?.name||'Punto concurrido' };
+      }catch(_e){ return null; }
     }
 
     function setStatus(text){ document.getElementById('status').textContent=text; }
 
     function renderAll(){
       if(!STATE.map || !STATE.me || !STATE.phone) return;
-      if(STATE.meMarker) STATE.meMarker.setMap(null);
-      if(STATE.phoneMarker) STATE.phoneMarker.setMap(null);
-      if(STATE.phonePulse) STATE.phonePulse.map=null;
-      if(STATE.meAccCircle) STATE.meAccCircle.setMap(null);
-      if(STATE.line) STATE.line.setMap(null);
+      if(STATE.meMarker){ STATE.map.removeLayer(STATE.meMarker); }
+      if(STATE.phoneMarker){ STATE.map.removeLayer(STATE.phoneMarker); }
+      if(STATE.meAccCircle){ STATE.map.removeLayer(STATE.meAccCircle); }
+      if(STATE.line){ STATE.map.removeLayer(STATE.line); }
 
-      STATE.meMarker = new google.maps.Marker({ map:STATE.map, position:{lat:STATE.me.lat, lng:STATE.me.lon}, title:'Tú', icon:{
-        path:google.maps.SymbolPath.CIRCLE, scale:7, fillColor:'#22c55e', fillOpacity:1, strokeColor:'#0f5132', strokeWeight:1
-      }});
-      STATE.meAccCircle = new google.maps.Circle({ map:STATE.map, center:{lat:STATE.me.lat, lng:STATE.me.lon}, radius:STATE.me.accuracy||60, strokeColor:'#22c55e', strokeOpacity:.4, strokeWeight:1, fillColor:'#22c55e', fillOpacity:.08 });
+      STATE.meMarker = L.circleMarker([STATE.me.lat, STATE.me.lon], { radius:6, color:'#0f5132', weight:1, fillColor:'#22c55e', fillOpacity:1 }).addTo(STATE.map).bindTooltip('Tú');
+      STATE.meAccCircle = L.circle([STATE.me.lat, STATE.me.lon], { radius: STATE.me.accuracy||60, color:'#22c55e', weight:1, opacity:.4, fillColor:'#22c55e', fillOpacity:.08 }).addTo(STATE.map);
 
-      STATE.phoneMarker = new google.maps.Marker({ map:STATE.map, position:{lat:STATE.phone.lat, lng:STATE.phone.lon}, title:'Posible móvil', icon:{
-        path:'M12 2L6 22h3l1.2-4h5.6L17 22h3L14 2h-2zm-1.2 14 1.2-4 1.2 4h-2.4z',
-        fillColor:'#3b82f6', fillOpacity:.95, strokeColor:'#1e40af', strokeWeight:1, scale:1.2, anchor:new google.maps.Point(12,22)
-      }});
-      STATE.phonePulse = drawPulseAt({lat:STATE.phone.lat, lng:STATE.phone.lon});
+      const pulseEl=document.createElement('div'); pulseEl.className='pulseDot';
+      const pulseIcon=L.divIcon({ className:'', html:pulseEl, iconSize:[12,12] });
+      STATE.phoneMarker = L.marker([STATE.phone.lat, STATE.phone.lon], { icon:pulseIcon, title:'Posible móvil' }).addTo(STATE.map);
 
-      STATE.line = new google.maps.Polyline({ map:STATE.map, path:[{lat:STATE.me.lat,lng:STATE.me.lon},{lat:STATE.phone.lat,lng:STATE.phone.lon}], strokeColor:'#60a5fa', strokeOpacity:.85, strokeWeight:2, icons:[{icon:{path:'M 0,-1 0,1', strokeOpacity:1, scale:3}, offset:'0', repeat:'12px'}] });
+      STATE.line = L.polyline([[STATE.me.lat,STATE.me.lon],[STATE.phone.lat,STATE.phone.lon]], { color:'#60a5fa', weight:2, opacity:.85, dashArray:'6 6' }).addTo(STATE.map);
 
-      const b=new google.maps.LatLngBounds();
-      b.extend({lat:STATE.me.lat, lng:STATE.me.lon});
-      b.extend({lat:STATE.phone.lat, lng:STATE.phone.lon});
-      STATE.map.fitBounds(b);
-
-      const dist = google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(STATE.me.lat,STATE.me.lon), new google.maps.LatLng(STATE.phone.lat,STATE.phone.lon));
+      const b=L.latLngBounds([[STATE.me.lat,STATE.me.lon],[STATE.phone.lat,STATE.phone.lon]]); STATE.map.fitBounds(b, { padding:[20,20] });
+      const dist=haversine({lat:STATE.me.lat,lon:STATE.me.lon},{lat:STATE.phone.lat,lon:STATE.phone.lon});
       document.getElementById('distanceBadge').textContent = metersToKm(dist) + ' km';
     }
 
     function explain(method, poi){
       const m = method==='gps'?'Navegador (GPS/Wi‑Fi)': method==='ip'?'IP aproximada':'Consentimiento navegador';
       document.getElementById('locMethod').textContent = m;
-      const hint = poi && poi.name ? `Tu móvil podría estar en «${poi.name}» (${poi.category==='shopping_mall'?'centro comercial':'transporte cercano'}).` : 'Tu móvil podría estar en una zona concurrida cercana.';
+      const hint = poi && poi.name ? `Tu móvil podría estar en «${poi.name}».` : 'Tu móvil podría estar en una zona cercana con actividad.';
       setStatus(`Aquí estás tú. ${hint}`);
     }
 
@@ -210,11 +173,11 @@
         return;
       }
       const seed = computeRandomTargetAround(me);
-      preferBusyPOIsAround(seed, poi=>{
+      overpassPOI(seed).then(poi=>{
         if(poi){
-          const out = { lat:+poi.lat.toFixed(6), lon:+poi.lon.toFixed(6) };
-          storeCachedTarget({ lat:out.lat, lon:out.lon, meta:{poiName:poi.name, category:poi.category} });
-          done({ ...out, cached:false, meta:{poiName:poi.name, category:poi.category} });
+          const out = { lat:+(+poi.lat).toFixed(6), lon:+(+poi.lon).toFixed(6) };
+          storeCachedTarget({ lat:out.lat, lon:out.lon, meta:{poiName:poi.name} });
+          done({ ...out, cached:false, meta:{poiName:poi.name} });
         }else{
           const out = { lat:+seed.lat.toFixed(6), lon:+seed.lon.toFixed(6) };
           storeCachedTarget({ lat:out.lat, lon:out.lon, meta:null });
@@ -223,9 +186,10 @@
       });
     }
 
-    function initMap(){
-      try{ STATE.places = google.maps.places; }catch(_e){ STATE.places = null; }
-      STATE.map = new google.maps.Map(document.getElementById('map'), { center:{lat:-34.6037,lng:-58.3816}, zoom:6, mapTypeControl:false, streetViewControl:false, fullscreenControl:false, styles:[{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'on'}]},{elementType:'labels.icon',stylers:[{visibility:'off'}]}] });
+    document.addEventListener('DOMContentLoaded', function(){
+      STATE.map = L.map('map', { zoomControl:true });
+      const tiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap contributors' }); tiles.addTo(STATE.map);
+      STATE.map.setView([-34.6037,-58.3816], 6);
 
       geolocateUser((me, method)=>{
         if(!me){ setStatus('No se pudo determinar tu ubicación.'); return; }
@@ -233,14 +197,14 @@
         ensurePhoneTargetAround(me, (phone)=>{
           STATE.phone = phone;
           renderAll();
-          explain(method, phone.meta ? {name:phone.meta.poiName, category:phone.meta.category} : null);
+          explain(method, phone.meta ? {name:phone.meta.poiName} : null);
         });
       });
 
       document.getElementById('regenBtn').addEventListener('click', ()=>{
         localStorage.removeItem(SKEY);
         if(!STATE.me){ showToast('Ubicación aún no disponible'); return; }
-        ensurePhoneTargetAround(STATE.me, (phone)=>{ STATE.phone=phone; renderAll(); explain('gps', phone.meta?{name:phone.meta.poiName, category:phone.meta.category}:null); showToast('Nueva sugerencia generada'); });
+        ensurePhoneTargetAround(STATE.me, (phone)=>{ STATE.phone=phone; renderAll(); explain('gps', phone.meta?{name:phone.meta.poiName}:null); showToast('Nueva estimación generada'); });
       });
       document.getElementById('routeBtn').addEventListener('click', ()=>{
         if(!STATE.me || !STATE.phone){ return; }
@@ -252,22 +216,7 @@
       if(!localStorage.getItem('lt_legal_ok')){ legalBox.style.display='block'; }
       document.getElementById('okLegal').addEventListener('click',()=>{ legalBox.style.display='none'; localStorage.setItem('lt_legal_ok','1'); });
       document.getElementById('year').textContent = new Date().getFullYear();
-    }
-
-    window.initMap = initMap;
-  </script>
-
-  <script>
-    // Carga dinámica desde /api/env (Vercel)
-    (function(){
-      fetch('/api/env').then(r=>r.ok?r.json():Promise.reject()).then(cfg=>{
-        var k = cfg.googleMapsApiKey || '';
-        var src = 'https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(k)+'&libraries=geometry,places,marker&v=weekly&callback=initMap';
-        var s = document.createElement('script'); s.src=src; s.async=true; s.defer=true; document.body.appendChild(s);
-      }).catch(function(){
-        const t=document.getElementById('toast'); t.textContent='Error cargando Google Maps. Revisa variables en Vercel.'; t.style.display='block';
-      });
-    })();
+    });
   </script>
 </body>
 </html>
