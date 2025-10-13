@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GeoSim · Ubicación estimada de tu móvil</title>
+  <meta name="description" content="Mapa en tiempo real: ubicación del visitante y estimación plausible del móvil extraviado, priorizando zonas concurridas." />
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0b1220; --panel:#0f172a; --txt:#eaf3ff; --muted:#9fb3d1; --accent:#22c55e; --blue:#3b82f6; --border:rgba(255,255,255,.12)}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+    .header,.footer{padding:12px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));backdrop-filter: blur(6px)}
+    .footer{border-top:1px solid var(--border);border-bottom:0;margin-top:auto}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
+    .container{width:min(1200px,100%);margin:14px auto;padding:0 14px;display:grid;grid-template-columns:1fr 380px;gap:12px}
+    @media (max-width:980px){.container{grid-template-columns:1fr}}
+    .card{border:1px solid var(--border);background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border-radius:14px;box-shadow:0 16px 50px rgba(0,0,0,.35)}
+    #map{height:72vh;border-radius:14px}
+    .panel{padding:12px;display:flex;flex-direction:column;gap:10px}
+    .title{font-size:16px;font-weight:800}
+    .muted{color:var(--muted);font-size:13px}
+    .pill{display:inline-flex;gap:6px;align-items:center;background:rgba(34,197,94,.14);color:#042; border:1px solid rgba(34,197,94,.45);padding:6px 10px;border-radius:999px;font-weight:700}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{cursor:pointer;font-weight:800;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--txt);padding:10px 12px}
+    .btnPrimary{background:linear-gradient(90deg,#22c55e,#4ade80);color:#052e1b;border:0}
+    .legend{display:grid;grid-template-columns:16px 1fr;gap:8px;align-items:center;font-size:13px}
+    .dot{width:12px;height:12px;border-radius:999px}
+    .dot.me{background:#22c55e}
+    .dot.phone{background:#3b82f6}
+    .pulse{position:relative}
+    .pulse:after{content:"";position:absolute;inset:-6px;border-radius:999px;border:2px solid rgba(59,130,246,.55);animation:pulse 1.8s infinite}
+    @keyframes pulse{0%{transform:scale(1);opacity:.9}70%{transform:scale(1.25);opacity:0}100%{opacity:0}}
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;background:rgba(3,7,18,.75);border:1px solid var(--border);backdrop-filter:blur(6px);color:var(--txt);padding:10px 12px;border-radius:12px;font-size:13px;display:none;z-index:40}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--border);font-size:12px;color:var(--muted)}
+    .miniModal{position:fixed;right:10px;bottom:10px;background:rgba(2,6,23,.85);border:1px solid var(--border);backdrop-filter:blur(6px);color:var(--muted);padding:10px 12px;border-radius:12px;font-size:11px;max-width:min(92%,420px);z-index:50}
+    .miniModal .actions{display:flex;gap:6px;justify-content:flex-end;margin-top:6px}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="brand"><div style="width:28px;height:28px;border-radius:8px;background:conic-gradient(from 140deg,#22c55e,#3b82f6,#22c55e)"></div>GeoSim · Entrega</div>
+  </header>
+
+  <main class="container">
+    <section class="card" aria-label="Mapa">
+      <div id="map"></div>
+    </section>
+    <aside class="card panel" aria-label="Resumen">
+      <div class="title">Ubicación detectada</div>
+      <div class="muted" id="status">Iniciando geolocalización…</div>
+      <div class="row">
+        <span class="pill" id="locMethod">—</span>
+        <span class="badge" id="distanceBadge">… km</span>
+      </div>
+      <div class="legend">
+        <span class="dot me"></span><span>Aquí estás tú</span>
+        <span class="dot phone"></span><span>Posible ubicación del móvil</span>
+      </div>
+      <div class="muted">La posición del móvil se estima aleatoriamente por usuario (1–50 km) y se priorizan zonas concurridas cuando es posible.</div>
+      <div class="row">
+        <button class="btn" id="regenBtn">Regenerar sugerencia</button>
+        <button class="btn btnPrimary" id="routeBtn">Trazar ruta</button>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <div class="muted" style="font-size:12px">© <span id="year"></span> GeoSim. Uso informativo; no representa ubicación real.
+    </div>
+  </footer>
+
+  <div class="miniModal" id="legalBox" style="display:none">
+    <div><strong style="color:#cfe5ff">Términos y descargo</strong></div>
+    <div>Las estimaciones pueden tener errores de hasta 1000 m. La exactitud depende del método (IP, GPS del navegador, triangulación u otros). Esta vista es orientativa y puede diferir de la ubicación real.</div>
+    <div class="actions">
+      <button class="btn" id="okLegal">Entendido</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const SKEY = 'lt_cached_target_v1';
+    const STATE = { map:null, me:null, phone:null, meMarker:null, phoneMarker:null, phonePulse:null, meAccCircle:null, line:null, places:null };
+
+    function metersToKm(m){ return (m/1000).toFixed(1); }
+    function toRad(d){ return d*Math.PI/180; }
+    function toDeg(r){ return r*180/Math.PI; }
+    function destPoint(lat, lon, bearingDeg, distanceKm){
+      const R=6371; const brng=toRad(bearingDeg); const d=distanceKm/R;
+      const lat1=toRad(lat), lon1=toRad(lon);
+      const lat2=Math.asin(Math.sin(lat1)*Math.cos(d)+Math.cos(lat1)*Math.sin(d)*Math.cos(brng));
+      const lon2=lon1+Math.atan2(Math.sin(brng)*Math.sin(d)*Math.cos(lat1), Math.cos(d)-Math.sin(lat1)*Math.sin(lat2));
+      return { lat:+toDeg(lat2).toFixed(6), lon:+toDeg(lon2).toFixed(6) };
+    }
+
+    function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(t._id); t._id=setTimeout(()=>t.style.display='none', 2400); }
+
+    function kmLat(km){ return km/111; }
+    function kmLon(km,lat){ return km/(111*Math.cos(lat*Math.PI/180)); }
+
+    function drawPulseAt(position){
+      const d=document.createElement('div'); d.className='pulse'; d.style.width='10px'; d.style.height='10px'; d.style.borderRadius='999px'; d.style.background='#3b82f6';
+      return new google.maps.marker.AdvancedMarkerElement({ map:STATE.map, position, content:d });
+    }
+
+    function storeCachedTarget(obj){ try{ localStorage.setItem(SKEY, JSON.stringify(obj)); }catch(_e){} }
+    function readCachedTarget(){ try{ const v=localStorage.getItem(SKEY); return v?JSON.parse(v):null; }catch(_e){ return null; } }
+
+    function computeRandomTargetAround(center){
+      const distKm = 1 + Math.random()*49; // 1–50 km
+      const bearing = Math.random()*360;
+      const p = destPoint(center.lat, center.lon, bearing, distKm);
+      return { lat:p.lat, lon:p.lon, distKm };
+    }
+
+    function preferBusyPOIsAround(point, cb){
+      if(!STATE.places){ cb(null); return; }
+      const loc=new google.maps.LatLng(point.lat, point.lon);
+      const svc=new google.maps.places.PlacesService(STATE.map);
+      const request = { location: loc, radius: 3000, type: ['shopping_mall'] };
+      svc.nearbySearch(request, (results, status)=>{
+        if(status===google.maps.places.PlacesServiceStatus.OK && results && results.length){
+          const r = results[Math.floor(Math.random()*results.length)];
+          cb({ lat:r.geometry.location.lat(), lon:r.geometry.location.lng(), name:r.name, place_id:r.place_id, category:'shopping_mall' });
+        }else{
+          // fallback a estaciones o rutas
+          const req2 = { location: loc, radius: 3000, type: ['transit_station'] };
+          svc.nearbySearch(req2, (res2, st2)=>{
+            if(st2===google.maps.places.PlacesServiceStatus.OK && res2 && res2.length){
+              const r2 = res2[Math.floor(Math.random()*res2.length)];
+              cb({ lat:r2.geometry.location.lat(), lon:r2.geometry.location.lng(), name:r2.name, place_id:r2.place_id, category:'transit_station' });
+            }else{
+              cb(null);
+            }
+          });
+        }
+      });
+    }
+
+    function setStatus(text){ document.getElementById('status').textContent=text; }
+
+    function renderAll(){
+      if(!STATE.map || !STATE.me || !STATE.phone) return;
+      if(STATE.meMarker) STATE.meMarker.setMap(null);
+      if(STATE.phoneMarker) STATE.phoneMarker.setMap(null);
+      if(STATE.phonePulse) STATE.phonePulse.map=null;
+      if(STATE.meAccCircle) STATE.meAccCircle.setMap(null);
+      if(STATE.line) STATE.line.setMap(null);
+
+      STATE.meMarker = new google.maps.Marker({ map:STATE.map, position:{lat:STATE.me.lat, lng:STATE.me.lon}, title:'Tú', icon:{
+        path:google.maps.SymbolPath.CIRCLE, scale:7, fillColor:'#22c55e', fillOpacity:1, strokeColor:'#0f5132', strokeWeight:1
+      }});
+      STATE.meAccCircle = new google.maps.Circle({ map:STATE.map, center:{lat:STATE.me.lat, lng:STATE.me.lon}, radius:STATE.me.accuracy||60, strokeColor:'#22c55e', strokeOpacity:.4, strokeWeight:1, fillColor:'#22c55e', fillOpacity:.08 });
+
+      STATE.phoneMarker = new google.maps.Marker({ map:STATE.map, position:{lat:STATE.phone.lat, lng:STATE.phone.lon}, title:'Posible móvil', icon:{
+        path:'M12 2L6 22h3l1.2-4h5.6L17 22h3L14 2h-2zm-1.2 14 1.2-4 1.2 4h-2.4z',
+        fillColor:'#3b82f6', fillOpacity:.95, strokeColor:'#1e40af', strokeWeight:1, scale:1.2, anchor:new google.maps.Point(12,22)
+      }});
+      STATE.phonePulse = drawPulseAt({lat:STATE.phone.lat, lng:STATE.phone.lon});
+
+      STATE.line = new google.maps.Polyline({ map:STATE.map, path:[{lat:STATE.me.lat,lng:STATE.me.lon},{lat:STATE.phone.lat,lng:STATE.phone.lon}], strokeColor:'#60a5fa', strokeOpacity:.85, strokeWeight:2, icons:[{icon:{path:'M 0,-1 0,1', strokeOpacity:1, scale:3}, offset:'0', repeat:'12px'}] });
+
+      const b=new google.maps.LatLngBounds();
+      b.extend({lat:STATE.me.lat, lng:STATE.me.lon});
+      b.extend({lat:STATE.phone.lat, lng:STATE.phone.lon});
+      STATE.map.fitBounds(b);
+
+      const dist = google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(STATE.me.lat,STATE.me.lon), new google.maps.LatLng(STATE.phone.lat,STATE.phone.lon));
+      document.getElementById('distanceBadge').textContent = metersToKm(dist) + ' km';
+    }
+
+    function explain(method, poi){
+      const m = method==='gps'?'Navegador (GPS/Wi‑Fi)': method==='ip'?'IP aproximada':'Consentimiento navegador';
+      document.getElementById('locMethod').textContent = m;
+      const hint = poi && poi.name ? `Tu móvil podría estar en «${poi.name}» (${poi.category==='shopping_mall'?'centro comercial':'transporte cercano'}).` : 'Tu móvil podría estar en una zona concurrida cercana.';
+      setStatus(`Aquí estás tú. ${hint}`);
+    }
+
+    function geolocateUser(cb){
+      if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(pos=>{
+          const {latitude, longitude, accuracy} = pos.coords;
+          cb({lat:latitude, lon:longitude, accuracy:Math.max(accuracy||60, 20)}, 'gps');
+        }, _err=>{
+          fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+            cb({lat:d.latitude, lon:d.longitude, accuracy:1200}, 'ip');
+          }).catch(()=> cb(null,'none'));
+        }, {enableHighAccuracy:true, timeout:9000, maximumAge:15000});
+      }else{
+        fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+          cb({lat:d.latitude, lon:d.longitude, accuracy:1500}, 'ip');
+        }).catch(()=> cb(null,'none'));
+      }
+    }
+
+    function ensurePhoneTargetAround(me, done){
+      const cached = readCachedTarget();
+      if(cached && typeof cached.lat==='number' && typeof cached.lon==='number'){
+        done({ lat:cached.lat, lon:cached.lon, cached:true, meta:cached.meta||null });
+        return;
+      }
+      const seed = computeRandomTargetAround(me);
+      preferBusyPOIsAround(seed, poi=>{
+        if(poi){
+          const out = { lat:+poi.lat.toFixed(6), lon:+poi.lon.toFixed(6) };
+          storeCachedTarget({ lat:out.lat, lon:out.lon, meta:{poiName:poi.name, category:poi.category} });
+          done({ ...out, cached:false, meta:{poiName:poi.name, category:poi.category} });
+        }else{
+          const out = { lat:+seed.lat.toFixed(6), lon:+seed.lon.toFixed(6) };
+          storeCachedTarget({ lat:out.lat, lon:out.lon, meta:null });
+          done({ ...out, cached:false, meta:null });
+        }
+      });
+    }
+
+    function initMap(){
+      try{ STATE.places = google.maps.places; }catch(_e){ STATE.places = null; }
+      STATE.map = new google.maps.Map(document.getElementById('map'), { center:{lat:-34.6037,lng:-58.3816}, zoom:6, mapTypeControl:false, streetViewControl:false, fullscreenControl:false, styles:[{featureType:'poi',stylers:[{visibility:'off'}]},{featureType:'transit',stylers:[{visibility:'on'}]},{elementType:'labels.icon',stylers:[{visibility:'off'}]}] });
+
+      geolocateUser((me, method)=>{
+        if(!me){ setStatus('No se pudo determinar tu ubicación.'); return; }
+        STATE.me = me;
+        ensurePhoneTargetAround(me, (phone)=>{
+          STATE.phone = phone;
+          renderAll();
+          explain(method, phone.meta ? {name:phone.meta.poiName, category:phone.meta.category} : null);
+        });
+      });
+
+      document.getElementById('regenBtn').addEventListener('click', ()=>{
+        localStorage.removeItem(SKEY);
+        if(!STATE.me){ showToast('Ubicación aún no disponible'); return; }
+        ensurePhoneTargetAround(STATE.me, (phone)=>{ STATE.phone=phone; renderAll(); explain('gps', phone.meta?{name:phone.meta.poiName, category:phone.meta.category}:null); showToast('Nueva sugerencia generada'); });
+      });
+      document.getElementById('routeBtn').addEventListener('click', ()=>{
+        if(!STATE.me || !STATE.phone){ return; }
+        const s = `${STATE.me.lat},${STATE.me.lon}`; const d = `${STATE.phone.lat},${STATE.phone.lon}`;
+        window.open(`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(s)}&destination=${encodeURIComponent(d)}&travelmode=driving`,'_blank');
+      });
+
+      const legalBox=document.getElementById('legalBox');
+      if(!localStorage.getItem('lt_legal_ok')){ legalBox.style.display='block'; }
+      document.getElementById('okLegal').addEventListener('click',()=>{ legalBox.style.display='none'; localStorage.setItem('lt_legal_ok','1'); });
+      document.getElementById('year').textContent = new Date().getFullYear();
+    }
+
+    window.initMap = initMap;
+  </script>
+
+  <script>
+    // Carga dinámica desde /api/env (Vercel)
+    (function(){
+      fetch('/api/env').then(r=>r.ok?r.json():Promise.reject()).then(cfg=>{
+        var k = cfg.googleMapsApiKey || '';
+        var src = 'https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(k)+'&libraries=geometry,places&v=weekly&callback=initMap';
+        var s = document.createElement('script'); s.src=src; s.async=true; s.defer=true; document.body.appendChild(s);
+      }).catch(function(){
+        const t=document.getElementById('toast'); t.textContent='Error cargando Google Maps. Revisa variables en Vercel.'; t.style.display='block';
+      });
+    })();
+  </script>
+</body>
+</html>
+
+

