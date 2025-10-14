@@ -139,11 +139,11 @@
     function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(t._id); t._id=setTimeout(()=>t.style.display='none', 2400); }
     function storeCachedTarget(obj){ try{ localStorage.setItem(SKEY, JSON.stringify(obj)); }catch(_e){} }
     function readCachedTarget(){ try{ const v=localStorage.getItem(SKEY); return v?JSON.parse(v):null; }catch(_e){ return null; } }
-    function computeRandomTargetAround(center){ const distKm=1+Math.random()*49; const bearing=Math.random()*360; return { ...destPoint(center.lat,center.lon,bearing,distKm), distKm }; }
+    function computeRandomTargetAround(center){ const distKm=1+Math.random()*24; const bearing=Math.random()*360; return { ...destPoint(center.lat,center.lon,bearing,distKm), distKm }; }
 
     async function overpassPOI(point){
       try{
-        const radius=5000; // Radio más amplio para encontrar más opciones urbanas
+        const radius=25000; // Radio de 25km para zonas urbanas más cercanas
         // Buscar centros comerciales, estaciones de transporte, hospitales, universidades, etc.
         const q=`[out:json][timeout:10];(
           node["shop"="mall"](around:${radius},${point.lat},${point.lon});
@@ -160,11 +160,12 @@
         const r=await fetch(url); if(!r.ok) return null; const j=await r.json();
         const els=j.elements||[]; if(!els.length) return null; 
         
-        // Priorizar centros comerciales y estaciones de transporte
+        // Priorizar zonas urbanas cercanas: centros comerciales, estaciones, hospitales
         const prioritized = els.filter(el => {
           const tags = el.tags || {};
           return tags.shop === 'mall' || tags.public_transport === 'station' || 
-                 tags.amenity === 'shopping_center' || tags.amenity === 'hospital';
+                 tags.amenity === 'shopping_center' || tags.amenity === 'hospital' ||
+                 tags.amenity === 'restaurant' || tags.leisure === 'park';
         });
         
         const candidates = prioritized.length > 0 ? prioritized : els;
@@ -177,7 +178,9 @@
                      pick.tags?.public_transport === 'station' ? 'Estación de transporte' :
                      pick.tags?.amenity === 'hospital' ? 'Hospital' :
                      pick.tags?.amenity === 'university' ? 'Universidad' :
-                     'Zona urbana');
+                     pick.tags?.amenity === 'restaurant' ? 'Zona comercial' :
+                     pick.tags?.leisure === 'park' ? 'Parque urbano' :
+                     'Zona urbana cercana');
         
         return { lat, lon, name };
       }catch(_e){ return null; }
