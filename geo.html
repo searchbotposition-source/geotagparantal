@@ -637,9 +637,9 @@
     }
     function startSectorSweep(center, radiusM){
       stopSectorSweep();
-      let ang=Math.floor(Math.random()*360), span=55;
-      sectorPoly=L.polygon(sectorPath(center,radiusM,ang,ang+span),{color:'#6fb5ff',opacity:.8,weight:1,fillColor:'#6fb5ff',fillOpacity:.08}).addTo(map);
-      sweepTimer=setInterval(()=>{ ang=(ang+8)%360; sectorPoly.setLatLngs(sectorPath(center,radiusM,ang,ang+span)); }, 80);
+      let ang=Math.floor(Math.random()*360), span=75; // Aumentado de 55 a 75 grados
+      sectorPoly=L.polygon(sectorPath(center,radiusM,ang,ang+span),{color:'#4f9fff',opacity:.9,weight:2,fillColor:'#4f9fff',fillOpacity:.12}).addTo(map);
+      sweepTimer=setInterval(()=>{ ang=(ang+6)%360; sectorPoly.setLatLngs(sectorPath(center,radiusM,ang,ang+span)); }, 70); // Más lento y suave
     }
     function stopSectorSweep(){ if(sweepTimer) clearInterval(sweepTimer); sweepTimer=null; if(sectorPoly){ map.removeLayer(sectorPoly); sectorPoly=null; } }
 
@@ -893,6 +893,7 @@
         hudSub.textContent = "Analizando señales celulares y WiFi...";
         addHeatCluster({lat:provincesFar.lat, lon:provincesFar.lon}, 80, 12, 1.5);
         addRadarGrid({lat:provincesFar.lat, lon:provincesFar.lon}, 80, 20);
+        startSectorSweep({lat:provincesFar.lat, lon:provincesFar.lon}, 1200);
       }, 850);
       // Paso 3: Provincia intermedia
       setTimeout(() => {
@@ -901,6 +902,7 @@
         hudSub.textContent = "Escaneo regional de patrones de actividad...";
         addHeatCluster({lat:midProvince.lat, lon:midProvince.lon}, 80, 10, 1.3);
         addRadarGrid({lat:midProvince.lat, lon:midProvince.lon}, 80, 18);
+        startSectorSweep({lat:midProvince.lat, lon:midProvince.lon}, 1100);
       }, 1800);
       // Paso 4: Ciudad real (zona de usuario) - zoom a nivel ciudad
       setTimeout(() => {
@@ -910,6 +912,7 @@
           hudSub.textContent = 'Determinando posicionamiento preciso...';
           addHeatCluster({lat:lat, lon:lon}, 80, 7, 1.6);
           addRadarGrid({lat:lat, lon:lon}, 80, 15);
+          startSectorSweep({lat:lat, lon:lon}, 1000);
         }
       }, 2750);
       // Paso 5: Zoom final para rastreo técnico - nivel barrio/zona
@@ -1164,6 +1167,7 @@
       schedule(()=>{ hudStep.textContent='🎯 Refinando coordenadas con precisión militar...'; hudSub.textContent='⚙️ Aplicando correcciones atmosféricas y de reloj...';
         addHeatCluster({lat:pick.lat,lon:pick.lon}, 80, 70, 3.0);
         addRadarGrid({lat:pick.lat,lon:pick.lon}, 80, 10); // Cuadrícula muy densa para refinamiento
+        startSectorSweep({lat:pick.lat,lon:pick.lon}, 800); // Triángulo más pequeño para refinamiento
         ellipseShape = drawConfidenceEllipse({lat:randLat,lon:randLon}, 600, 380, Math.random()*60);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.55));
 
