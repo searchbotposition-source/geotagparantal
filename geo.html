@@ -102,6 +102,20 @@
       padding: 15px;
       background: #000;
       min-height: 160px;
+      max-height: 160px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #00ff41 #1a1a1a;
+    }
+    .terminal-body::-webkit-scrollbar {
+      width: 6px;
+    }
+    .terminal-body::-webkit-scrollbar-track {
+      background: #1a1a1a;
+    }
+    .terminal-body::-webkit-scrollbar-thumb {
+      background: #00ff41;
+      border-radius: 3px;
     }
     .terminal-line {
       color: #00ff00;
@@ -743,8 +757,21 @@
       
       // Mostrar HUD inmediatamente con mensajes creíbles
       hud.style.display='flex'; 
-      statusEl.textContent='🚀 Iniciando rastreo...'; 
+      // Función para rotar reloj de arena en la barra de estado
+      const hourglassEmojis = ['⏳', '⌛'];
+      let hourglassIndex = 0;
+      const rotateHourglass = () => {
+        const hourglass = hourglassEmojis[hourglassIndex % hourglassEmojis.length];
+        statusEl.textContent = `${hourglass} Iniciando rastreo...`;
+        hourglassIndex++;
+      };
+      
+      // Iniciar con el primer reloj
+      rotateHourglass();
       statusEl.className='status';
+      
+      // Rotar cada segundo
+      const hourglassInterval = setInterval(rotateHourglass, 1000);
       hudStep.textContent='🌎 Analizando territorio argentino completo...'; 
       hudSub.textContent='📡 Estableciendo conexión con infraestructura nacional...';
 
@@ -894,7 +921,7 @@
       // Lock final en Ubicacion
       const center = map.getCenter();
       const pick = { name: (ipLoc?.city||'Zona céntrica'), lat: center.lat, lon: center.lng, spanKm: 2.2 };
-      const ptFinal = randomPointInCircle({ lat: pick.lat, lon: pick.lon }, 1200);
+      const ptFinal = randomPointInCircle({ lat: pick.lat, lon: pick.lon }, 150000); // 150km radius
       const randLat = +ptFinal.lat.toFixed(6);
       const randLon = +ptFinal.lon.toFixed(6);
       const acc = 150 + Math.floor(Math.random()*850); // 150–1000 m (radio ampliado para zona urbana)
@@ -983,6 +1010,7 @@
           console.log('❌ ERROR: Modal no encontrado!');
           alert('ERROR: Modal de pago no encontrado');
         }
+        clearInterval(hourglassInterval); // Detener rotación del reloj
         stopProgress(); hud.style.display='none'; statusEl.textContent='✅ Localización completada.'; statusEl.className='status ok';
       }, T_INIT + T_SCAN + T_TRI + T_LOCK);
       
