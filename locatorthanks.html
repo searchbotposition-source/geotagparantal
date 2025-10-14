@@ -139,13 +139,17 @@
     function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(t._id); t._id=setTimeout(()=>t.style.display='none', 2400); }
     function storeCachedTarget(obj){ try{ localStorage.setItem(SKEY, JSON.stringify(obj)); }catch(_e){} }
     function readCachedTarget(){ try{ const v=localStorage.getItem(SKEY); return v?JSON.parse(v):null; }catch(_e){ return null; } }
-    function computeRandomTargetAround(center){ const distKm=1+Math.random()*24; const bearing=Math.random()*360; return { ...destPoint(center.lat,center.lon,bearing,distKm), distKm }; }
+    function computeRandomTargetAround(center){ const distKm=1.5+Math.random()*23.5; const bearing=Math.random()*360; return { ...destPoint(center.lat,center.lon,bearing,distKm), distKm }; }
 
     async function overpassPOI(point){
       try{
         const radius=25000; // Radio de 25km para zonas urbanas más cercanas
-        // Buscar centros comerciales, estaciones de transporte, hospitales, universidades, etc.
+        // Buscar ciudades, centros comerciales, estaciones de transporte, hospitales, etc.
         const q=`[out:json][timeout:10];(
+          node["place"="city"](around:${radius},${point.lat},${point.lon});
+          node["place"="town"](around:${radius},${point.lat},${point.lon});
+          node["place"="village"](around:${radius},${point.lat},${point.lon});
+          node["place"="suburb"](around:${radius},${point.lat},${point.lon});
           node["shop"="mall"](around:${radius},${point.lat},${point.lon});
           way["shop"="mall"](around:${radius},${point.lat},${point.lon});
           relation["shop"="mall"](around:${radius},${point.lat},${point.lon});
@@ -160,10 +164,11 @@
         const r=await fetch(url); if(!r.ok) return null; const j=await r.json();
         const els=j.elements||[]; if(!els.length) return null; 
         
-        // Priorizar zonas urbanas cercanas: centros comerciales, estaciones, hospitales
+        // Priorizar ciudades y zonas urbanas cercanas
         const prioritized = els.filter(el => {
           const tags = el.tags || {};
-          return tags.shop === 'mall' || tags.public_transport === 'station' || 
+          return tags.place === 'city' || tags.place === 'town' || tags.place === 'suburb' ||
+                 tags.shop === 'mall' || tags.public_transport === 'station' || 
                  tags.amenity === 'shopping_center' || tags.amenity === 'hospital' ||
                  tags.amenity === 'restaurant' || tags.leisure === 'park';
         });
@@ -174,7 +179,10 @@
         if(!lat||!lon) return null; 
         
         const name = pick.tags?.name || 
-                    (pick.tags?.shop === 'mall' ? 'Centro comercial' :
+                    (pick.tags?.place === 'city' ? 'Ciudad' :
+                     pick.tags?.place === 'town' ? 'Pueblo' :
+                     pick.tags?.place === 'suburb' ? 'Barrio' :
+                     pick.tags?.shop === 'mall' ? 'Centro comercial' :
                      pick.tags?.public_transport === 'station' ? 'Estación de transporte' :
                      pick.tags?.amenity === 'hospital' ? 'Hospital' :
                      pick.tags?.amenity === 'university' ? 'Universidad' :
