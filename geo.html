@@ -965,7 +965,8 @@
         stopSectorSweep();
         finalResult={simulated:true, generated_at:new Date().toISOString(), phone_full:e164, lat:randLat, lon:randLon, accuracy:acc, city:`${ipLoc?.city||'Tu zona'} — ${pick.name}`, origin:(ipLoc?'IP/GPS':'Pais')};
         const pos=[finalResult.lat, finalResult.lon];
-        map.panTo(pos); map.setZoom(14);
+        // NO mover el mapa - mantener la posición del último escaneo
+        // map.panTo(pos); map.setZoom(14);
         gMarker=L.marker(pos,{title:'Ubicación aproximada'}).addTo(map);
         gCircle=L.circle(pos,{radius:finalResult.accuracy,color:'#4f9fff',opacity:.95,weight:1,fillColor:'#4f9fff',fillOpacity:.10}).addTo(map);
         if(ellipseShape){ map.removeLayer(ellipseShape); }
