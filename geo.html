@@ -403,6 +403,12 @@
     }, true); // <-- true = fase de captura
 
     document.getElementById('closeModal').addEventListener('click', function () {
+      // Restaurar scroll del body
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      
       document.getElementById('modalBack').style.display = 'none';
     });
   })();
@@ -1089,6 +1095,12 @@
         console.log('📍 Modal exists:', !!modalBack);
         
         if (modalBack) {
+          // Bloquear scroll del body
+          document.body.style.overflow = 'hidden';
+          document.body.style.position = 'fixed';
+          document.body.style.width = '100%';
+          document.body.style.height = '100%';
+          
           modalBack.style.display='flex';
           modalBack.style.position='fixed';
           modalBack.style.top='0';
@@ -1099,7 +1111,8 @@
           modalBack.style.zIndex='99999';
           modalBack.style.alignItems='center';
           modalBack.style.justifyContent='center';
-          console.log('✅ Modal mostrado con display:flex y estilos completos');
+          modalBack.style.overflow='hidden';
+          console.log('✅ Modal mostrado con scroll bloqueado');
           
           // Iniciar cuenta regresiva de 1 hora (60 minutos)
           let timeLeft = 3600; // 60 minutos en segundos
@@ -1174,8 +1187,24 @@
 
     document.getElementById('simulateBtn').addEventListener('click', startSimulation);
     document.getElementById('resetBtn').addEventListener('click', resetAll);
-    document.getElementById('downloadBtn').addEventListener('click', downloadJSON);
-    document.getElementById('closeModal').addEventListener('click', ()=> document.getElementById('modalBack').style.display='none');
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+      // Restaurar scroll del body antes de redirigir
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      
+      downloadJSON();
+    });
+    document.getElementById('closeModal').addEventListener('click', function() {
+      // Restaurar scroll del body
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      
+      document.getElementById('modalBack').style.display='none';
+    });
     
     // Verificación inicial del modal
     document.addEventListener('DOMContentLoaded', function() {
