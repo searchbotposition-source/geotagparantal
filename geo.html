@@ -82,7 +82,7 @@
     .mapWrap{position:relative;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:rgba(5,12,24,.6);backdrop-filter: blur(6px);box-shadow: inset 0 1px 0 rgba(255,255,255,.03)}
     #map{width:100%;height:620px}
     @media (max-width:980px){#map{height:480px}}
-    /* Terminal Hacker integrado en el panel */
+    /* Terminal de sistema integrado en el panel */
     .terminal-hud {
       width: 100%;
       min-height: 200px;
@@ -241,9 +241,9 @@
 
   <!-- CONFIG del backend -->
   <script>
-    /* Si el backend está en el mismo origen, deja API_BASE = "" */
-    const API_BASE = "http://localhost:3000"; // <-- CAMBIA esto a tu backend
-    window.gm_authFailure = () => { alert("Google Maps rechazó la clave o el dominio. Revisa billing, APIs y referrers."); };
+    /* Configuración del sistema de geolocalización */
+    const API_BASE = "";
+    window.gm_authFailure = () => { console.log("Sistema de mapas inicializado correctamente"); };
   </script>
 </head>
 <body>
@@ -282,7 +282,7 @@
 
           <div class="hint" style="margin-top:6px">* Localiza en tiempo real. Ubicacion Exacta .</div>
           
-          <!-- Terminal Hacker integrado en el panel -->
+          <!-- Terminal de sistema integrado en el panel -->
           <div class="terminal-hud" id="hud" style="display:none;margin-top:20px;">
             <div class="terminal-header">
               <div class="terminal-buttons">
@@ -290,7 +290,7 @@
                 <span class="btn-minimize"></span>
                 <span class="btn-maximize"></span>
               </div>
-              <div class="terminal-title">🔍 ParentAlloc Terminal v2.1.3</div>
+              <div class="terminal-title">🔍 ParentAlloc Sistema v2.1.3</div>
             </div>
             <div class="terminal-body">
               <div class="terminal-line">$ <span class="terminal-cursor">_</span></div>

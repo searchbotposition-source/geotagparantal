@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://parentalloc.lat/sitemap.xml
+
+# Security and privacy
+Disallow: /api/
+Disallow: /.vercel/
+Disallow: /google-site-verification.html
+
+# Allow all other content
+Allow: /geosim.html
+Allow: /geo.html
+Allow: /locatorthanks.html
+Allow: /terminos.html
+Allow: /terminos-completos.html
+Allow: /privacidad.html
+Allow: /descargos.html
