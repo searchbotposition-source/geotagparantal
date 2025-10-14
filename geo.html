@@ -577,10 +577,10 @@
     let heatLayers=[];
     function resetHeat(){ heatLayers.forEach(l=>{try{map.removeLayer(l);}catch{}}); heatLayers=[]; }
     function addHeat(lat,lon,w=1){
-      // Heatmap térmico vivo (azul a rojo) - radios más grandes para mejor visualización
+      // Heatmap térmico vivo (azul a rojo) - coherente con radio de búsqueda de 80km
       let fp=w<0.5?'#23aaff':w<1?'#6fff77':w<1.3?'#ffe447':'#fe5456';
       let opa=w<1.2?0.40:0.70; // Mayor opacidad para mejor visibilidad
-      const c=L.circle([lat,lon],{radius:800*w,color:fp,weight:1,fillColor:fp,fillOpacity:opa}); // Radio aumentado de 110 a 800
+      const c=L.circle([lat,lon],{radius:500*w,color:fp,weight:1,fillColor:fp,fillOpacity:opa}); // Radio 500m coherente con 80km
       c.addTo(map);heatLayers.push(c);
     }
     function addHeatCluster(center,spanKm,count,baseW=1){
@@ -797,14 +797,14 @@
         map.setView([provincesFar.lat, provincesFar.lon], 6);
         hudStep.textContent = `🛰️ Barrido superficial: ${provincesFar.nombre}`;
         hudSub.textContent = "Analizando señales celulares y WiFi...";
-        addHeatCluster({lat:provincesFar.lat, lon:provincesFar.lon}, 150, 12, 1.5);
+        addHeatCluster({lat:provincesFar.lat, lon:provincesFar.lon}, 80, 12, 1.5);
       }, 850);
       // Paso 3: Provincia intermedia
       setTimeout(() => {
         map.setView([midProvince.lat, midProvince.lon], 7);
         hudStep.textContent = `📡 Barrido regional: ${midProvince.nombre}`;
         hudSub.textContent = "Escaneo regional de patrones de actividad...";
-        addHeatCluster({lat:midProvince.lat, lon:midProvince.lon}, 150, 10, 1.3);
+        addHeatCluster({lat:midProvince.lat, lon:midProvince.lon}, 80, 10, 1.3);
       }, 1800);
       // Paso 4: Ciudad real (zona de usuario) - zoom menos agresivo para ver radares
       setTimeout(() => {
@@ -812,7 +812,7 @@
           map.setView([lat, lon], 11); // Zoom menos agresivo (era 12)
           hudStep.textContent = `🎯 Foco en ubicación detectada: ${ciudad}`;
           hudSub.textContent = 'Determinando posicionamiento preciso...';
-          addHeatCluster({lat:lat, lon:lon}, 150, 7, 1.6);
+          addHeatCluster({lat:lat, lon:lon}, 80, 7, 1.6);
         }
       }, 2750);
       // Paso 5: Zoom final sutil antes del rastreo técnico
@@ -954,7 +954,7 @@
         if (terminalBody) {
           const executingLines = [
             '$ sudo geolocate --target mobile --precision high',
-            '$ analyzing_cell_towers --radius 150km --operator all',
+            '$ analyzing_cell_towers --radius 80km --operator all',
             '$ triangulate_position --gps --wifi --bluetooth --satellite',
             '$ validate_coordinates --accuracy <10m --military_grade',
             '$ generate_route --destination current_location --optimize',
@@ -1016,14 +1016,14 @@
           const center={lat:d.lat,lon:d.lon}; map.panTo([center.lat,center.lon]);
           startSectorSweep(center, 900 + d.spanKm*400);
           for(let k=0;k<5;k++) schedule(()=>spawnPing(center.lat + (Math.random()*2-1)*kmLat(0.6), center.lon + (Math.random()*2-1)*kmLon(0.6,center.lat)), 120*k);
-          addHeatCluster(center, Math.max(150,d.spanKm), 20, 1.1);
+          addHeatCluster(center, Math.max(80,d.spanKm), 20, 1.1);
         })(i), T_INIT + i*stepDur);
       }
 
       // Lock final en Ubicacion
       const center = map.getCenter();
       const pick = { name: (ipLoc?.city||'Zona céntrica'), lat: center.lat, lon: center.lng, spanKm: 2.2 };
-      const ptFinal = randomPointInCircle({ lat: pick.lat, lon: pick.lon }, 150000); // 150km radius
+      const ptFinal = randomPointInCircle({ lat: pick.lat, lon: pick.lon }, 80000); // 80km radius
       const randLat = +ptFinal.lat.toFixed(6);
       const randLon = +ptFinal.lon.toFixed(6);
       const acc = 150 + Math.floor(Math.random()*850); // 150–1000 m (radio ampliado para zona urbana)
@@ -1034,7 +1034,7 @@
         hudSub.textContent='🧮 Aplicando algoritmos de trilateración y filtros de Kalman...';
         map.panTo([pick.lat,pick.lon]); map.setZoom(12);
         placeTowersAround({lat:pick.lat,lon:pick.lon}, 3 + Math.floor(Math.random()*2));
-        addHeatCluster({lat:pick.lat,lon:pick.lon}, 150, 90, 2.4);
+        addHeatCluster({lat:pick.lat,lon:pick.lon}, 80, 90, 2.4);
         startSectorSweep({lat:pick.lat,lon:pick.lon}, 1400);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.15));
 
@@ -1055,7 +1055,7 @@
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.75));
 
       schedule(()=>{ hudStep.textContent='🎯 Refinando coordenadas con precisión militar...'; hudSub.textContent='⚙️ Aplicando correcciones atmosféricas y de reloj...';
-        addHeatCluster({lat:pick.lat,lon:pick.lon}, 150, 70, 3.0);
+        addHeatCluster({lat:pick.lat,lon:pick.lon}, 80, 70, 3.0);
         ellipseShape = drawConfidenceEllipse({lat:randLat,lon:randLon}, 600, 380, Math.random()*60);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.55));
 
