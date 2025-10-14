@@ -785,7 +785,7 @@
         div.innerHTML = `
           <div style="background: rgba(0,0,0,0.8); color: #4f9fff; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; text-align: center; margin: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
             📍 Argentina<br>
-            <span style="font-size: 9px; color: #a9bbd8;">Cobertura nacional</span>
+            <span style="font-size: 9px; color: #a9bbd8;">Precisión: ± 75 m</span>
           </div>
         `;
         return div;
@@ -1123,7 +1123,7 @@
       const ptFinal = randomPointInCircle({ lat: pick.lat, lon: pick.lon }, 80000); // 80km radius
       const randLat = +ptFinal.lat.toFixed(6);
       const randLon = +ptFinal.lon.toFixed(6);
-      const acc = 150 + Math.floor(Math.random()*850); // 150–1000 m (radio ampliado para zona urbana)
+      const acc = 50 + Math.floor(Math.random()*50); // 50–100 m (precisión coherente)
 
       let ellipseShape=null;
       schedule(()=>{ 
