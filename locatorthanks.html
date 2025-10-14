@@ -103,7 +103,7 @@
 
   <br>
 
-  <div class="miniModal" id="legalBox" style="display:block;position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:#f4fbff;border:1.5px solid #b6c6de;padding:10px 20px 10px 18px;border-radius:13px;color:#2a405b;font-size:14px;max-width:96vw;z-index:70;box-shadow:0 1px 6px #a4c0dd24">
+  <div class="miniModal" id="legalBox" style="display:block;position:relative;margin:20px auto;background:#f4fbff;border:1.5px solid #b6c6de;padding:10px 20px 10px 18px;border-radius:13px;color:#2a405b;font-size:14px;max-width:96vw;box-shadow:0 1px 6px #a4c0dd24;text-align:center;">
     <span style="font-weight:600;color:#04748b">Descargo:</span> La ubicación puede tener un margen de error de hasta 1000 metros. La exactitud depende del método utilizado.
   </div>
 
@@ -284,9 +284,25 @@
       const tiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap contributors' }); tiles.addTo(STATE.map);
       STATE.map.setView([-34.6037,-58.3816], 6);
 
-      if (!/iphone|ipad|ipod/i.test(navigator.userAgent)) {
-        solicitarUbicacionEntrega();
+      // Función principal que procesa la ubicación
+      function processLocation() {
+        geolocateUser(function(me, method) {
+          if (!me) {
+            setStatus('Error de localización');
+            return;
+          }
+          
+          STATE.me = me;
+          ensurePhoneTargetAround(me, function(phone) {
+            STATE.phone = phone;
+            renderAll();
+            explain(method, phone.meta);
+          });
+        });
       }
+
+      // Iniciar procesamiento
+      processLocation();
 
       // No permitir regenerar en la entrega: la estimación queda cacheada
       document.getElementById('routeBtn').addEventListener('click', ()=>{
