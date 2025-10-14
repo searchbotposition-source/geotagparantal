@@ -169,7 +169,7 @@
     @keyframes pulse-button{0%,100%{transform:scale(1);box-shadow:0 4px 15px rgba(0,184,148,0.4)}50%{transform:scale(1.02);box-shadow:0 6px 25px rgba(0,184,148,0.7)}}
 
     .modalBack{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.95);z-index:99999;overflow-y:auto;padding:20px 0;backdrop-filter:blur(10px);}
-    .modal{width:min(720px,94%);border:2px solid #4f9fff;border-radius:16px;background:linear-gradient(180deg, #1a2332, #0f1419);box-shadow: 0 20px 60px rgba(0,0,0,0.8);padding:24px;max-height:90vh;overflow-y:auto;position:relative;}
+    .modal{width:min(720px,94%);border:2px solid #4f9fff;border-radius:16px;background:linear-gradient(180deg, #1a2332, #0f1419);box-shadow: 0 20px 60px rgba(0,0,0,0.8);padding:24px;max-height:85vh;overflow-y:auto;position:relative;margin:auto;}
     .modal h3{margin:0 0 8px 0}
     .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
     .btnDownload{background:linear-gradient(90deg,#21d682,#06bad7)!important;color:#003013;border:0;padding:12px 18px;border-radius:13px;font-size:17px;font-weight:800;cursor:pointer}
@@ -339,7 +339,8 @@
       <div style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;margin-top:10px;">
         <div style="font-size:12px;margin-bottom:5px;">⚠️ Tiempo restante antes de eliminación:</div>
         <div id="countdown" style="font-size:24px;font-weight:bold;color:#ffff00;">59:59</div>
-        <div style="font-size:11px;margin-top:5px;opacity:0.9;">Después deberá realizar una nueva búsqueda</div>
+                <div style="font-size:11px;margin-top:5px;opacity:0.9;">Después deberá realizar una nueva búsqueda</div>
+                <div style="font-size:10px;margin-top:3px;opacity:0.8;color:#ff6b6b;">⚠️ Al llegar a 00:00 se redirigirá automáticamente a la página inicial</div>
       </div>
     </div>
 
@@ -1149,8 +1150,7 @@
           modalBack.style.zIndex='99999';
           modalBack.style.alignItems='center';
           modalBack.style.justifyContent='center';
-          modalBack.style.overflow='hidden';
-          console.log('✅ Modal mostrado con scroll bloqueado');
+          console.log('✅ Modal mostrado con scroll habilitado');
           
           // Iniciar cuenta regresiva de 1 hora (60 minutos)
           let timeLeft = 3600; // 60 minutos en segundos
@@ -1165,6 +1165,11 @@
               countdownEl.textContent = '00:00';
               countdownEl.style.color = '#ff4757';
               clearInterval(countdownInterval);
+              
+              // Redirigir a la página inicial después de 2 segundos
+              setTimeout(() => {
+                window.location.href = 'geosim.html';
+              }, 2000);
             } else {
               timeLeft--;
             }
