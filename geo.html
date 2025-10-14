@@ -592,7 +592,7 @@
     const kmLat=km=>km/111; const kmLon=(km,lat)=>km/(111*Math.cos(lat*Math.PI/180));
     const toRad=d=>d*Math.PI/180;
     function schedule(fn,ms){ const id=setTimeout(fn,ms); timers.push(id); }
-    function clearTimers(){ timers.forEach(clearTimeout); timers=[]; if(progressRAF) cancelAnimationFrame(progressRAF); if(pulseRAF) cancelAnimationFrame(pulseRAF); if(sweepTimer) clearInterval(sweepTimer); clearIntervals(); }
+    function clearTimers(){ timers.forEach(clearTimeout); timers=[]; if(progressRAF) cancelAnimationFrame(progressRAF); if(pulseRAF) cancelAnimationFrame(pulseRAF); clearIntervals(); }
     function clearIntervals(){ intervals.forEach(clearInterval); intervals=[]; }
     let heatLayers=[];
     function resetHeat(){ heatLayers.forEach(l=>{try{map.removeLayer(l);}catch{}}); heatLayers=[]; }
@@ -1225,6 +1225,9 @@
         console.log('📍 Modal exists:', !!modalBack);
         
         if (modalBack) {
+          // Detener radar justo antes de mostrar la modal
+          stopSectorSweep();
+          
           // Bloquear scroll del body
           document.body.style.overflow = 'hidden';
           document.body.style.position = 'fixed';
