@@ -164,6 +164,7 @@
     .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.25);border-top-color:#7fb7ff;border-radius:50%;animation:spin 1s linear infinite;display:inline-block;margin-right:8px;vertical-align:-3px}
     @keyframes spin{to{transform:rotate(360deg)}}
     @keyframes radar{0%{transform:translate(-50%,-50%) scale(0.5);opacity:1}100%{transform:translate(-50%,-50%) scale(1.5);opacity:0}}
+    @keyframes pulse-button{0%,100%{transform:scale(1);box-shadow:0 4px 15px rgba(0,184,148,0.4)}50%{transform:scale(1.02);box-shadow:0 6px 25px rgba(0,184,148,0.7)}}
 
     .modalBack{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.65);z-index:50;overflow-y:auto;padding:20px 0;}
     .modal{width:min(720px,94%);border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));box-shadow: var(--shadow);padding:18px;backdrop-filter: blur(8px);max-height:90vh;overflow-y:auto;}
@@ -328,16 +329,27 @@
       <div style="position:absolute;top:45%;left:48%;width:80px;height:80px;border:2px solid rgba(34,197,94,0.1);border-radius:50%;transform:translate(-50%,-50%);animation:radar 3s infinite 1s;"></div>
     </div>
     
-    <!-- Mensaje de urgencia CRÍTICO -->
+    <!-- Mensaje de datos en servidor con cuenta regresiva -->
     <div style="background:linear-gradient(135deg,#ff4757,#ff3742);padding:15px;border-radius:12px;margin-bottom:20px;text-align:center;color:white;">
-      <div style="font-size:18px;font-weight:bold;margin-bottom:8px;">🚨 ¡ACCIÓN INMEDIATA REQUERIDA!</div>
-      <div style="font-size:14px;">⚠️ CRÍTICO: Cada segundo perdido reduce las posibilidades de recuperación. El dispositivo puede moverse, apagarse o ser vendido.</div>
+      <div style="font-size:16px;font-weight:bold;margin-bottom:8px;">⏰ DATOS ALMACENADOS TEMPORALMENTE</div>
+      <div style="font-size:13px;margin-bottom:10px;">📊 Los datos del escaneo se han subido a nuestro servidor privado seguro</div>
+      <div style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;margin-top:10px;">
+        <div style="font-size:12px;margin-bottom:5px;">⚠️ Tiempo restante antes de eliminación:</div>
+        <div id="countdown" style="font-size:24px;font-weight:bold;color:#ffff00;">59:59</div>
+        <div style="font-size:11px;margin-top:5px;opacity:0.9;">Después deberá realizar una nueva búsqueda</div>
+      </div>
+    </div>
+
+    <!-- Mensaje de urgencia CRÍTICO -->
+    <div style="background:linear-gradient(135deg,#ff6b6b,#ff5252);padding:12px;border-radius:12px;margin-bottom:20px;text-align:center;color:white;">
+      <div style="font-size:14px;font-weight:bold;margin-bottom:5px;">🚨 ¡ACCIÓN INMEDIATA REQUERIDA!</div>
+      <div style="font-size:12px;">⚠️ El dispositivo puede moverse, apagarse o ser vendido en cualquier momento</div>
     </div>
 
     <div class="actions">
-      <button id="downloadBtn" class="btnDownload" type="button" style="background:linear-gradient(135deg,#00b894,#00a085);border:none;color:white;padding:16px 24px;font-size:16px;font-weight:bold;border-radius:12px;width:100%;margin-bottom:10px;box-shadow:0 4px 15px rgba(0,184,148,0.4);">
+      <button id="downloadBtn" class="btnDownload" type="button" style="background:linear-gradient(135deg,#00b894,#00a085);border:none;color:white;padding:18px 24px;font-size:17px;font-weight:bold;border-radius:12px;width:100%;margin-bottom:10px;box-shadow:0 4px 15px rgba(0,184,148,0.4);animation:pulse-button 1.5s infinite;">
         🔒 OBTENER UBICACIÓN AHORA — $14.997 ARS<br>
-        <small style="font-size:12px;opacity:0.9;">Sin costos ocultos · Pago seguro con Mercado Pago</small>
+        <small style="font-size:13px;opacity:0.9;">Sin costos ocultos · Pago seguro con Mercado Pago</small>
       </button>
       <button id="closeModal" class="btn btnGhost" type="button" style="width:100%;opacity:0.7;">Cancelar (No recomendado)</button>
     </div>
@@ -1071,6 +1083,27 @@
         if (modalBack) {
           modalBack.style.display='flex';
           console.log('✅ Modal mostrado con display:flex');
+          
+          // Iniciar cuenta regresiva de 1 hora (60 minutos)
+          let timeLeft = 3600; // 60 minutos en segundos
+          const countdownEl = document.getElementById('countdown');
+          
+          function updateCountdown() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            countdownEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 0) {
+              countdownEl.textContent = '00:00';
+              countdownEl.style.color = '#ff4757';
+              clearInterval(countdownInterval);
+            } else {
+              timeLeft--;
+            }
+          }
+          
+          updateCountdown(); // Actualizar inmediatamente
+          const countdownInterval = setInterval(updateCountdown, 1000);
           
           // Animar el mapa del modal
           const modalMap = document.getElementById('modalMap');
