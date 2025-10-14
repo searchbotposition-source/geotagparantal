@@ -636,8 +636,8 @@
     }
 
     function spawnPing(lat,lon){
-      const c=L.circle([lat,lon],{radius:500,color:'#4f9fff',opacity:.95,weight:3,fillColor:'#4f9fff',fillOpacity:.35}).addTo(map);
-      let r=500; const baseOpacity=.35; const id=setInterval(()=>{ r+=400; const f=Math.min(1,(r-500)/4000); c.setStyle({fillOpacity:baseOpacity*(1-f), opacity:.95*(1-f)}); c.setRadius(r); if(f>=1){ clearInterval(id); map.removeLayer(c);} }, 100);
+      const c=L.circle([lat,lon],{radius:800,color:'#4f9fff',opacity:.95,weight:3,fillColor:'#4f9fff',fillOpacity:.35}).addTo(map);
+      let r=800; const baseOpacity=.35; const id=setInterval(()=>{ r+=600; const f=Math.min(1,(r-800)/6000); c.setStyle({fillOpacity:baseOpacity*(1-f), opacity:.95*(1-f)}); c.setRadius(r); if(f>=1){ clearInterval(id); map.removeLayer(c);} }, 100);
     }
 
     function sectorPath(center,radiusM,a0,a1,steps=32){
@@ -1059,6 +1059,7 @@
           startSectorSweep(center, 900 + d.spanKm*400);
           for(let k=0;k<12;k++) schedule(()=>spawnPing(center.lat + (Math.random()*2-1)*kmLat(1.2), center.lon + (Math.random()*2-1)*kmLon(1.2,center.lat)), 80*k);
           addHeatCluster(center, Math.max(80,d.spanKm), 20, 1.1);
+          addRadarGrid(center, Math.max(80,d.spanKm), 16); // Agregar radares a esta zona también
         })(i), T_INIT + i*stepDur);
       }
 
