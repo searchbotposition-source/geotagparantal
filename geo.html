@@ -288,7 +288,7 @@
         </aside>
 
         <div class="mapWrap">
-          <div id="map" role="application" aria-label="Mapa de la simulación"></div>
+          <div id="map" role="application" aria-label="Mapa de rastreo en tiempo real"></div>
         </div>
       </div>
     </section>
@@ -765,12 +765,12 @@
           // Zoom sutil para ver mejor los radares sin perder contexto
           map.setView([lat, lon], 13); // Zoom intermedio (era 15)
           hudStep.textContent = '📍 Rastreo preciso activo';
-          hudSub.textContent = 'Iniciando simulación avanzada en tu zona.';
+          hudSub.textContent = 'Iniciando rastreo avanzado en tu zona.';
         } else {
           // Fallback: zoom sutil en Buenos Aires
           map.setView([-34.6037, -58.3816], 13);
           hudStep.textContent = '📍 Rastreo preciso activo';
-          hudSub.textContent = 'Iniciando simulación avanzada en zona metropolitana.';
+          hudSub.textContent = 'Iniciando rastreo avanzado en zona metropolitana.';
         }
       }, 3650);
       
