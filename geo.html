@@ -794,13 +794,13 @@
       }
 
       // Agregar texto superpuesto
-      const overlay = L.control({position: 'topleft'});
+      const overlay = L.control({position: 'topright'});
       overlay.onAdd = function() {
         const div = L.DomUtil.create('div', 'modal-map-overlay');
         div.innerHTML = `
-          <div style="background: rgba(0,0,0,0.3); color: #4f9fff; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; text-align: center; margin: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); border: 1px solid rgba(79,159,255,0.5);">
+          <div style="background: rgba(0,0,0,0.4); color: #4f9fff; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-align: center; margin: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); border: 1px solid rgba(79,159,255,0.6); white-space: nowrap;">
             📍 ${userCity}<br>
-            <span style="font-size: 9px; color: #a9bbd8;">Ciudad analizada - Zona de rastreo</span>
+            <span style="font-size: 10px; color: #a9bbd8;">Ciudad analizada</span>
           </div>
         `;
         return div;
@@ -1198,7 +1198,7 @@
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.80));
 
       schedule(()=>{ 
-        stopSectorSweep();
+        // stopSectorSweep(); // Mantener radar hasta el final
         finalResult={simulated:true, generated_at:new Date().toISOString(), phone_full:e164, lat:randLat, lon:randLon, accuracy:acc, city:`${ipLoc?.city||'Tu zona'} — ${pick.name}`, origin:(ipLoc?'IP/GPS':'Pais')};
         const pos=[finalResult.lat, finalResult.lon];
         // NO mover el mapa - mantener la posición del último escaneo
