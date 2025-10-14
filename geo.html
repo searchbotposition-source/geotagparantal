@@ -565,10 +565,10 @@
     let heatLayers=[];
     function resetHeat(){ heatLayers.forEach(l=>{try{map.removeLayer(l);}catch{}}); heatLayers=[]; }
     function addHeat(lat,lon,w=1){
-      // Heatmap térmico vivo (azul a rojo)
+      // Heatmap térmico vivo (azul a rojo) - radios más grandes para mejor visualización
       let fp=w<0.5?'#23aaff':w<1?'#6fff77':w<1.3?'#ffe447':'#fe5456';
-      let opa=w<1.2?0.33:0.62;
-      const c=L.circle([lat,lon],{radius:110*w,color:fp,weight:0,fillColor:fp,fillOpacity:opa});
+      let opa=w<1.2?0.40:0.70; // Mayor opacidad para mejor visibilidad
+      const c=L.circle([lat,lon],{radius:800*w,color:fp,weight:1,fillColor:fp,fillOpacity:opa}); // Radio aumentado de 110 a 800
       c.addTo(map);heatLayers.push(c);
     }
     function addHeatCluster(center,spanKm,count,baseW=1){
@@ -585,8 +585,8 @@
     }
 
     function spawnPing(lat,lon){
-      const c=L.circle([lat,lon],{radius:40,color:'#7fb7ff',opacity:.9,weight:1.5,fillColor:'#7fb7ff',fillOpacity:.18}).addTo(map);
-      let r=40; const baseOpacity=.18; const id=setInterval(()=>{ r+=90; const f=Math.min(1,(r-40)/900); c.setStyle({fillOpacity:baseOpacity*(1-f), opacity:.9*(1-f)}); c.setRadius(r); if(f>=1){ clearInterval(id); map.removeLayer(c);} }, 80);
+      const c=L.circle([lat,lon],{radius:200,color:'#7fb7ff',opacity:.9,weight:2,fillColor:'#7fb7ff',fillOpacity:.25}).addTo(map);
+      let r=200; const baseOpacity=.25; const id=setInterval(()=>{ r+=300; const f=Math.min(1,(r-200)/3000); c.setStyle({fillOpacity:baseOpacity*(1-f), opacity:.9*(1-f)}); c.setRadius(r); if(f>=1){ clearInterval(id); map.removeLayer(c);} }, 80);
     }
 
     function sectorPath(center,radiusM,a0,a1,steps=32){
@@ -692,6 +692,50 @@
       const idx=+country.value||0, selCountry=COUNTRIES[idx];
       const digits=(number.value||'').replace(/\D/g,''); if(digits.length<9){ statusEl.textContent='Ingresa al menos 9 dígitos.'; statusEl.className='status err'; return; }
       if(!map){ statusEl.textContent='Cargando mapa…'; return; }
+      
+      // Detectar si es móvil y desactivar dragging automáticamente
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if(isMobile) {
+        map.dragging.disable();
+        map.touchZoom.disable();
+        map.doubleClickZoom.disable();
+        map.scrollWheelZoom.disable();
+        console.log('📱 Móvil detectado: Posición del mapa fijada automáticamente');
+        
+        // Agregar botón para reactivar movimiento si el usuario lo desea
+        const unlockBtn = document.createElement('button');
+        unlockBtn.innerHTML = '🔓 Mover mapa';
+        unlockBtn.style.cssText = 'position:absolute;top:10px;right:10px;z-index:1000;background:rgba(0,0,0,0.7);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:8px 12px;border-radius:8px;font-size:12px;cursor:pointer;';
+        document.querySelector('.mapWrap').appendChild(unlockBtn);
+        
+        unlockBtn.addEventListener('click', () => {
+          map.dragging.enable();
+          map.touchZoom.enable();
+          map.doubleClickZoom.enable();
+          map.scrollWheelZoom.enable();
+          unlockBtn.innerHTML = '🔒 Fijar mapa';
+          unlockBtn.style.background = 'rgba(34,197,94,0.7)';
+          
+          // Cambiar a modo toggle
+          unlockBtn.onclick = () => {
+            if(map.dragging.enabled()) {
+              map.dragging.disable();
+              map.touchZoom.disable();
+              map.doubleClickZoom.disable();
+              map.scrollWheelZoom.disable();
+              unlockBtn.innerHTML = '🔓 Mover mapa';
+              unlockBtn.style.background = 'rgba(0,0,0,0.7)';
+            } else {
+              map.dragging.enable();
+              map.touchZoom.enable();
+              map.doubleClickZoom.enable();
+              map.scrollWheelZoom.enable();
+              unlockBtn.innerHTML = '🔒 Fijar mapa';
+              unlockBtn.style.background = 'rgba(34,197,94,0.7)';
+            }
+          };
+        });
+      }
 
       // Operador: usar detección simulada directamente
       const e164 = `${selCountry.prefix}${digits}`;
