@@ -58,21 +58,30 @@
     .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--border);font-size:12px;color:var(--muted)}
     .miniModal{position:fixed;right:10px;bottom:10px;background:rgba(2,6,23,.85);border:1px solid var(--border);backdrop-filter:blur(6px);color:var(--muted);padding:10px 12px;border-radius:12px;font-size:11px;max-width:min(92%,420px);z-index:50}
     .miniModal .actions{display:flex;gap:6px;justify-content:flex-end;margin-top:6px}
-    .pulseDot{width:16px;height:16px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pulse 2s infinite;display:grid;place-items:center}
-    .pulseDot span{font-size:12px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.35))}
-    body{background:linear-gradient(180deg,#e8f3fc,#fafdff);color:#153b47;}
+    .pulseDot{width:20px;height:20px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pulse 2s infinite;display:grid;place-items:center;position:relative}
+    .pulseDot span{font-size:14px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.35));animation:bounce 1.5s infinite}
+    @keyframes bounce{0%,20%,50%,80%,100%{transform:translateY(0)}40%{transform:translateY(-3px)}60%{transform:translateY(-2px)}}
+    body{background:linear-gradient(135deg,#e8f3fc 0%,#f0f9ff 25%,#fafdff 50%,#e0f2fe 75%,#e8f3fc 100%);color:#153b47;min-height:100vh;position:relative}
+    body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%);pointer-events:none;z-index:-1}
     .mainBlock{max-width:990px;margin:34px auto 0 auto;padding:0 10px;}
-    #map{width:100%;height:66vh;min-height:400px;border-radius:16px!important;box-shadow:0 6px 32px #1d90cf12,inset 0 1px 0 #fff1;overflow:hidden;border:2px solid #a3d8fc!important}
+    #map{width:100%;height:66vh;min-height:400px;border-radius:20px!important;box-shadow:0 8px 40px rgba(29,144,207,0.15), inset 0 1px 0 rgba(255,255,255,0.1);overflow:hidden;border:2px solid #a3d8fc!important;animation:mapFadeIn 1.2s ease-out;position:relative}
+    @keyframes mapFadeIn{0%{opacity:0;transform:scale(0.95)}100%{opacity:1;transform:scale(1)}}
     @media (max-width:700px){ #map{min-height:280px;height:44vh} }
-    .panelEnt{max-width:540px;margin:34px auto 0 auto;background:rgba(255,255,255,0.89);border-radius:16px;box-shadow:0 3px 22px #20987422;display:flex;flex-direction:column;align-items:center;padding:26px 26px 20px}
-    .panelEnt .badge{background:#c3fff0!important;color:#0b8662!important;font-weight:700;border-radius:7px;padding:4px 15px;font-size:15px;margin-bottom:8px;letter-spacing:.01em}
-    .panelEnt .heading{font-weight:800;font-size:19px;color:#089373;margin-bottom:9px;text-align:center;}
-    .panelEnt .summary{color:#339883;font-size:14.5px;margin-bottom:18px;font-weight:500;text-align:center}
-    .panelEnt .dist {font-size:15px;font-weight:600;margin-bottom:14px;}
+    .panelEnt{max-width:540px;margin:34px auto 0 auto;background:rgba(255,255,255,0.95);border-radius:20px;box-shadow:0 8px 32px rgba(32,152,116,0.15), 0 2px 8px rgba(0,0,0,0.1);display:flex;flex-direction:column;align-items:center;padding:32px 28px 24px;animation:slideUp 0.8s ease-out;border:1px solid rgba(255,255,255,0.8)}
+    @keyframes slideUp{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:translateY(0)}}
+    .panelEnt .badge{background:linear-gradient(135deg,#c3fff0,#a8f5e8)!important;color:#0b8662!important;font-weight:700;border-radius:12px;padding:8px 18px;font-size:15px;margin-bottom:12px;letter-spacing:.01em;animation:glow 2s ease-in-out infinite alternate;box-shadow:0 2px 8px rgba(11,134,98,0.2)}
+    @keyframes glow{0%{box-shadow:0 2px 8px rgba(11,134,98,0.2)}100%{box-shadow:0 4px 16px rgba(11,134,98,0.3)}}
+    .panelEnt .heading{font-weight:800;font-size:22px;color:#089373;margin-bottom:12px;text-align:center;animation:fadeIn 1s ease-out 0.3s both}
+    @keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+    .panelEnt .summary{color:#339883;font-size:15px;margin-bottom:20px;font-weight:500;text-align:center;animation:fadeIn 1s ease-out 0.5s both;line-height:1.5}
+    .panelEnt .dist {font-size:16px;font-weight:600;margin-bottom:16px;animation:fadeIn 1s ease-out 0.7s both;color:#2d7a6b}
     .panelEnt .accionBtn{margin:10px 0 0 0;display:flex;justify-content:center;width:100%}
-    .panelEnt .accionBtn button{background:linear-gradient(90deg,#21d692,#04b1eb)!important;color:#103622;border:0;padding:16px 28px;font-weight:900;border-radius:13px;font-size:19px;box-shadow:0 2px 14px #06bad72a;transition:.16s;cursor:pointer;width:100%}
-    .panelEnt .accionBtn button:active{transform:scale(.99)}
-    .panelEnt .seal{margin-top:19px;color:#05876d!important;background:#d8fdec!important;font-weight:500;border-radius:7px;padding:6px 14px;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+    .panelEnt .accionBtn button{background:linear-gradient(135deg,#21d692,#04b1eb,#16c371)!important;color:#103622;border:0;padding:18px 32px;font-weight:900;border-radius:16px;font-size:20px;box-shadow:0 4px 20px rgba(6,186,215,0.3), 0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease;cursor:pointer;width:100%;position:relative;overflow:hidden;animation:buttonPulse 2s ease-in-out infinite}
+    .panelEnt .accionBtn button:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(6,186,215,0.4), 0 4px 12px rgba(0,0,0,0.15)}
+    .panelEnt .accionBtn button:active{transform:scale(.98)}
+    @keyframes buttonPulse{0%,100%{box-shadow:0 4px 20px rgba(6,186,215,0.3), 0 2px 8px rgba(0,0,0,0.1)}50%{box-shadow:0 4px 20px rgba(6,186,215,0.4), 0 2px 8px rgba(0,0,0,0.1)}}
+    @keyframes retryPulse{0%,100%{transform:scale(1);box-shadow:0 4px 12px rgba(245,158,11,0.3)}50%{transform:scale(1.02);box-shadow:0 6px 16px rgba(245,158,11,0.4)}}
+    .panelEnt .seal{margin-top:24px;color:#05876d!important;background:linear-gradient(135deg,#d8fdec,#c8f7e0)!important;font-weight:500;border-radius:12px;padding:8px 16px;font-size:13px;display:inline-flex;align-items:center;gap:8px;animation:fadeIn 1s ease-out 1s both;box-shadow:0 2px 8px rgba(5,135,109,0.15)}
     .footer{background:#e8f3fc!important;color:#698aa0!important;border:none;}
     body{background:#f2f6fc!important;color:#232e3e;}
     .mainBlock,.card,.panelEnt{background:#fff!important;border:1px solid #e0e8ef!important;border-radius:16px!important;color:#232e3e;box-shadow:0 2px 10px #1b93c011}
@@ -107,7 +116,7 @@
       <div class="dist"><b><span id="distanceBadge">… km</span></b> de distancia desde tu posición actual.</div>
       <div class="accionBtn">
         <button id="routeBtn">Trazar ruta en Google Maps</button>
-        <button id="retryBtn" style="display:none;margin-top:10px;background:#f59e0b;color:#fff;border:none;padding:12px 20px;border-radius:8px;font-weight:600;cursor:pointer;">🔄 Reintentar ubicación</button>
+        <button id="retryBtn" style="display:none;margin-top:12px;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;border:none;padding:14px 24px;border-radius:12px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(245,158,11,0.3);transition:all 0.3s ease;animation:retryPulse 1.5s ease-in-out infinite;">🔄 Reintentar ubicación</button>
       </div>
     </div>
   </main>
