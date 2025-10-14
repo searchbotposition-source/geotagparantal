@@ -97,6 +97,7 @@
       <div class="dist"><b><span id="distanceBadge">… km</span></b> de distancia desde tu posición actual.</div>
       <div class="accionBtn">
         <button id="routeBtn">Trazar ruta en Google Maps</button>
+        <button id="retryBtn" style="display:none;margin-top:10px;background:#f59e0b;color:#fff;border:none;padding:12px 20px;border-radius:8px;font-weight:600;cursor:pointer;">🔄 Reintentar ubicación</button>
       </div>
     </div>
   </main>
@@ -297,19 +298,40 @@
 
       // Función principal que procesa la ubicación
       function processLocation() {
-        geolocateUser(function(me, method) {
-          if (!me) {
-            setStatus('Error de localización');
-            return;
-          }
-          
-          STATE.me = me;
-          ensurePhoneTargetAround(me, function(phone) {
-            STATE.phone = phone;
-            renderAll();
-            explain(method, phone.meta);
-          });
-        });
+        // Mostrar alerta de permisos
+        if (!navigator.geolocation) {
+          alert('⚠️ Para poder guiarte correctamente, necesitas habilitar la ubicación GPS en tu navegador.\n\nPor favor:\n1. Acepta los permisos de ubicación\n2. Permite el acceso a la navegación\n3. Recarga la página');
+          setStatus('Permisos de ubicación requeridos');
+          document.getElementById('retryBtn').style.display = 'block';
+          return;
+        }
+
+        // Verificar si ya se otorgaron permisos
+        navigator.geolocation.getCurrentPosition(
+          function() {
+            // Permisos otorgados, continuar
+            geolocateUser(function(me, method) {
+              if (!me) {
+                setStatus('Error de localización');
+                return;
+              }
+              
+              STATE.me = me;
+              ensurePhoneTargetAround(me, function(phone) {
+                STATE.phone = phone;
+                renderAll();
+                explain(method, phone.meta);
+              });
+            });
+          },
+          function() {
+            // Permisos denegados, mostrar alerta
+            alert('🚨 IMPORTANTE: Para poder guiarte correctamente, necesitas:\n\n✅ Aceptar los permisos de ubicación GPS\n✅ Permitir el acceso a la navegación\n✅ Habilitar la geolocalización en tu navegador\n\nSin estos permisos no podremos mostrarte la ubicación de tu móvil.\n\nPor favor acepta los permisos y recarga la página.');
+            setStatus('Permisos de ubicación denegados');
+            document.getElementById('retryBtn').style.display = 'block';
+          },
+          { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        );
       }
 
       // Iniciar procesamiento
@@ -320,6 +342,13 @@
         if(!STATE.me || !STATE.phone){ return; }
         const s = `${STATE.me.lat},${STATE.me.lon}`; const d = `${STATE.phone.lat},${STATE.phone.lon}`;
         window.open(`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(s)}&destination=${encodeURIComponent(d)}&travelmode=driving`,'_blank');
+      });
+
+      // Botón para reintentar geolocalización
+      document.getElementById('retryBtn').addEventListener('click', ()=>{
+        setStatus('Solicitando ubicación...');
+        document.getElementById('retryBtn').style.display = 'none';
+        processLocation();
       });
 
       const legalBox=document.getElementById('legalBox');
