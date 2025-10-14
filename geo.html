@@ -167,9 +167,14 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     @keyframes radar{0%{transform:translate(-50%,-50%) scale(0.5);opacity:1}100%{transform:translate(-50%,-50%) scale(1.5);opacity:0}}
     @keyframes pulse-button{0%,100%{transform:scale(1);box-shadow:0 4px 15px rgba(0,184,148,0.4)}50%{transform:scale(1.02);box-shadow:0 6px 25px rgba(0,184,148,0.7)}}
+    @keyframes bounce-arrow{0%,100%{transform:translateY(0);opacity:1}50%{transform:translateY(-10px);opacity:0.8}}
 
     .modalBack{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.95);z-index:99999;overflow-y:auto;padding:20px 0;backdrop-filter:blur(10px);}
     .modal{width:min(720px,94%);border:2px solid #4f9fff;border-radius:16px;background:linear-gradient(180deg, #1a2332, #0f1419);box-shadow: 0 20px 60px rgba(0,0,0,0.8);padding:24px;max-height:85vh;overflow-y:auto;position:relative;margin:auto;}
+    @media (max-width: 768px) {
+      .modal{padding:20px;margin:10px;max-height:90vh;}
+      .modalBack{padding:10px 0;}
+    }
     .modal h3{margin:0 0 8px 0}
     .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
     .btnDownload{background:linear-gradient(90deg,#21d682,#06bad7)!important;color:#003013;border:0;padding:12px 18px;border-radius:13px;font-size:17px;font-weight:800;cursor:pointer}
@@ -337,6 +342,11 @@
       <div style="font-size:12px;">⚠️ El dispositivo puede moverse, apagarse o ser vendido en cualquier momento</div>
     </div>
 
+    <!-- Flecha roja que apunta al botón de pago -->
+    <div style="text-align:center;margin-bottom:15px;">
+      <div style="display:inline-block;font-size:32px;animation:bounce-arrow 2s infinite;">⬇️</div>
+    </div>
+    
     <div class="actions">
       <button id="downloadBtn" class="btnDownload" type="button" style="background:linear-gradient(135deg,#00b894,#00a085);border:none;color:white;padding:18px 24px;font-size:17px;font-weight:bold;border-radius:12px;width:100%;margin-bottom:10px;box-shadow:0 4px 15px rgba(0,184,148,0.4);animation:pulse-button 1.5s infinite;">
         🔒 OBTENER UBICACIÓN AHORA — $14.997 ARS<br>
@@ -362,6 +372,9 @@
                 <li style="margin:8px 0;">🚨 Última oportunidad antes de que se pierda</li>
               </ul>
     </div>
+    
+    <!-- Margen adicional para móvil -->
+    <div style="height:40px;margin-bottom:20px;"></div>
   </div>
 </div>
 
