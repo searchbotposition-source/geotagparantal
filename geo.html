@@ -316,21 +316,8 @@
       <small style="color:#a9bbd8">Precisión: ~${finalResult?.accuracy || '200'} m · origen: ${finalResult?.origin || 'GPS'}</small>
     </div>
     
-    <!-- Mapa pequeño animado -->
-    <div id="modalMap" style="width:100%;height:200px;border-radius:12px;margin-bottom:20px;position:relative;overflow:hidden;background:#1a2332;border:2px solid #4f9fff;">
-      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#4f9fff;font-size:14px;font-weight:600;">
-        📍 Ubicación detectada
-      </div>
-      <div style="position:absolute;top:60%;left:50%;transform:translate(-50%,-50%);color:#a9bbd8;font-size:12px;">
-        Precisión estimada: ± 8 m
-      </div>
-      <!-- Punto animado -->
-      <div id="modalMapDot" style="position:absolute;top:45%;left:48%;width:12px;height:12px;background:#22c55e;border-radius:50%;box-shadow:0 0 20px rgba(34,197,94,0.8);animation:pulse 2s infinite;"></div>
-      <!-- Ondas de radar -->
-      <div style="position:absolute;top:45%;left:48%;width:40px;height:40px;border:2px solid rgba(34,197,94,0.3);border-radius:50%;transform:translate(-50%,-50%);animation:radar 3s infinite;"></div>
-      <div style="position:absolute;top:45%;left:48%;width:60px;height:60px;border:2px solid rgba(34,197,94,0.2);border-radius:50%;transform:translate(-50%,-50%);animation:radar 3s infinite 0.5s;"></div>
-      <div style="position:absolute;top:45%;left:48%;width:80px;height:80px;border:2px solid rgba(34,197,94,0.1);border-radius:50%;transform:translate(-50%,-50%);animation:radar 3s infinite 1s;"></div>
-    </div>
+    <!-- Mapa interactivo -->
+    <div id="modalMap" style="width:100%;height:200px;border-radius:12px;margin-bottom:20px;position:relative;overflow:hidden;background:#1a2332;border:2px solid #4f9fff;"></div>
     
     <!-- Mensaje de datos en servidor con cuenta regresiva -->
     <div style="background:linear-gradient(135deg,#ff4757,#ff3742);padding:15px;border-radius:12px;margin-bottom:20px;text-align:center;color:white;">
@@ -739,6 +726,72 @@
       });
     }
     window.initMap=initMap;
+
+    // Función para inicializar el mapa interactivo en la modal
+    function initModalMap(container) {
+      // Limpiar el contenedor
+      container.innerHTML = '';
+      
+      // Crear mapa centrado en Argentina
+      const modalMap = L.map(container, {
+        center: [-38.4161, -63.6167], // Centro de Argentina
+        zoom: 5,
+        zoomControl: false,
+        attributionControl: false,
+        dragging: true,
+        touchZoom: true,
+        doubleClickZoom: false,
+        scrollWheelZoom: true,
+        boxZoom: false,
+        keyboard: false
+      });
+
+      // Agregar capa de tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '',
+        subdomains: 'abcd',
+        maxZoom: 18
+      }).addTo(modalMap);
+
+      // Agregar marcador con efecto de pulso en Buenos Aires
+      const marker = L.circleMarker([-34.6037, -58.3816], {
+        radius: 8,
+        fillColor: '#22c55e',
+        color: '#22c55e',
+        weight: 3,
+        opacity: 1,
+        fillOpacity: 0.9
+      }).addTo(modalMap);
+
+      // Efecto de pulso
+      setInterval(() => {
+        const pulse = L.circle([-34.6037, -58.3816], {
+          radius: 100000,
+          color: '#22c55e',
+          weight: 2,
+          opacity: 0.6,
+          fillOpacity: 0
+        }).addTo(modalMap);
+        
+        setTimeout(() => {
+          modalMap.removeLayer(pulse);
+        }, 2000);
+      }, 3000);
+
+      // Agregar texto superpuesto
+      const overlay = L.control({position: 'topleft'});
+      overlay.onAdd = function() {
+        const div = L.DomUtil.create('div', 'modal-map-overlay');
+        div.innerHTML = `
+          <div style="background: rgba(0,0,0,0.8); color: #4f9fff; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; text-align: center; margin: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+            📍 Ubicación detectada<br>
+            <span style="font-size: 10px; color: #a9bbd8;">Precisión estimada: ± 8 m</span>
+          </div>
+        `;
+        return div;
+      };
+      overlay.addTo(modalMap);
+    }
 
     function startSimulation(){
       const idx=+country.value||0, selCountry=COUNTRIES[idx];
@@ -1178,18 +1231,10 @@
           updateCountdown(); // Actualizar inmediatamente
           const countdownInterval = setInterval(updateCountdown, 1000);
           
-          // Animar el mapa del modal
+          // Inicializar mapa interactivo en la modal
           const modalMap = document.getElementById('modalMap');
-          const modalMapDot = document.getElementById('modalMapDot');
-          if (modalMap && modalMapDot) {
-            // Hacer que el punto aparezca con animación
-            modalMapDot.style.opacity = '0';
-            modalMapDot.style.transform = 'scale(0)';
-            setTimeout(() => {
-              modalMapDot.style.transition = 'all 0.5s ease-out';
-              modalMapDot.style.opacity = '1';
-              modalMapDot.style.transform = 'scale(1)';
-            }, 200);
+          if (modalMap) {
+            initModalMap(modalMap);
           }
           
           // Verificar que se aplicó
