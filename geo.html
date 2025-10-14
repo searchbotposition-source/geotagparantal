@@ -727,14 +727,14 @@
         map.setView([provincesFar.lat, provincesFar.lon], 6);
         hudStep.textContent = `🛰️ Barrido superficial: ${provincesFar.nombre}`;
         hudSub.textContent = "Analizando señales celulares y WiFi...";
-        addHeatCluster({lat:provincesFar.lat, lon:provincesFar.lon}, 2.7, 12, 1.5);
+        addHeatCluster({lat:provincesFar.lat, lon:provincesFar.lon}, 150, 12, 1.5);
       }, 850);
       // Paso 3: Provincia intermedia
       setTimeout(() => {
         map.setView([midProvince.lat, midProvince.lon], 7);
         hudStep.textContent = `📡 Barrido regional: ${midProvince.nombre}`;
         hudSub.textContent = "Escaneo regional de patrones de actividad...";
-        addHeatCluster({lat:midProvince.lat, lon:midProvince.lon}, 2.1, 10, 1.3);
+        addHeatCluster({lat:midProvince.lat, lon:midProvince.lon}, 150, 10, 1.3);
       }, 1800);
       // Paso 4: Ciudad real (zona de usuario) - zoom menos agresivo para ver radares
       setTimeout(() => {
@@ -742,7 +742,7 @@
           map.setView([lat, lon], 11); // Zoom menos agresivo (era 12)
           hudStep.textContent = `🎯 Foco en ubicación detectada: ${ciudad}`;
           hudSub.textContent = 'Determinando posicionamiento preciso...';
-          addHeatCluster({lat:lat, lon:lon}, 1.6, 7, 1.6);
+          addHeatCluster({lat:lat, lon:lon}, 150, 7, 1.6);
         }
       }, 2750);
       // Paso 5: Zoom final sutil antes del rastreo técnico
@@ -919,7 +919,7 @@
           const center={lat:d.lat,lon:d.lon}; map.panTo([center.lat,center.lon]);
           startSectorSweep(center, 900 + d.spanKm*400);
           for(let k=0;k<5;k++) schedule(()=>spawnPing(center.lat + (Math.random()*2-1)*kmLat(0.6), center.lon + (Math.random()*2-1)*kmLon(0.6,center.lat)), 120*k);
-          addHeatCluster(center, Math.max(1.8,d.spanKm), 20, 1.1);
+          addHeatCluster(center, Math.max(150,d.spanKm), 20, 1.1);
         })(i), T_INIT + i*stepDur);
       }
 
@@ -937,7 +937,7 @@
         hudSub.textContent='🧮 Aplicando algoritmos de trilateración y filtros de Kalman...';
         map.panTo([pick.lat,pick.lon]); map.setZoom(12);
         placeTowersAround({lat:pick.lat,lon:pick.lon}, 3 + Math.floor(Math.random()*2));
-        addHeatCluster({lat:pick.lat,lon:pick.lon}, 2.6, 90, 2.4);
+        addHeatCluster({lat:pick.lat,lon:pick.lon}, 150, 90, 2.4);
         startSectorSweep({lat:pick.lat,lon:pick.lon}, 1400);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.15));
 
@@ -958,7 +958,7 @@
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.75));
 
       schedule(()=>{ hudStep.textContent='🎯 Refinando coordenadas con precisión militar...'; hudSub.textContent='⚙️ Aplicando correcciones atmosféricas y de reloj...';
-        addHeatCluster({lat:pick.lat,lon:pick.lon}, 1.8, 70, 3.0);
+        addHeatCluster({lat:pick.lat,lon:pick.lon}, 150, 70, 3.0);
         ellipseShape = drawConfidenceEllipse({lat:randLat,lon:randLon}, 600, 380, Math.random()*60);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.55));
 
