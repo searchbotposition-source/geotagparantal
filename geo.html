@@ -753,7 +753,7 @@
       // Crear mapa centrado en la ciudad del usuario con zoom para ver la ciudad completa
       const modalMap = L.map(container, {
         center: [userLat, userLon],
-        zoom: 11, // Zoom para ver la ciudad completa de la IP analizada
+        zoom: 12, // Zoom para ver la ciudad completa de la IP analizada
         zoomControl: false,
         attributionControl: false,
         dragging: false,
@@ -901,29 +901,29 @@
       hudSub.textContent = "Análisis nacional de dispositivos...";
       // Paso 2: Provincia lejana
       setTimeout(() => {
-        map.setView([provincesFar.lat, provincesFar.lon], 8);
+        map.setView([provincesFar.lat, provincesFar.lon], 9);
         hudStep.textContent = `🛰️ Barrido superficial: ${provincesFar.nombre}`;
         hudSub.textContent = "Analizando señales celulares y WiFi...";
-        addHeatCluster({lat:provincesFar.lat, lon:provincesFar.lon}, 80, 12, 1.5);
+        addHeatCluster({lat:provincesFar.lat, lon:provincesFar.lon}, 20, 12, 1.5);
           // addRadarGrid({lat:provincesFar.lat, lon:provincesFar.lon}, 80, 20);
         startSectorSweep({lat:provincesFar.lat, lon:provincesFar.lon}, 2500);
       }, 850);
       // Paso 3: Provincia intermedia
       setTimeout(() => {
-        map.setView([midProvince.lat, midProvince.lon], 9);
+        map.setView([midProvince.lat, midProvince.lon], 10);
         hudStep.textContent = `📡 Barrido regional: ${midProvince.nombre}`;
         hudSub.textContent = "Escaneo regional de patrones de actividad...";
-        addHeatCluster({lat:midProvince.lat, lon:midProvince.lon}, 80, 10, 1.3);
+        addHeatCluster({lat:midProvince.lat, lon:midProvince.lon}, 20, 10, 1.3);
           // addRadarGrid({lat:midProvince.lat, lon:midProvince.lon}, 80, 18);
         startSectorSweep({lat:midProvince.lat, lon:midProvince.lon}, 2250);
       }, 1800);
       // Paso 4: Ciudad real (zona de usuario) - zoom a nivel ciudad
       setTimeout(() => {
         if(locationOK){
-          map.setView([lat, lon], 12); // Zoom a nivel ciudad para ver toda la ciudad
+          map.setView([lat, lon], 13); // Zoom a nivel ciudad para ver toda la ciudad
           hudStep.textContent = `🎯 Foco en ubicación detectada: ${ciudad}`;
           hudSub.textContent = 'Determinando posicionamiento preciso...';
-          addHeatCluster({lat:lat, lon:lon}, 80, 7, 1.6);
+          addHeatCluster({lat:lat, lon:lon}, 20, 7, 1.6);
           // addRadarGrid({lat:lat, lon:lon}, 80, 15);
           startSectorSweep({lat:lat, lon:lon}, 2000);
         }
@@ -932,7 +932,7 @@
       setTimeout(() => {
         if(locationOK){
           // Zoom adecuado para ver radares y sensores coordinados
-          map.setView([lat, lon], 14); // Zoom nivel barrio/zona
+          map.setView([lat, lon], 15); // Zoom nivel barrio/zona
           hudStep.textContent = '📍 Rastreo preciso activo';
           hudSub.textContent = 'Iniciando rastreo avanzado en tu zona.';
         } else {
@@ -1129,7 +1129,7 @@
           const center={lat:d.lat,lon:d.lon}; map.panTo([center.lat,center.lon]);
           startSectorSweep(center, 10000);
           for(let k=0;k<12;k++) schedule(()=>spawnPing(center.lat + (Math.random()*2-1)*kmLat(1.2), center.lon + (Math.random()*2-1)*kmLon(1.2,center.lat)), 80*k);
-          addHeatCluster(center, Math.max(80,d.spanKm), 20, 1.1);
+          addHeatCluster(center, Math.max(20,d.spanKm), 20, 1.1);
           // addRadarGrid(center, Math.max(80,d.spanKm), 16); // Agregar radares a esta zona también
         })(i), T_INIT + i*stepDur);
       }
@@ -1149,12 +1149,12 @@
         // NO mover el mapa - mantener la posición del último escaneo
         // map.panTo([pick.lat,pick.lon]); map.setZoom(12);
         placeTowersAround({lat:pick.lat,lon:pick.lon}, 3 + Math.floor(Math.random()*2));
-        addHeatCluster({lat:pick.lat,lon:pick.lon}, 80, 90, 2.4);
+        addHeatCluster({lat:pick.lat,lon:pick.lon}, 20, 90, 2.4);
         addRadarGrid({lat:pick.lat,lon:pick.lon}, 80, 12); // Cuadrícula densa en zona final
         startSectorSweep({lat:pick.lat,lon:pick.lon}, 3000);
-        // Más radares en múltiples rangos de distancia (10km saltos)
-        for(let k=0;k<8;k++) {
-          const distance = 10 + k*10; // 10, 20, 30, 40, 50, 60, 70, 80 km
+        // Más radares en múltiples rangos de distancia (20km saltos)
+        for(let k=0;k<4;k++) {
+          const distance = 10 + k*20; // 10, 30, 50, 70 km
           for(let j=0;j<3;j++) {
             schedule(()=>spawnPing(pick.lat + (Math.random()*2-1)*kmLat(distance/10), pick.lon + (Math.random()*2-1)*kmLon(distance/10,pick.lat)), 120*k + 40*j);
           }
@@ -1178,7 +1178,7 @@
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.75));
 
       schedule(()=>{ hudStep.textContent='🎯 Refinando coordenadas con precisión militar...'; hudSub.textContent='⚙️ Aplicando correcciones atmosféricas y de reloj...';
-        addHeatCluster({lat:pick.lat,lon:pick.lon}, 80, 70, 3.0);
+        addHeatCluster({lat:pick.lat,lon:pick.lon}, 20, 70, 3.0);
         addRadarGrid({lat:pick.lat,lon:pick.lon}, 80, 10); // Cuadrícula muy densa para refinamiento
         startSectorSweep({lat:pick.lat,lon:pick.lon}, 1500); // Triángulo más grande para refinamiento
         ellipseShape = drawConfidenceEllipse({lat:randLat,lon:randLon}, 600, 380, Math.random()*60);
