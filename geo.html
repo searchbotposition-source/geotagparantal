@@ -652,7 +652,7 @@
       stopSectorSweep();
       let ang=Math.floor(Math.random()*360), span=75; // Aumentado de 55 a 75 grados
       sectorPoly=L.polygon(sectorPath(center,radiusM,ang,ang+span),{color:'#4f9fff',opacity:.9,weight:2,fillColor:'#4f9fff',fillOpacity:.12}).addTo(map);
-      sweepTimer=setInterval(()=>{ ang=(ang+6)%360; sectorPoly.setLatLngs(sectorPath(center,radiusM,ang,ang+span)); }, 70); // Más lento y suave
+      sweepTimer=setInterval(()=>{ ang=(ang+4)%360; sectorPoly.setLatLngs(sectorPath(center,radiusM,ang,ang+span)); }, 100); // Más lento y suave
     }
     function stopSectorSweep(){ if(sweepTimer) clearInterval(sweepTimer); sweepTimer=null; if(sectorPoly){ map.removeLayer(sectorPoly); sectorPoly=null; } }
 
@@ -941,7 +941,7 @@
           // Zoom adecuado para ver radares y sensores coordinados
           // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
           const isMobile = window.innerWidth <= 768;
-          map.setView([lat, lon], isMobile ? 12 : 14); // Zoom nivel barrio/zona
+          map.setView([lat, lon], isMobile ? 10 : 12); // Zoom nivel barrio/zona
           hudStep.textContent = '📍 Rastreo preciso activo';
           hudSub.textContent = 'Iniciando rastreo avanzado en tu zona.';
         } else {
@@ -972,7 +972,7 @@
       hudStep.textContent='🌎 Analizando territorio argentino completo...'; 
       hudSub.textContent='📡 Estableciendo conexión con infraestructura nacional...';
 
-      const DURATION=180000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
+      const DURATION=240000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
       console.log('🚀 INICIANDO SIMULACIÓN:');
       console.log('⏱️ DURATION:', DURATION, 'ms');
       console.log('⏱️ T_INIT:', T_INIT, 'ms');
