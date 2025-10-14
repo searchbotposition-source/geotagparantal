@@ -1199,9 +1199,17 @@
       schedule(()=>{ hudStep.textContent='🎯 Refinando coordenadas con precisión militar...'; hudSub.textContent='⚙️ Aplicando correcciones atmosféricas y de reloj...';
         addHeatCluster({lat:pick.lat,lon:pick.lon}, 20, 70, 3.0);
         addRadarGrid({lat:pick.lat,lon:pick.lon}, 80, 10); // Cuadrícula muy densa para refinamiento
-        startSectorSweep({lat:pick.lat,lon:pick.lon}, 20000); // Triángulo más grande para refinamiento
+        startSectorSweep({lat:pick.lat,lon:pick.lon}, 20000); // Triángulo más grande para refinamiento - CONTINÚA HASTA LA MODAL
         ellipseShape = drawConfidenceEllipse({lat:randLat,lon:randLon}, 600, 380, Math.random()*60);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.55));
+      
+      // Asegurar que el radar continúa hasta el final (60 segundos)
+      schedule(()=>{ 
+        hudStep.textContent='🔐 Cifrando datos de ubicación...'; 
+        hudSub.textContent='🛡️ Aplicando protocolos de seguridad y verificación final...';
+        // Mantener el radar activo - NO detenerlo
+        startSectorSweep({lat:pick.lat,lon:pick.lon}, 20000); // Reactivar radar para asegurar continuidad
+      }, T_INIT + T_SCAN + Math.floor(T_TRI*0.90));
 
       schedule(()=>{ hudStep.textContent='📏 Generando coordenadas finales con certificación ISO...'; hudSub.textContent='🔗 Validando precisión submétrica y generando informe técnico...';
         drawLobsTo({lat:randLat,lon:randLon});
