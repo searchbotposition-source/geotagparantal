@@ -3,6 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <!-- Google tag (gtag.js) - DEBE IR PRIMERO -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-11DMCLMJWC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-11DMCLMJWC', {
+      'page_title': 'ParentAlloc - Home',
+      'page_location': window.location.href,
+      'send_page_view': true
+    });
+  </script>
+  
   <title>ParentAlloc — Localización precisa de móviles y personas</title>
   <meta name="description" content="ParentAlloc: localiza móviles perdidos por pérdida o robo y encuentra personas extraviadas con ubicación precisa. Tecnología de geolocalización confiable y asistencia 24/7." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,15 +26,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <!-- TailwindCSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-11DMCLMJWC"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-11DMCLMJWC');
-  </script>
   <style>
     :root{--gs-primary:#0ea5e9; --gs-accent:#22c55e; --gs-bg:#0d1828; --gs-bg2:#0f2136; --gs-card:#132238; --gs-text:#eaf6ff}
     html,body{background:linear-gradient(180deg,#e8f3fc,#fafdff);color:#193044;}
