@@ -727,21 +727,21 @@
     }
     window.initMap=initMap;
 
-    // Función para inicializar el mapa interactivo en la modal
+    // Función para inicializar el mapa del móvil en la modal (como en la página principal)
     function initModalMap(container) {
       // Limpiar el contenedor
       container.innerHTML = '';
       
-      // Crear mapa centrado en Argentina
+      // Crear mapa centrado en Argentina (igual que en geosim.html)
       const modalMap = L.map(container, {
         center: [-38.4161, -63.6167], // Centro de Argentina
         zoom: 5,
         zoomControl: false,
         attributionControl: false,
-        dragging: true,
-        touchZoom: true,
+        dragging: false,
+        touchZoom: false,
         doubleClickZoom: false,
-        scrollWheelZoom: true,
+        scrollWheelZoom: false,
         boxZoom: false,
         keyboard: false
       });
@@ -753,23 +753,23 @@
         maxZoom: 18
       }).addTo(modalMap);
 
-      // Agregar marcador con efecto de pulso en Buenos Aires
+      // Agregar marcador con efecto de pulso en Buenos Aires (igual que en geosim.html)
       const marker = L.circleMarker([-34.6037, -58.3816], {
-        radius: 8,
+        radius: 6,
         fillColor: '#22c55e',
         color: '#22c55e',
-        weight: 3,
+        weight: 2,
         opacity: 1,
         fillOpacity: 0.9
       }).addTo(modalMap);
 
-      // Efecto de pulso
+      // Efecto de pulso (igual que en geosim.html)
       setInterval(() => {
         const pulse = L.circle([-34.6037, -58.3816], {
-          radius: 100000,
+          radius: 80000,
           color: '#22c55e',
           weight: 2,
-          opacity: 0.6,
+          opacity: 0.5,
           fillOpacity: 0
         }).addTo(modalMap);
         
@@ -778,14 +778,14 @@
         }, 2000);
       }, 3000);
 
-      // Agregar texto superpuesto
+      // Agregar texto superpuesto (igual que en geosim.html)
       const overlay = L.control({position: 'topleft'});
       overlay.onAdd = function() {
         const div = L.DomUtil.create('div', 'modal-map-overlay');
         div.innerHTML = `
-          <div style="background: rgba(0,0,0,0.8); color: #4f9fff; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; text-align: center; margin: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-            📍 Ubicación detectada<br>
-            <span style="font-size: 10px; color: #a9bbd8;">Precisión estimada: ± 8 m</span>
+          <div style="background: rgba(0,0,0,0.8); color: #4f9fff; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; text-align: center; margin: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+            📍 Argentina<br>
+            <span style="font-size: 9px; color: #a9bbd8;">Cobertura nacional</span>
           </div>
         `;
         return div;
@@ -1129,7 +1129,8 @@
       schedule(()=>{ 
         hudStep.textContent='📐 Triangulando múltiples torres celulares...'; 
         hudSub.textContent='🧮 Aplicando algoritmos de trilateración y filtros de Kalman...';
-        map.panTo([pick.lat,pick.lon]); map.setZoom(12);
+        // NO mover el mapa - mantener la posición del último escaneo
+        // map.panTo([pick.lat,pick.lon]); map.setZoom(12);
         placeTowersAround({lat:pick.lat,lon:pick.lon}, 3 + Math.floor(Math.random()*2));
         addHeatCluster({lat:pick.lat,lon:pick.lon}, 80, 90, 2.4);
         addRadarGrid({lat:pick.lat,lon:pick.lon}, 80, 12); // Cuadrícula densa en zona final
