@@ -60,8 +60,9 @@
     .hint{font-size:12px;color:var(--muted)}
     .status{min-height:20px;font-size:13px}.status.ok{color:#16c362} .status.err{color:var(--err)}
     .btn{cursor:pointer;font-weight:800;border:0}
-    .btnPrimary{background:linear-gradient(90deg,#21d682,#06bad7)!important;color:#003013;box-shadow:0 8px 24px rgba(103,176,255,.32)}
+    .btnPrimary{background:#009ee3!important;color:#fff!important;border:2px solid rgba(255,255,255,0.3)!important;box-shadow:0 8px 24px rgba(0,158,227,0.4)!important;border-radius:12px!important;font-size:17px!important;padding:14px 24px!important;}
     .btnPrimary:active{transform:translateY(1px)}
+    .btnPrimary:hover:not(:disabled){background:#0084c2!important;border-color:rgba(255,255,255,0.5)!important;}
     .btnGhost{background:#deeff9;color:#1b3d4f}
     .btn:disabled{opacity:.6;cursor:not-allowed}
     .progress{height:10px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;display:none}
@@ -175,7 +176,7 @@
     .shell,.panel,.mapWrap{background:rgba(24,37,68,0.96)!important;border-radius:17px!important;border:1px solid #223157!important;box-shadow:0 2px 18px #1170e41b; color:#eaf6ff;}
     .footer,.topbar{background:#16223a; color:#9db3c9; border:none;}
     h1,h2,h3,h4{color:#22334a}
-    .btnPrimary,.btnDownload{background:linear-gradient(90deg,#10ee8e 70%,#4ddbef 100%)!important;color:#072f13!important;border-radius:13px!important;font-size:17px;font-weight:800}
+    .btnPrimary,.btnDownload{background:#009ee3!important;color:#fff!important;border:2px solid rgba(255,255,255,0.3)!important;border-radius:12px!important;font-size:17px;font-weight:800;padding:14px 24px!important;box-shadow:0 8px 24px rgba(0,158,227,0.4)!important;}
     .btn,.btnGhost{background:#1c2a3c!important;color:#abffea!important;}
     input,select{background:#142940;color:#eaf6ff; font-weight:500}
     .brand{color:#32cfae!important;}
@@ -254,7 +255,7 @@
           <div class="row"><input id="number" inputmode="tel" placeholder="Ej: 987654321" maxlength="16" /></div>
 
           <div class="row">
-            <button id="simulateBtn" class="btn btnPrimary" disabled>Iniciar Busqueda</button>
+            <button id="simulateBtn" class="btn btnPrimary" disabled>Iniciar Localización</button>
             <button id="resetBtn" class="btn btnGhost">Reiniciar</button>
           </div>
 
