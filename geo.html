@@ -750,10 +750,10 @@
       const userLon = ipLoc?.longitude || -58.3816;
       const userCity = ipLoc?.city || 'Buenos Aires';
       
-      // Crear mapa centrado en la ciudad del usuario
+      // Crear mapa centrado en la ciudad del usuario con zoom para ver la ciudad completa
       const modalMap = L.map(container, {
         center: [userLat, userLon],
-        zoom: 10, // Zoom más amplio para ver sin cortarse
+        zoom: 11, // Zoom para ver la ciudad completa de la IP analizada
         zoomControl: false,
         attributionControl: false,
         dragging: false,
@@ -799,7 +799,7 @@
         div.innerHTML = `
           <div style="background: rgba(0,0,0,0.8); color: #4f9fff; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; text-align: center; margin: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
             📍 ${userCity}<br>
-            <span style="font-size: 9px; color: #a9bbd8;">Zona de rastreo activa</span>
+            <span style="font-size: 9px; color: #a9bbd8;">Ciudad analizada - Zona de rastreo</span>
           </div>
         `;
         return div;
@@ -963,7 +963,7 @@
       hudStep.textContent='🌎 Analizando territorio argentino completo...'; 
       hudSub.textContent='📡 Estableciendo conexión con infraestructura nacional...';
 
-      const DURATION=24000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
+      const DURATION=180000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
       console.log('🚀 INICIANDO SIMULACIÓN:');
       console.log('⏱️ DURATION:', DURATION, 'ms');
       console.log('⏱️ T_INIT:', T_INIT, 'ms');
