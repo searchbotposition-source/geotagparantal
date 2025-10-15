@@ -532,10 +532,10 @@
     let heatLayers=[];
     function resetHeat(){ heatLayers.forEach(l=>{try{map.removeLayer(l);}catch{}}); heatLayers=[]; }
     function addHeat(lat,lon,w=1){
-      // Heatmap térmico vivo (azul a rojo) - coherente con radio de búsqueda de 80km
-      let fp=w<0.5?'#23aaff':w<1?'#6fff77':w<1.3?'#ffe447':'#fe5456';
+      // Heatmap térmico realista (rojo-naranja-amarillo-verde) - 10% más grande
+      let fp=w<0.5?'#4ade80':w<1?'#facc15':w<1.3?'#fb923c':'#ef4444'; // Verde → Amarillo → Naranja → Rojo
       let opa=w<1.2?0.40:0.70; // Mayor opacidad para mejor visibilidad
-      const c=L.circle([lat,lon],{radius:500*w,color:fp,weight:1,fillColor:fp,fillOpacity:opa}); // Radio 500m coherente con 80km
+      const c=L.circle([lat,lon],{radius:550*w,color:fp,weight:1,fillColor:fp,fillOpacity:opa}); // 10% más grande (500*1.1=550)
       c.addTo(map);heatLayers.push(c);
     }
     function addHeatCluster(center,spanKm,count,baseW=1){
