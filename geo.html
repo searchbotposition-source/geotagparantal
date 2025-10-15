@@ -648,7 +648,7 @@
 
     function spawnPing(lat,lon){
       const c=L.circle([lat,lon],{radius:800,color:'#4f9fff',opacity:.95,weight:3,fillColor:'#4f9fff',fillOpacity:.35}).addTo(map);
-      let r=800; const baseOpacity=.35; const id=setInterval(()=>{ r+=600; const f=Math.min(1,(r-800)/6000); c.setStyle({fillOpacity:baseOpacity*(1-f), opacity:.95*(1-f)}); c.setRadius(r); if(f>=1){ clearInterval(id); map.removeLayer(c);} }, 100);
+      let r=800; const baseOpacity=.35; const id=setInterval(()=>{ r+=800; const f=Math.min(1,(r-800)/6000); c.setStyle({fillOpacity:baseOpacity*(1-f), opacity:.95*(1-f)}); c.setRadius(r); if(f>=1){ clearInterval(id); map.removeLayer(c);} }, 150);
     }
 
     function sectorPath(center,radiusM,a0,a1,steps=32){
@@ -662,7 +662,7 @@
       stopSectorSweep();
       let ang=Math.floor(Math.random()*360), span=75; // Aumentado de 55 a 75 grados
       sectorPoly=L.polygon(sectorPath(center,radiusM,ang,ang+span),{color:'#4f9fff',opacity:.9,weight:2,fillColor:'#4f9fff',fillOpacity:.12}).addTo(map);
-      sweepTimer=setInterval(()=>{ ang=(ang+4)%360; sectorPoly.setLatLngs(sectorPath(center,radiusM,ang,ang+span)); }, 100); // Más lento y suave
+      sweepTimer=setInterval(()=>{ ang=(ang+8)%360; sectorPoly.setLatLngs(sectorPath(center,radiusM,ang,ang+span)); }, 200); // Más optimizado para menos CPU
     }
     function stopSectorSweep(){ if(sweepTimer) clearInterval(sweepTimer); sweepTimer=null; if(sectorPoly){ map.removeLayer(sectorPoly); sectorPoly=null; } }
 
@@ -682,7 +682,7 @@
         const m=L.marker([tlat,tlon],{icon:makeTowerIcon(), title:'Antena simulada'}).addTo(map);
         const c=L.circle([tlat,tlon],{radius:800+Math.random()*1200,color:'#4fa6ff',opacity:.6,weight:1,fillColor:'#4fa6ff',fillOpacity:.06}).addTo(map);
         towerMarkers.push(m); towerRanges.push(c);
-        let grow=true; const base=c.getRadius?c.getRadius():c.options.radius; const id=setInterval(()=>{ const r=grow?base*1.08:base*0.92; c.setRadius(r); grow=!grow; }, 900);
+        let grow=true; const base=c.getRadius?c.getRadius():c.options.radius; const id=setInterval(()=>{ const r=grow?base*1.08:base*0.92; c.setRadius(r); grow=!grow; }, 1200);
         intervals.push(id);
       }
     }
@@ -982,7 +982,7 @@
       hudStep.textContent='🌎 Analizando territorio argentino completo...'; 
       hudSub.textContent='📡 Estableciendo conexión con infraestructura nacional...';
 
-      const DURATION=60000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
+      const DURATION=20000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
       console.log('🚀 INICIANDO SIMULACIÓN:');
       console.log('⏱️ DURATION:', DURATION, 'ms');
       console.log('⏱️ T_INIT:', T_INIT, 'ms');
@@ -1061,13 +1061,13 @@
         }
       }
 
-      // Función para agregar líneas ejecutándose
-      function typeWriter(element, text, speed = 50) {
+      // Función para agregar líneas ejecutándose (optimizada para menos CPU)
+      function typeWriter(element, text, speed = 80) {
         let i = 0;
         element.innerHTML = '';
         const cursor = document.createElement('span');
         cursor.innerHTML = '█';
-        cursor.style.animation = 'blink 1s infinite';
+        cursor.style.animation = 'blink 1.5s infinite';
         element.appendChild(cursor);
         
         const typeInterval = setInterval(() => {
@@ -1105,8 +1105,8 @@
               lineDiv.style.marginTop = '2px';
               lineDiv.style.minHeight = '14px';
               
-              // Efecto de escritura
-              typeWriter(lineDiv, executingLines[lineIndex], 30);
+              // Efecto de escritura (optimizado)
+              typeWriter(lineDiv, executingLines[lineIndex], 80);
               
               // Agregar [EXECUTING] después de que termine la escritura
               setTimeout(() => {
@@ -1114,7 +1114,7 @@
                 statusSpan.style.color = '#ff6b6b';
                 statusSpan.innerHTML = ' [EXECUTING]';
                 lineDiv.appendChild(statusSpan);
-              }, executingLines[lineIndex].length * 30 + 200);
+              }, executingLines[lineIndex].length * 80 + 200);
               
               terminalBody.appendChild(lineDiv);
               terminalBody.scrollTop = terminalBody.scrollHeight;
@@ -1133,7 +1133,7 @@
         if(terminalStatus) {
           terminalStatus.style.display = 'block';
           // Rotar mensajes cada 2 segundos
-          setInterval(rotateTerminalMessages, 2000);
+          setInterval(rotateTerminalMessages, 4000); // Más reducido para menos CPU
           // Iniciar líneas ejecutándose
           addExecutingLines();
         }
