@@ -93,6 +93,15 @@
       color: #4f9fff;
       font-weight: bold;
     }
+    
+    /* Asegurar que cada línea esté en su propio bloque */
+    #hud > div {
+      display: block !important;
+      width: 100% !important;
+      clear: both !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+    }
     .hudStep {
       color: #00ff00;
       font-family: 'Courier New', monospace;
@@ -222,10 +231,10 @@
           
           <!-- Estado del sistema con efecto typewriter -->
           <div id="hud" style="display:none;margin-top:20px;">
-            <div class="hudStep" id="hudStep" style="color:#4f9fff;font-size:14px;font-weight:500;margin-bottom:8px;min-height:20px;"></div>
-            <div class="hudSub" id="hudSub" style="color:#a9bbd8;font-size:12px;margin-bottom:4px;min-height:16px;"></div>
-            <div class="hudCarrier" id="hudCarrier" style="display:none;color:#a9bbd8;font-size:12px;margin-bottom:4px;min-height:16px;"></div>
-            <div id="hudStatus" style="color:#a9bbd8;font-size:12px;min-height:16px;"></div>
+            <div class="hudStep" id="hudStep" style="color:#4f9fff;font-size:14px;font-weight:500;margin-bottom:8px;min-height:20px;display:block;width:100%;"></div>
+            <div class="hudSub" id="hudSub" style="color:#a9bbd8;font-size:12px;margin-bottom:4px;min-height:16px;display:block;width:100%;"></div>
+            <div class="hudCarrier" id="hudCarrier" style="display:none;color:#a9bbd8;font-size:12px;margin-bottom:4px;min-height:16px;display:block;width:100%;"></div>
+            <div id="hudStatus" style="color:#a9bbd8;font-size:12px;min-height:16px;display:block;width:100%;"></div>
           </div>
         </aside>
 
@@ -909,6 +918,9 @@
       // Función typewriter para efecto letra por letra
       function typeWriter(element, text, speed = 80) {
         element.innerHTML = '';
+        element.style.whiteSpace = 'nowrap';
+        element.style.display = 'block';
+        element.style.width = '100%';
         let i = 0;
         const cursor = document.createElement('span');
         cursor.innerHTML = '█';
