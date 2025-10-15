@@ -87,6 +87,11 @@
       51%, 100% { opacity: 0; }
     }
     
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
     /* Cursor parpadeante para efecto typewriter */
     .typewriter-cursor {
       animation: blink 1s infinite;
@@ -238,10 +243,11 @@
           <div class="hint" style="margin-top:6px">* Localiza en tiempo real. Ubicacion Exacta .</div>
           
           <!-- Estado del sistema con efecto typewriter -->
-          <div id="hud" style="display:none;margin-top:20px;flex-direction:column;">
-            <div class="hudStep" id="hudStep" style="color:#4f9fff;font-size:14px;font-weight:500;margin-bottom:8px;min-height:20px;display:block;width:100%;"></div>
-            <div class="hudSub" id="hudSub" style="color:#a9bbd8;font-size:12px;margin-bottom:4px;min-height:16px;display:block;width:100%;"></div>
-            <div class="hudCarrier" id="hudCarrier" style="display:none;color:#a9bbd8;font-size:12px;margin-bottom:4px;min-height:16px;display:block;width:100%;"></div>
+          <div id="hud" style="display:none;margin-top:20px;">
+            <div id="hudLine" style="color:#4f9fff;font-size:14px;font-weight:500;min-height:20px;display:flex;align-items:center;gap:10px;">
+              <span id="hudText" style="flex:1;"></span>
+              <span id="hudHourglass" style="font-size:16px;animation:spin 2s linear infinite;">⏳</span>
+            </div>
           </div>
         </aside>
 
@@ -844,15 +850,13 @@
       }
       // Paso 1: Argentina
       map.setView([ARG_CENTER.lat, ARG_CENTER.lon], 4);
-      typeWriter(hudStep, "🌎 Análisis nacional iniciado...", 100);
-      setTimeout(() => typeWriter(hudSub, "Procesando datos de ubicación...", 90), 1200);
+      // Mensajes manejados por sistema secuencial automático
       // Paso 2: Provincia lejana
       setTimeout(() => {
         // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
         const isMobile = window.innerWidth <= 768;
         map.setView([provincesFar.lat, provincesFar.lon], isMobile ? 4 : 6);
-        typeWriter(hudStep, `🛰️ Analizando zona: ${provincesFar.nombre}`, 100);
-        setTimeout(() => typeWriter(hudSub, "Procesando datos de red...", 90), 1200);
+        // Mensajes manejados por sistema secuencial automático
         addHeatCluster({lat:provincesFar.lat, lon:provincesFar.lon}, 20, 2, 1.5);
           // addRadarGrid({lat:provincesFar.lat, lon:provincesFar.lon}, 80, 20);
         startSectorSweep({lat:provincesFar.lat, lon:provincesFar.lon}, 20000);
@@ -862,8 +866,7 @@
         // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
         const isMobile = window.innerWidth <= 768;
         map.setView([midProvince.lat, midProvince.lon], isMobile ? 5 : 7);
-        typeWriter(hudStep, `📡 Analizando región: ${midProvince.nombre}`, 100);
-        setTimeout(() => typeWriter(hudSub, "Procesando patrones de actividad...", 90), 1200);
+        // Mensajes manejados por sistema secuencial automático
         addHeatCluster({lat:midProvince.lat, lon:midProvince.lon}, 20, 2, 1.3);
           // addRadarGrid({lat:midProvince.lat, lon:midProvince.lon}, 80, 18);
         startSectorSweep({lat:midProvince.lat, lon:midProvince.lon}, 20000);
@@ -874,8 +877,7 @@
           // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
           const isMobile = window.innerWidth <= 768;
           map.setView([lat, lon], isMobile ? 7 : 9); // Zoom a nivel ciudad para ver toda la ciudad
-          typeWriter(hudStep, `🎯 Analizando ubicación: ${ciudad}`, 100);
-          setTimeout(() => typeWriter(hudSub, 'Procesando datos de ubicación...', 90), 1200);
+          // Mensajes manejados por sistema secuencial automático
           addHeatCluster({lat:lat, lon:lon}, 20, 2, 1.6);
           // addRadarGrid({lat:lat, lon:lon}, 80, 15);
           startSectorSweep({lat:lat, lon:lon}, 20000);
@@ -888,13 +890,11 @@
           // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
           const isMobile = window.innerWidth <= 768;
           map.setView([lat, lon], isMobile ? 7 : 9); // Zoom nivel barrio/zona
-          typeWriter(hudStep, '📍 Análisis preciso activo', 100);
-          setTimeout(() => typeWriter(hudSub, 'Procesando datos en tu zona.', 90), 1200);
+          // Mensajes manejados por sistema secuencial automático
         } else {
           // Fallback: zoom sutil en Buenos Aires
           map.setView([-34.6037, -58.3816], 9);
-          typeWriter(hudStep, '📍 Análisis preciso activo', 100);
-          setTimeout(() => typeWriter(hudSub, 'Procesando datos en zona metropolitana.', 90), 1200);
+          // Mensajes manejados por sistema secuencial automático
         }
       }, 3650);
       
@@ -915,56 +915,83 @@
       
       // Rotar cada segundo
       const hourglassInterval = setInterval(rotateHourglass, 1000);
-      typeWriter(hudStep, '🌎 Iniciando análisis de ubicación...', 100);
-      setTimeout(() => typeWriter(hudSub, '📡 Conectando con servicios de red...', 90), 1200);
+      // Mensajes manejados por sistema secuencial automático
 
       const DURATION=40000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
       const simulationStartTime = Date.now();
       startProgress(DURATION);
       
-      // Función typewriter para efecto letra por letra
-      function typeWriter(element, text, speed = 80) {
-        element.innerHTML = '';
-        element.style.whiteSpace = 'nowrap';
-        element.style.display = 'block';
-        element.style.width = '100%';
-        element.style.clear = 'both';
-        element.style.marginBottom = '4px';
-        let i = 0;
-        const cursor = document.createElement('span');
-        cursor.innerHTML = '█';
-        cursor.className = 'typewriter-cursor';
-        element.appendChild(cursor);
+      // Sistema de mensajes secuenciales con reloj de arena
+      const hudText = document.getElementById('hudText');
+      const hudHourglass = document.getElementById('hudHourglass');
+      
+      const messages = [
+        '🚀 Inicializando análisis de geolocalización...',
+        '📡 Conectando con infraestructura de red...',
+        '🔄 Sincronizando datos de red...',
+        '📊 Analizando cobertura de operadores...',
+        '🌎 Análisis nacional iniciado...',
+        '🛰️ Analizando zona: Buenos Aires...',
+        '📡 Analizando región: Córdoba...',
+        '🎯 Analizando ubicación: Rosario...',
+        '📍 Análisis preciso activo...',
+        '📐 Procesando datos de ubicación...',
+        '🧮 Aplicando algoritmos de análisis...',
+        '🔍 Analizando datos de operadores...',
+        '📊 Consultando bases de datos disponibles...',
+        '⚡ Procesando datos de señal...',
+        '🎯 Calculando ubicación estimada...',
+        '🔄 Refinando coordenadas...',
+        '📡 Validando precisión...',
+        '🎯 Refinando coordenadas finales...',
+        '⚙️ Aplicando correcciones finales...',
+        '🔐 Procesando datos finales...',
+        '🛡️ Aplicando protocolos de seguridad...',
+        '📏 Generando coordenadas finales...',
+        '🔗 Validando precisión y generando informe...'
+      ];
+      
+      let currentMessageIndex = 0;
+      let currentCharIndex = 0;
+      let isTyping = false;
+      
+      function typeWriterSequential() {
+        if (currentMessageIndex >= messages.length) return;
         
-        const typeInterval = setInterval(() => {
-          if (i < text.length) {
-            cursor.insertAdjacentHTML('beforebegin', text.charAt(i));
-            i++;
-          } else {
-            clearInterval(typeInterval);
-            cursor.style.display = 'none';
-          }
-        }, speed);
+        const currentMessage = messages[currentMessageIndex];
+        const textElement = hudText;
+        
+        if (currentCharIndex < currentMessage.length) {
+          textElement.textContent = currentMessage.substring(0, currentCharIndex + 1) + '█';
+          currentCharIndex++;
+          setTimeout(typeWriterSequential, 120); // Velocidad más lenta
+        } else {
+          // Mensaje completo, esperar un poco y pasar al siguiente
+          textElement.textContent = currentMessage;
+          setTimeout(() => {
+            currentMessageIndex++;
+            currentCharIndex = 0;
+            if (currentMessageIndex < messages.length) {
+              typeWriterSequential();
+            } else {
+              // Todos los mensajes completados
+              hudHourglass.style.display = 'none';
+            }
+          }, 1500); // Pausa entre mensajes
+        }
       }
 
-      // Mostrar estado del sistema con efecto typewriter
+      // Iniciar sistema de mensajes secuenciales
       setTimeout(() => {
-        typeWriter(hudStep, '🚀 Inicializando análisis de geolocalización...', 100);
-        setTimeout(() => {
-          typeWriter(hudSub, '📡 Conectando con infraestructura de red...', 90);
-        }, 1500);
+        typeWriterSequential();
       }, 2000);
-      schedule(()=>{ 
-        typeWriter(hudStep, '🔄 Sincronizando datos de red...', 100);
-        setTimeout(() => typeWriter(hudSub, '📊 Analizando cobertura de operadores...', 90), 1200);
-      }, Math.floor(T_INIT*0.5));
+      // Los mensajes se manejan automáticamente por el sistema secuencial
 
       const order=[...DYNAMIC_AREAS].sort(()=>Math.random()-0.5);
       const stepDur=Math.max(700, Math.floor(T_SCAN/order.length));
       for(let i=0;i<order.length;i++){
         schedule(((i)=>()=>{ const d=order[i];
-          typeWriter(hudStep, `📡 Analizando zona: ${d.name}...`, 100);
-          setTimeout(() => typeWriter(hudSub, '🔍 Procesando datos de red disponibles...', 90), 1200);
+          // Mensajes manejados por sistema secuencial automático
           const center={lat:d.lat,lon:d.lon}; map.panTo([center.lat,center.lon]);
           startSectorSweep(center, 20000);
           for(let k=0;k<1;k++) schedule(()=>spawnPing(center.lat + (Math.random()*2-1)*kmLat(1.2), center.lon + (Math.random()*2-1)*kmLon(1.2,center.lat)), 500*k);
@@ -983,8 +1010,7 @@
 
       let ellipseShape=null;
       schedule(()=>{ 
-        typeWriter(hudStep, '📐 Procesando datos de ubicación...', 100);
-        setTimeout(() => typeWriter(hudSub, '🧮 Aplicando algoritmos de análisis...', 90), 1200);
+        // Mensajes manejados por sistema secuencial automático
         // NO mover el mapa - mantener la posición del último escaneo
         // map.panTo([pick.lat,pick.lon]); map.setZoom(12);
         placeTowersAround({lat:pick.lat,lon:pick.lon}, 3 + Math.floor(Math.random()*2));
@@ -1002,23 +1028,19 @@
 
       // Mensajes dinámicos adicionales durante triangulación
       schedule(()=>{ 
-        typeWriter(hudStep, '🔍 Analizando datos de operadores...', 100);
-        setTimeout(() => typeWriter(hudSub, '📊 Consultando bases de datos disponibles...', 90), 1200);
+        // Mensajes manejados por sistema secuencial automático
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.35));
       
       schedule(()=>{ 
-        typeWriter(hudStep, '⚡ Procesando datos de señal...', 100);
-        setTimeout(() => typeWriter(hudSub, '🎯 Calculando ubicación estimada...', 90), 1200);
+        // Mensajes manejados por sistema secuencial automático
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.55));
       
       schedule(()=>{ 
-        typeWriter(hudStep, '🔄 Refinando coordenadas...', 100);
-        setTimeout(() => typeWriter(hudSub, '📡 Validando precisión...', 90), 1200);
+        // Mensajes manejados por sistema secuencial automático
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.75));
 
       schedule(()=>{ 
-        typeWriter(hudStep, '🎯 Refinando coordenadas finales...', 100);
-        setTimeout(() => typeWriter(hudSub, '⚙️ Aplicando correcciones finales...', 90), 1200);
+        // Mensajes manejados por sistema secuencial automático
         addHeatCluster({lat:pick.lat,lon:pick.lon}, 20, 6, 3.0);
         addRadarGrid({lat:pick.lat,lon:pick.lon}, 80, 10); // Cuadrícula muy densa para refinamiento
         startSectorSweep({lat:pick.lat,lon:pick.lon}, 20000); // Triángulo más grande para refinamiento - CONTINÚA HASTA LA MODAL
@@ -1027,15 +1049,13 @@
 
       // Asegurar que el radar continúa hasta el final (60 segundos)
       schedule(()=>{ 
-        typeWriter(hudStep, '🔐 Procesando datos finales...', 100);
-        setTimeout(() => typeWriter(hudSub, '🛡️ Aplicando protocolos de seguridad...', 90), 1200);
+        // Mensajes manejados por sistema secuencial automático
         // Mantener el radar activo - NO detenerlo
         startSectorSweep({lat:pick.lat,lon:pick.lon}, 20000); // Reactivar radar para asegurar continuidad
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.90));
 
       schedule(()=>{ 
-        typeWriter(hudStep, '📏 Generando coordenadas finales...', 100);
-        setTimeout(() => typeWriter(hudSub, '🔗 Validando precisión y generando informe...', 90), 1200);
+        // Mensajes manejados por sistema secuencial automático
         drawLobsTo({lat:randLat,lon:randLon});
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.80));
 
