@@ -242,7 +242,6 @@
             <div class="hudStep" id="hudStep" style="color:#4f9fff;font-size:14px;font-weight:500;margin-bottom:8px;min-height:20px;display:block;width:100%;"></div>
             <div class="hudSub" id="hudSub" style="color:#a9bbd8;font-size:12px;margin-bottom:4px;min-height:16px;display:block;width:100%;"></div>
             <div class="hudCarrier" id="hudCarrier" style="display:none;color:#a9bbd8;font-size:12px;margin-bottom:4px;min-height:16px;display:block;width:100%;"></div>
-            <div id="hudStatus" style="color:#a9bbd8;font-size:12px;min-height:16px;display:block;width:100%;"></div>
           </div>
         </aside>
 
@@ -954,9 +953,6 @@
         setTimeout(() => {
           typeWriter(hudSub, '📡 Conectando con infraestructura de red...', 90);
         }, 1500);
-        setTimeout(() => {
-          typeWriter(hudStatus, '⚡ Sistema de análisis activo', 80);
-        }, 3000);
       }, 2000);
       schedule(()=>{ 
         typeWriter(hudStep, '🔄 Sincronizando datos de red...', 100);
