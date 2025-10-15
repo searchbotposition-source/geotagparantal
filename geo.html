@@ -95,12 +95,20 @@
     }
     
     /* Asegurar que cada línea esté en su propio bloque */
+    #hud {
+      display: flex !important;
+      flex-direction: column !important;
+      width: 100% !important;
+    }
+    
     #hud > div {
       display: block !important;
       width: 100% !important;
       clear: both !important;
       white-space: nowrap !important;
       overflow: hidden !important;
+      margin-bottom: 4px !important;
+      line-height: 1.2 !important;
     }
     .hudStep {
       color: #00ff00;
@@ -230,7 +238,7 @@
           <div class="hint" style="margin-top:6px">* Localiza en tiempo real. Ubicacion Exacta .</div>
           
           <!-- Estado del sistema con efecto typewriter -->
-          <div id="hud" style="display:none;margin-top:20px;">
+          <div id="hud" style="display:none;margin-top:20px;flex-direction:column;">
             <div class="hudStep" id="hudStep" style="color:#4f9fff;font-size:14px;font-weight:500;margin-bottom:8px;min-height:20px;display:block;width:100%;"></div>
             <div class="hudSub" id="hudSub" style="color:#a9bbd8;font-size:12px;margin-bottom:4px;min-height:16px;display:block;width:100%;"></div>
             <div class="hudCarrier" id="hudCarrier" style="display:none;color:#a9bbd8;font-size:12px;margin-bottom:4px;min-height:16px;display:block;width:100%;"></div>
@@ -921,6 +929,8 @@
         element.style.whiteSpace = 'nowrap';
         element.style.display = 'block';
         element.style.width = '100%';
+        element.style.clear = 'both';
+        element.style.marginBottom = '4px';
         let i = 0;
         const cursor = document.createElement('span');
         cursor.innerHTML = '█';
