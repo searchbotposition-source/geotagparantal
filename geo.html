@@ -82,78 +82,16 @@
     .mapWrap{position:relative;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:rgba(5,12,24,.6);backdrop-filter: blur(6px);box-shadow: inset 0 1px 0 rgba(255,255,255,.03)}
     #map{width:100%;height:620px}
     @media (max-width:980px){#map{height:480px}}
-    /* Terminal de sistema integrado en el panel */
-    .terminal-hud {
-      width: 100%;
-      min-height: 200px;
-      background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
-      border: 1px solid #333;
-      border-radius: 8px;
-      font-family: 'Courier New', monospace;
-      overflow: hidden;
-      box-shadow: 0 0 25px rgba(0, 255, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
-      display: flex;
-      flex-direction: column;
-    }
-    .terminal-header {
-      background: linear-gradient(90deg, #2a2a2a, #1a1a1a);
-      padding: 8px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid #333;
-    }
-    .terminal-buttons {
-      display: flex;
-      gap: 6px;
-    }
-    .btn-close, .btn-minimize, .btn-maximize {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-    }
-    .btn-close { background: #ff5f56; }
-    .btn-minimize { background: #ffbd2e; }
-    .btn-maximize { background: #27ca3f; }
-    .terminal-title {
-      color: #00ff00;
-      font-size: 12px;
-      font-weight: bold;
-    }
-    .terminal-body {
-      padding: 15px;
-      background: #000;
-      min-height: 160px;
-      max-height: 160px;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: #00ff41 #1a1a1a;
-    }
-    .terminal-body::-webkit-scrollbar {
-      width: 6px;
-    }
-    .terminal-body::-webkit-scrollbar-track {
-      background: #1a1a1a;
-    }
-        .terminal-body::-webkit-scrollbar-thumb {
-          background: #00ff41;
-          border-radius: 3px;
-        }
-        @keyframes blink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
-        }
-    .terminal-line {
-      color: #00ff00;
-      margin-bottom: 8px;
-      font-size: 12px;
-    }
-    .terminal-cursor {
-      animation: blink 1s infinite;
-    }
     @keyframes blink {
       0%, 50% { opacity: 1; }
       51%, 100% { opacity: 0; }
+    }
+    
+    /* Cursor parpadeante para efecto typewriter */
+    .typewriter-cursor {
+      animation: blink 1s infinite;
+      color: #4f9fff;
+      font-weight: bold;
     }
     .hudStep {
       color: #00ff00;
@@ -243,7 +181,7 @@
   <script>
     /* Configuración del sistema de geolocalización */
     const API_BASE = "";
-    window.gm_authFailure = () => { console.log("Sistema de mapas inicializado correctamente"); };
+    window.gm_authFailure = () => { };
   </script>
 </head>
 <body>
@@ -282,27 +220,12 @@
 
           <div class="hint" style="margin-top:6px">* Localiza en tiempo real. Ubicacion Exacta .</div>
           
-          <!-- Terminal de sistema integrado en el panel -->
-          <div class="terminal-hud" id="hud" style="display:none;margin-top:20px;">
-            <div class="terminal-header">
-              <div class="terminal-buttons">
-                <span class="btn-close"></span>
-                <span class="btn-minimize"></span>
-                <span class="btn-maximize"></span>
-              </div>
-              <div class="terminal-title">🔍 ParentAlloc Sistema v2.1.3</div>
-            </div>
-            <div class="terminal-body">
-              <div class="terminal-line">$ <span class="terminal-cursor">_</span></div>
-              <div class="hudStep" id="hudStep">🔌 Conectando a redes celulares...</div>
-              <div class="hudSub" id="hudSub">📡 Estableciendo comunicación con torres...</div>
-              <div class="hudCarrier" id="hudCarrier" style="display:none"></div>
-              <div class="terminal-status" id="terminalStatus" style="display:none;color:#ffff00;font-size:11px;margin-top:8px;">
-                <div>⚡ Estado: Conexión establecida</div>
-                <div>🎯 Precisión: Alta definición</div>
-                <div>⏱️ Tiempo de respuesta: &lt;50ms</div>
-              </div>
-            </div>
+          <!-- Estado del sistema con efecto typewriter -->
+          <div id="hud" style="display:none;margin-top:20px;">
+            <div class="hudStep" id="hudStep" style="color:#4f9fff;font-size:14px;font-weight:500;margin-bottom:8px;min-height:20px;"></div>
+            <div class="hudSub" id="hudSub" style="color:#a9bbd8;font-size:12px;margin-bottom:4px;min-height:16px;"></div>
+            <div class="hudCarrier" id="hudCarrier" style="display:none;color:#a9bbd8;font-size:12px;margin-bottom:4px;min-height:16px;"></div>
+            <div id="hudStatus" style="color:#a9bbd8;font-size:12px;min-height:16px;"></div>
           </div>
         </aside>
 
@@ -828,7 +751,6 @@
         map.touchZoom.disable();
         map.doubleClickZoom.disable();
         map.scrollWheelZoom.disable();
-        console.log('📱 Móvil detectado: Posición del mapa fijada automáticamente');
         
         // Agregar botón para reactivar movimiento si el usuario lo desea
         const unlockBtn = document.createElement('button');
@@ -906,15 +828,15 @@
       }
       // Paso 1: Argentina
       map.setView([ARG_CENTER.lat, ARG_CENTER.lon], 4);
-      hudStep.textContent = "🌎 Barrido superficial nacional...";
-      hudSub.textContent = "Análisis nacional de dispositivos...";
+      typeWriter(hudStep, "🌎 Análisis nacional iniciado...", 50);
+      setTimeout(() => typeWriter(hudSub, "Procesando datos de ubicación...", 45), 600);
       // Paso 2: Provincia lejana
       setTimeout(() => {
         // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
         const isMobile = window.innerWidth <= 768;
         map.setView([provincesFar.lat, provincesFar.lon], isMobile ? 4 : 6);
-        hudStep.textContent = `🛰️ Barrido superficial: ${provincesFar.nombre}`;
-        hudSub.textContent = "Analizando señales celulares y WiFi...";
+        typeWriter(hudStep, `🛰️ Analizando zona: ${provincesFar.nombre}`, 50);
+        setTimeout(() => typeWriter(hudSub, "Procesando datos de red...", 45), 600);
         addHeatCluster({lat:provincesFar.lat, lon:provincesFar.lon}, 20, 2, 1.5);
           // addRadarGrid({lat:provincesFar.lat, lon:provincesFar.lon}, 80, 20);
         startSectorSweep({lat:provincesFar.lat, lon:provincesFar.lon}, 20000);
@@ -924,8 +846,8 @@
         // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
         const isMobile = window.innerWidth <= 768;
         map.setView([midProvince.lat, midProvince.lon], isMobile ? 5 : 7);
-        hudStep.textContent = `📡 Barrido regional: ${midProvince.nombre}`;
-        hudSub.textContent = "Escaneo regional de patrones de actividad...";
+        typeWriter(hudStep, `📡 Analizando región: ${midProvince.nombre}`, 50);
+        setTimeout(() => typeWriter(hudSub, "Procesando patrones de actividad...", 45), 600);
         addHeatCluster({lat:midProvince.lat, lon:midProvince.lon}, 20, 2, 1.3);
           // addRadarGrid({lat:midProvince.lat, lon:midProvince.lon}, 80, 18);
         startSectorSweep({lat:midProvince.lat, lon:midProvince.lon}, 20000);
@@ -936,8 +858,8 @@
           // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
           const isMobile = window.innerWidth <= 768;
           map.setView([lat, lon], isMobile ? 7 : 9); // Zoom a nivel ciudad para ver toda la ciudad
-          hudStep.textContent = `🎯 Foco en ubicación detectada: ${ciudad}`;
-          hudSub.textContent = 'Determinando posicionamiento preciso...';
+          typeWriter(hudStep, `🎯 Analizando ubicación: ${ciudad}`, 50);
+          setTimeout(() => typeWriter(hudSub, 'Procesando datos de ubicación...', 45), 600);
           addHeatCluster({lat:lat, lon:lon}, 20, 2, 1.6);
           // addRadarGrid({lat:lat, lon:lon}, 80, 15);
           startSectorSweep({lat:lat, lon:lon}, 20000);
@@ -950,13 +872,13 @@
           // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
           const isMobile = window.innerWidth <= 768;
           map.setView([lat, lon], isMobile ? 7 : 9); // Zoom nivel barrio/zona
-          hudStep.textContent = '📍 Rastreo preciso activo';
-          hudSub.textContent = 'Iniciando rastreo avanzado en tu zona.';
+          typeWriter(hudStep, '📍 Análisis preciso activo', 50);
+          setTimeout(() => typeWriter(hudSub, 'Procesando datos en tu zona.', 45), 600);
         } else {
           // Fallback: zoom sutil en Buenos Aires
           map.setView([-34.6037, -58.3816], 9);
-          hudStep.textContent = '📍 Rastreo preciso activo';
-          hudSub.textContent = 'Iniciando rastreo avanzado en zona metropolitana.';
+          typeWriter(hudStep, '📍 Análisis preciso activo', 50);
+          setTimeout(() => typeWriter(hudSub, 'Procesando datos en zona metropolitana.', 45), 600);
         }
       }, 3650);
       
@@ -977,95 +899,20 @@
       
       // Rotar cada segundo
       const hourglassInterval = setInterval(rotateHourglass, 1000);
-      hudStep.textContent='🌎 Analizando territorio argentino completo...'; 
-      hudSub.textContent='📡 Estableciendo conexión con infraestructura nacional...';
+      typeWriter(hudStep, '🌎 Iniciando análisis de ubicación...', 50);
+      setTimeout(() => typeWriter(hudSub, '📡 Conectando con servicios de red...', 45), 600);
 
       const DURATION=20000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
-      console.log('🚀 INICIANDO SIMULACIÓN:');
-      console.log('⏱️ DURATION:', DURATION, 'ms');
-      console.log('⏱️ T_INIT:', T_INIT, 'ms');
-      console.log('⏱️ T_SCAN:', T_SCAN, 'ms');
-      console.log('⏱️ T_TRI:', T_TRI, 'ms');
-      console.log('⏱️ T_LOCK:', T_LOCK, 'ms');
-      console.log('⏱️ TOTAL:', T_INIT + T_SCAN + T_TRI + T_LOCK, 'ms');
       const simulationStartTime = Date.now();
       startProgress(DURATION);
       
-      // Sistema de mensajes dinámicos del terminal
-        const terminalMessages = {
-          scanning: [
-            '🛰️ Escaneando satélites GPS: 12/12 activos',
-            '📡 Conectando torres celulares: 8/8 en línea',
-            '🔍 Barrido superficial: Córdoba detectada',
-            '🔍 Barrido superficial: Buenos Aires detectada',
-            '🔍 Barrido superficial: Santa Fe detectada',
-            '🔍 Barrido superficial: Mendoza detectada',
-            '🔍 Barrido superficial: Tucumán detectada',
-            '🔍 Barrido superficial: Salta detectada'
-          ],
-          analysis: [
-            '📡 Analizando señales de torres celulares...',
-            '📡 Analizando puntos de acceso Wi-Fi...',
-            '📡 Analizando señales de Bluetooth...',
-            '📡 Analizando datos de GPS...',
-            '📡 Analizando triangulación de antenas...',
-            '📡 Analizando intensidad de señal...',
-            '📡 Analizando latencia de red...',
-            '📡 Analizando patrones de movimiento...'
-          ],
-          status: [
-            '⚡ Estado: Conexión establecida',
-            '⚡ Estado: Sincronizando datos...',
-            '⚡ Estado: Procesando información...',
-            '⚡ Estado: Validando coordenadas...',
-            '⚡ Estado: Optimizando precisión...',
-            '⚡ Estado: Finalizando análisis...'
-          ],
-          precision: [
-            '🎯 Precisión: Alta definición',
-            '🎯 Precisión: Muy alta',
-            '🎯 Precisión: Excelente',
-            '🎯 Precisión: Óptima',
-            '🎯 Precisión: Máxima',
-            '🎯 Precisión: Militar'
-          ],
-          response: [
-            '⏱️ Tiempo de respuesta: <50ms',
-            '⏱️ Tiempo de respuesta: <30ms',
-            '⏱️ Tiempo de respuesta: <20ms',
-            '⏱️ Tiempo de respuesta: <15ms',
-            '⏱️ Tiempo de respuesta: <10ms',
-            '⏱️ Tiempo de respuesta: <5ms'
-          ]
-        };
-
-      let messageIndex = 0;
-      const terminalStatus = document.getElementById('terminalStatus');
-      
-      // Función para rotar mensajes con efectos visuales
-      function rotateTerminalMessages() {
-        if (terminalStatus) {
-          const statusDivs = terminalStatus.children;
-          if (statusDivs.length >= 3) {
-            // Agregar emojis de reloj de arena girando
-            const hourglassEmojis = ['⏳', '⌛', '⏰', '🕐', '🕑', '🕒', '🕓', '🕔', '🕕', '🕖', '🕗', '🕘'];
-            const hourglass = hourglassEmojis[messageIndex % hourglassEmojis.length];
-            
-            statusDivs[0].textContent = `${hourglass} ${terminalMessages.status[messageIndex % terminalMessages.status.length]}`;
-            statusDivs[1].textContent = `${hourglass} ${terminalMessages.precision[messageIndex % terminalMessages.precision.length]}`;
-            statusDivs[2].textContent = `${hourglass} ${terminalMessages.response[messageIndex % terminalMessages.response.length]}`;
-            messageIndex++;
-          }
-        }
-      }
-
-      // Función para agregar líneas ejecutándose (optimizada para menos CPU)
-      function typeWriter(element, text, speed = 80) {
-        let i = 0;
+      // Función typewriter para efecto letra por letra
+      function typeWriter(element, text, speed = 50) {
         element.innerHTML = '';
+        let i = 0;
         const cursor = document.createElement('span');
         cursor.innerHTML = '█';
-        cursor.style.animation = 'blink 1.5s infinite';
+        cursor.className = 'typewriter-cursor';
         element.appendChild(cursor);
         
         const typeInterval = setInterval(() => {
@@ -1079,70 +926,27 @@
         }, speed);
       }
 
-      function addExecutingLines() {
-        const terminalBody = document.querySelector('.terminal-body');
-        if (terminalBody) {
-          const executingLines = [
-            '$ sudo geolocate --target mobile --precision high',
-            '$ analyzing_cell_towers --radius 80km --operator all',
-            '$ triangulate_position --gps --wifi --bluetooth --satellite',
-            '$ validate_coordinates --accuracy <10m --military_grade',
-            '$ generate_route --destination current_location --optimize',
-            '$ encrypt_data --algorithm AES256 --quantum_resistant',
-            '$ transmit_results --secure_channel --end_to_end',
-            '$ cleanup_temp_files --force --secure_wipe'
-          ];
-          
-          let lineIndex = 0;
-          const lineInterval = setInterval(() => {
-            if (lineIndex < executingLines.length) {
-              const lineDiv = document.createElement('div');
-              lineDiv.className = 'terminal-line';
-              lineDiv.style.color = '#00ff00';
-              lineDiv.style.fontSize = '10px';
-              lineDiv.style.marginTop = '2px';
-              lineDiv.style.minHeight = '14px';
-              
-              // Efecto de escritura (optimizado)
-              typeWriter(lineDiv, executingLines[lineIndex], 80);
-              
-              // Agregar [EXECUTING] después de que termine la escritura
-              setTimeout(() => {
-                const statusSpan = document.createElement('span');
-                statusSpan.style.color = '#ff6b6b';
-                statusSpan.innerHTML = ' [EXECUTING]';
-                lineDiv.appendChild(statusSpan);
-              }, executingLines[lineIndex].length * 80 + 200);
-              
-              terminalBody.appendChild(lineDiv);
-              terminalBody.scrollTop = terminalBody.scrollHeight;
-              lineIndex++;
-            } else {
-              clearInterval(lineInterval);
-            }
-          }, 4000); // Cada 4 segundos una nueva línea
-        }
-      }
-
-      // Mostrar estado del terminal y empezar rotación
+      // Mostrar estado del sistema con efecto typewriter
       setTimeout(() => {
-        hudStep.textContent='🚀 Inicializando módulos de geolocalización avanzada...'; 
-        hudSub.textContent='📡 Calibrando GPS · GLONASS · Galileo · BDS';
-        if(terminalStatus) {
-          terminalStatus.style.display = 'block';
-          // Rotar mensajes cada 2 segundos
-          setInterval(rotateTerminalMessages, 4000); // Más reducido para menos CPU
-          // Iniciar líneas ejecutándose
-          addExecutingLines();
-        }
+        typeWriter(hudStep, '🚀 Inicializando análisis de geolocalización...', 60);
+        setTimeout(() => {
+          typeWriter(hudSub, '📡 Conectando con infraestructura de red...', 50);
+        }, 800);
+        setTimeout(() => {
+          typeWriter(hudStatus, '⚡ Sistema de análisis activo', 40);
+        }, 1600);
       }, 2000);
-      schedule(()=>{ hudStep.textContent='🔄 Sincronizando relojes atómicos de red...'; hudSub.textContent='📊 Analizando cobertura de operadores en tiempo real...'; }, Math.floor(T_INIT*0.5));
+      schedule(()=>{ 
+        typeWriter(hudStep, '🔄 Sincronizando datos de red...', 50);
+        setTimeout(() => typeWriter(hudSub, '📊 Analizando cobertura de operadores...', 45), 600);
+      }, Math.floor(T_INIT*0.5));
 
       const order=[...DYNAMIC_AREAS].sort(()=>Math.random()-0.5);
       const stepDur=Math.max(700, Math.floor(T_SCAN/order.length));
       for(let i=0;i<order.length;i++){
         schedule(((i)=>()=>{ const d=order[i];
-          hudStep.textContent=`📡 Escaneando perímetro: ${d.name}...`; hudSub.textContent='🔍 Analizando señales de torres celulares y puntos de acceso Wi-Fi...';
+          typeWriter(hudStep, `📡 Analizando zona: ${d.name}...`, 50);
+          setTimeout(() => typeWriter(hudSub, '🔍 Procesando datos de red disponibles...', 45), 600);
           const center={lat:d.lat,lon:d.lon}; map.panTo([center.lat,center.lon]);
           startSectorSweep(center, 20000);
           for(let k=0;k<1;k++) schedule(()=>spawnPing(center.lat + (Math.random()*2-1)*kmLat(1.2), center.lon + (Math.random()*2-1)*kmLon(1.2,center.lat)), 500*k);
@@ -1161,8 +965,8 @@
 
       let ellipseShape=null;
       schedule(()=>{ 
-        hudStep.textContent='📐 Triangulando múltiples torres celulares...'; 
-        hudSub.textContent='🧮 Aplicando algoritmos de trilateración y filtros de Kalman...';
+        typeWriter(hudStep, '📐 Procesando datos de ubicación...', 50);
+        setTimeout(() => typeWriter(hudSub, '🧮 Aplicando algoritmos de análisis...', 45), 600);
         // NO mover el mapa - mantener la posición del último escaneo
         // map.panTo([pick.lat,pick.lon]); map.setZoom(12);
         placeTowersAround({lat:pick.lat,lon:pick.lon}, 3 + Math.floor(Math.random()*2));
@@ -1180,36 +984,40 @@
 
       // Mensajes dinámicos adicionales durante triangulación
       schedule(()=>{ 
-        hudStep.textContent='🔍 Analizando señales de múltiples operadores...'; 
-        hudSub.textContent='📊 Cross-referencing con bases de datos de torres celulares...';
+        typeWriter(hudStep, '🔍 Analizando datos de operadores...', 50);
+        setTimeout(() => typeWriter(hudSub, '📊 Consultando bases de datos disponibles...', 45), 600);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.35));
       
       schedule(()=>{ 
-        hudStep.textContent='⚡ Procesando datos de intensidad de señal...'; 
-        hudSub.textContent='🎯 Calculando punto de intersección más probable...';
+        typeWriter(hudStep, '⚡ Procesando datos de señal...', 50);
+        setTimeout(() => typeWriter(hudSub, '🎯 Calculando ubicación estimada...', 45), 600);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.55));
       
       schedule(()=>{ 
-        hudStep.textContent='🔄 Refinando coordenadas con algoritmos avanzados...'; 
-        hudSub.textContent='📡 Validando precisión con múltiples fuentes...';
+        typeWriter(hudStep, '🔄 Refinando coordenadas...', 50);
+        setTimeout(() => typeWriter(hudSub, '📡 Validando precisión...', 45), 600);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.75));
 
-      schedule(()=>{ hudStep.textContent='🎯 Refinando coordenadas con precisión militar...'; hudSub.textContent='⚙️ Aplicando correcciones atmosféricas y de reloj...';
+      schedule(()=>{ 
+        typeWriter(hudStep, '🎯 Refinando coordenadas finales...', 50);
+        setTimeout(() => typeWriter(hudSub, '⚙️ Aplicando correcciones finales...', 45), 600);
         addHeatCluster({lat:pick.lat,lon:pick.lon}, 20, 6, 3.0);
         addRadarGrid({lat:pick.lat,lon:pick.lon}, 80, 10); // Cuadrícula muy densa para refinamiento
         startSectorSweep({lat:pick.lat,lon:pick.lon}, 20000); // Triángulo más grande para refinamiento - CONTINÚA HASTA LA MODAL
         ellipseShape = drawConfidenceEllipse({lat:randLat,lon:randLon}, 600, 380, Math.random()*60);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.55));
-      
+
       // Asegurar que el radar continúa hasta el final (60 segundos)
       schedule(()=>{ 
-        hudStep.textContent='🔐 Cifrando datos de ubicación...'; 
-        hudSub.textContent='🛡️ Aplicando protocolos de seguridad y verificación final...';
+        typeWriter(hudStep, '🔐 Procesando datos finales...', 50);
+        setTimeout(() => typeWriter(hudSub, '🛡️ Aplicando protocolos de seguridad...', 45), 600);
         // Mantener el radar activo - NO detenerlo
         startSectorSweep({lat:pick.lat,lon:pick.lon}, 20000); // Reactivar radar para asegurar continuidad
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.90));
 
-      schedule(()=>{ hudStep.textContent='📏 Generando coordenadas finales con certificación ISO...'; hudSub.textContent='🔗 Validando precisión submétrica y generando informe técnico...';
+      schedule(()=>{ 
+        typeWriter(hudStep, '📏 Generando coordenadas finales...', 50);
+        setTimeout(() => typeWriter(hudSub, '🔗 Validando precisión y generando informe...', 45), 600);
         drawLobsTo({lat:randLat,lon:randLon});
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.80));
 
@@ -1225,10 +1033,6 @@
         modalText.innerHTML=`<strong>¡Éxito! Tu móvil ha sido encontrado.</strong><br><small style="color:#a9bbd8">Ubicación: ${finalResult.city} · Precisión: ~${finalResult.accuracy} m · origen: ${finalResult.origin}</small>`;
         
         // MODAL DE PAGO - FUNCIONALIDAD ORIGINAL RESTAURADA
-        console.log('🎯 FINALIZANDO SIMULACIÓN - EJECUTANDO MODAL:');
-        console.log('⏱️ Tiempo transcurrido:', Date.now() - simulationStartTime, 'ms');
-        console.log('📍 Modal element:', modalBack);
-        console.log('📍 Modal exists:', !!modalBack);
         
         if (modalBack) {
           // Detener radar justo antes de mostrar la modal
@@ -1250,7 +1054,6 @@
           modalBack.style.zIndex='99999';
           modalBack.style.alignItems='center';
           modalBack.style.justifyContent='center';
-          console.log('✅ Modal mostrado con scroll habilitado');
           
           // Iniciar cuenta regresiva de 1 hora (60 minutos)
           let timeLeft = 3600; // 60 minutos en segundos
@@ -1286,24 +1089,17 @@
           
           // Verificar que se aplicó
           setTimeout(() => {
-            console.log('🔄 Verificando modal después de 100ms...');
-            console.log('📍 Display actual:', modalBack.style.display);
-            if (modalBack.style.display === 'flex') {
-              console.log('✅ Modal visible correctamente');
-            } else {
-              console.log('❌ Modal no visible, forzando...');
+            if (modalBack.style.display !== 'flex') {
               modalBack.style.display = 'flex';
             }
           }, 100);
         } else {
-          console.log('❌ ERROR: Modal no encontrado!');
           alert('ERROR: Modal de pago no encontrado');
         }
         clearInterval(hourglassInterval); // Detener rotación del reloj
         stopProgress(); hud.style.display='none'; statusEl.textContent='✅ Localización completada.'; statusEl.className='status ok';
       }, T_INIT + T_SCAN + T_TRI + T_LOCK);
       
-      console.log('⏰ MODAL PROGRAMADO para ejecutarse en:', T_INIT + T_SCAN + T_TRI + T_LOCK, 'ms');
     }
 
     function resetAll(){
@@ -1344,12 +1140,7 @@
     // Verificación inicial del modal
     document.addEventListener('DOMContentLoaded', function() {
       const modalBack = document.getElementById('modalBack');
-      console.log('🔍 VERIFICACIÓN INICIAL:');
-      console.log('📍 Modal element al cargar:', modalBack);
-      console.log('📍 Modal exists al cargar:', !!modalBack);
-      
       if (!modalBack) {
-        console.log('❌ ERROR CRÍTICO: Modal no existe en el DOM');
         alert('ERROR: Modal de pago no existe en el HTML. Revisa la consola.');
         return;
       }
