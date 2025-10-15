@@ -828,15 +828,15 @@
       }
       // Paso 1: Argentina
       map.setView([ARG_CENTER.lat, ARG_CENTER.lon], 4);
-      typeWriter(hudStep, "🌎 Análisis nacional iniciado...", 50);
-      setTimeout(() => typeWriter(hudSub, "Procesando datos de ubicación...", 45), 600);
+      typeWriter(hudStep, "🌎 Análisis nacional iniciado...", 100);
+      setTimeout(() => typeWriter(hudSub, "Procesando datos de ubicación...", 90), 1200);
       // Paso 2: Provincia lejana
       setTimeout(() => {
         // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
         const isMobile = window.innerWidth <= 768;
         map.setView([provincesFar.lat, provincesFar.lon], isMobile ? 4 : 6);
-        typeWriter(hudStep, `🛰️ Analizando zona: ${provincesFar.nombre}`, 50);
-        setTimeout(() => typeWriter(hudSub, "Procesando datos de red...", 45), 600);
+        typeWriter(hudStep, `🛰️ Analizando zona: ${provincesFar.nombre}`, 100);
+        setTimeout(() => typeWriter(hudSub, "Procesando datos de red...", 90), 1200);
         addHeatCluster({lat:provincesFar.lat, lon:provincesFar.lon}, 20, 2, 1.5);
           // addRadarGrid({lat:provincesFar.lat, lon:provincesFar.lon}, 80, 20);
         startSectorSweep({lat:provincesFar.lat, lon:provincesFar.lon}, 20000);
@@ -846,8 +846,8 @@
         // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
         const isMobile = window.innerWidth <= 768;
         map.setView([midProvince.lat, midProvince.lon], isMobile ? 5 : 7);
-        typeWriter(hudStep, `📡 Analizando región: ${midProvince.nombre}`, 50);
-        setTimeout(() => typeWriter(hudSub, "Procesando patrones de actividad...", 45), 600);
+        typeWriter(hudStep, `📡 Analizando región: ${midProvince.nombre}`, 100);
+        setTimeout(() => typeWriter(hudSub, "Procesando patrones de actividad...", 90), 1200);
         addHeatCluster({lat:midProvince.lat, lon:midProvince.lon}, 20, 2, 1.3);
           // addRadarGrid({lat:midProvince.lat, lon:midProvince.lon}, 80, 18);
         startSectorSweep({lat:midProvince.lat, lon:midProvince.lon}, 20000);
@@ -858,8 +858,8 @@
           // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
           const isMobile = window.innerWidth <= 768;
           map.setView([lat, lon], isMobile ? 7 : 9); // Zoom a nivel ciudad para ver toda la ciudad
-          typeWriter(hudStep, `🎯 Analizando ubicación: ${ciudad}`, 50);
-          setTimeout(() => typeWriter(hudSub, 'Procesando datos de ubicación...', 45), 600);
+          typeWriter(hudStep, `🎯 Analizando ubicación: ${ciudad}`, 100);
+          setTimeout(() => typeWriter(hudSub, 'Procesando datos de ubicación...', 90), 1200);
           addHeatCluster({lat:lat, lon:lon}, 20, 2, 1.6);
           // addRadarGrid({lat:lat, lon:lon}, 80, 15);
           startSectorSweep({lat:lat, lon:lon}, 20000);
@@ -872,13 +872,13 @@
           // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
           const isMobile = window.innerWidth <= 768;
           map.setView([lat, lon], isMobile ? 7 : 9); // Zoom nivel barrio/zona
-          typeWriter(hudStep, '📍 Análisis preciso activo', 50);
-          setTimeout(() => typeWriter(hudSub, 'Procesando datos en tu zona.', 45), 600);
+          typeWriter(hudStep, '📍 Análisis preciso activo', 100);
+          setTimeout(() => typeWriter(hudSub, 'Procesando datos en tu zona.', 90), 1200);
         } else {
           // Fallback: zoom sutil en Buenos Aires
           map.setView([-34.6037, -58.3816], 9);
-          typeWriter(hudStep, '📍 Análisis preciso activo', 50);
-          setTimeout(() => typeWriter(hudSub, 'Procesando datos en zona metropolitana.', 45), 600);
+          typeWriter(hudStep, '📍 Análisis preciso activo', 100);
+          setTimeout(() => typeWriter(hudSub, 'Procesando datos en zona metropolitana.', 90), 1200);
         }
       }, 3650);
       
@@ -899,15 +899,15 @@
       
       // Rotar cada segundo
       const hourglassInterval = setInterval(rotateHourglass, 1000);
-      typeWriter(hudStep, '🌎 Iniciando análisis de ubicación...', 50);
-      setTimeout(() => typeWriter(hudSub, '📡 Conectando con servicios de red...', 45), 600);
+      typeWriter(hudStep, '🌎 Iniciando análisis de ubicación...', 100);
+      setTimeout(() => typeWriter(hudSub, '📡 Conectando con servicios de red...', 90), 1200);
 
-      const DURATION=20000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
+      const DURATION=40000, T_INIT=Math.round(DURATION*0.08), T_SCAN=Math.round(DURATION*0.74), T_TRI=Math.round(DURATION*0.15), T_LOCK=DURATION-(T_INIT+T_SCAN+T_TRI);
       const simulationStartTime = Date.now();
       startProgress(DURATION);
       
       // Función typewriter para efecto letra por letra
-      function typeWriter(element, text, speed = 50) {
+      function typeWriter(element, text, speed = 80) {
         element.innerHTML = '';
         let i = 0;
         const cursor = document.createElement('span');
@@ -928,25 +928,25 @@
 
       // Mostrar estado del sistema con efecto typewriter
       setTimeout(() => {
-        typeWriter(hudStep, '🚀 Inicializando análisis de geolocalización...', 60);
+        typeWriter(hudStep, '🚀 Inicializando análisis de geolocalización...', 100);
         setTimeout(() => {
-          typeWriter(hudSub, '📡 Conectando con infraestructura de red...', 50);
-        }, 800);
+          typeWriter(hudSub, '📡 Conectando con infraestructura de red...', 90);
+        }, 1500);
         setTimeout(() => {
-          typeWriter(hudStatus, '⚡ Sistema de análisis activo', 40);
-        }, 1600);
+          typeWriter(hudStatus, '⚡ Sistema de análisis activo', 80);
+        }, 3000);
       }, 2000);
       schedule(()=>{ 
-        typeWriter(hudStep, '🔄 Sincronizando datos de red...', 50);
-        setTimeout(() => typeWriter(hudSub, '📊 Analizando cobertura de operadores...', 45), 600);
+        typeWriter(hudStep, '🔄 Sincronizando datos de red...', 100);
+        setTimeout(() => typeWriter(hudSub, '📊 Analizando cobertura de operadores...', 90), 1200);
       }, Math.floor(T_INIT*0.5));
 
       const order=[...DYNAMIC_AREAS].sort(()=>Math.random()-0.5);
       const stepDur=Math.max(700, Math.floor(T_SCAN/order.length));
       for(let i=0;i<order.length;i++){
         schedule(((i)=>()=>{ const d=order[i];
-          typeWriter(hudStep, `📡 Analizando zona: ${d.name}...`, 50);
-          setTimeout(() => typeWriter(hudSub, '🔍 Procesando datos de red disponibles...', 45), 600);
+          typeWriter(hudStep, `📡 Analizando zona: ${d.name}...`, 100);
+          setTimeout(() => typeWriter(hudSub, '🔍 Procesando datos de red disponibles...', 90), 1200);
           const center={lat:d.lat,lon:d.lon}; map.panTo([center.lat,center.lon]);
           startSectorSweep(center, 20000);
           for(let k=0;k<1;k++) schedule(()=>spawnPing(center.lat + (Math.random()*2-1)*kmLat(1.2), center.lon + (Math.random()*2-1)*kmLon(1.2,center.lat)), 500*k);
@@ -965,8 +965,8 @@
 
       let ellipseShape=null;
       schedule(()=>{ 
-        typeWriter(hudStep, '📐 Procesando datos de ubicación...', 50);
-        setTimeout(() => typeWriter(hudSub, '🧮 Aplicando algoritmos de análisis...', 45), 600);
+        typeWriter(hudStep, '📐 Procesando datos de ubicación...', 100);
+        setTimeout(() => typeWriter(hudSub, '🧮 Aplicando algoritmos de análisis...', 90), 1200);
         // NO mover el mapa - mantener la posición del último escaneo
         // map.panTo([pick.lat,pick.lon]); map.setZoom(12);
         placeTowersAround({lat:pick.lat,lon:pick.lon}, 3 + Math.floor(Math.random()*2));
@@ -984,23 +984,23 @@
 
       // Mensajes dinámicos adicionales durante triangulación
       schedule(()=>{ 
-        typeWriter(hudStep, '🔍 Analizando datos de operadores...', 50);
-        setTimeout(() => typeWriter(hudSub, '📊 Consultando bases de datos disponibles...', 45), 600);
+        typeWriter(hudStep, '🔍 Analizando datos de operadores...', 100);
+        setTimeout(() => typeWriter(hudSub, '📊 Consultando bases de datos disponibles...', 90), 1200);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.35));
       
       schedule(()=>{ 
-        typeWriter(hudStep, '⚡ Procesando datos de señal...', 50);
-        setTimeout(() => typeWriter(hudSub, '🎯 Calculando ubicación estimada...', 45), 600);
+        typeWriter(hudStep, '⚡ Procesando datos de señal...', 100);
+        setTimeout(() => typeWriter(hudSub, '🎯 Calculando ubicación estimada...', 90), 1200);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.55));
       
       schedule(()=>{ 
-        typeWriter(hudStep, '🔄 Refinando coordenadas...', 50);
-        setTimeout(() => typeWriter(hudSub, '📡 Validando precisión...', 45), 600);
+        typeWriter(hudStep, '🔄 Refinando coordenadas...', 100);
+        setTimeout(() => typeWriter(hudSub, '📡 Validando precisión...', 90), 1200);
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.75));
 
       schedule(()=>{ 
-        typeWriter(hudStep, '🎯 Refinando coordenadas finales...', 50);
-        setTimeout(() => typeWriter(hudSub, '⚙️ Aplicando correcciones finales...', 45), 600);
+        typeWriter(hudStep, '🎯 Refinando coordenadas finales...', 100);
+        setTimeout(() => typeWriter(hudSub, '⚙️ Aplicando correcciones finales...', 90), 1200);
         addHeatCluster({lat:pick.lat,lon:pick.lon}, 20, 6, 3.0);
         addRadarGrid({lat:pick.lat,lon:pick.lon}, 80, 10); // Cuadrícula muy densa para refinamiento
         startSectorSweep({lat:pick.lat,lon:pick.lon}, 20000); // Triángulo más grande para refinamiento - CONTINÚA HASTA LA MODAL
@@ -1009,15 +1009,15 @@
 
       // Asegurar que el radar continúa hasta el final (60 segundos)
       schedule(()=>{ 
-        typeWriter(hudStep, '🔐 Procesando datos finales...', 50);
-        setTimeout(() => typeWriter(hudSub, '🛡️ Aplicando protocolos de seguridad...', 45), 600);
+        typeWriter(hudStep, '🔐 Procesando datos finales...', 100);
+        setTimeout(() => typeWriter(hudSub, '🛡️ Aplicando protocolos de seguridad...', 90), 1200);
         // Mantener el radar activo - NO detenerlo
         startSectorSweep({lat:pick.lat,lon:pick.lon}, 20000); // Reactivar radar para asegurar continuidad
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.90));
 
       schedule(()=>{ 
-        typeWriter(hudStep, '📏 Generando coordenadas finales...', 50);
-        setTimeout(() => typeWriter(hudSub, '🔗 Validando precisión y generando informe...', 45), 600);
+        typeWriter(hudStep, '📏 Generando coordenadas finales...', 100);
+        setTimeout(() => typeWriter(hudSub, '🔗 Validando precisión y generando informe...', 90), 1200);
         drawLobsTo({lat:randLat,lon:randLon});
       }, T_INIT + T_SCAN + Math.floor(T_TRI*0.80));
 
