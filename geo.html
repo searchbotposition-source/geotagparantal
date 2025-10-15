@@ -302,11 +302,10 @@
     </div>
     
     <div class="actions">
-      <button id="downloadBtn" class="btnDownload" type="button" style="background:linear-gradient(135deg,#00b894,#00a085);border:none;color:white;padding:18px 24px;font-size:17px;font-weight:bold;border-radius:12px;width:100%;margin-bottom:10px;box-shadow:0 4px 15px rgba(0,184,148,0.4);animation:pulse-button 1.5s infinite;">
+      <button id="downloadBtn" class="btnDownload" type="button" style="background:linear-gradient(135deg,#00b894,#00a085);border:none;color:white;padding:18px 24px;font-size:17px;font-weight:bold;border-radius:12px;width:100%;box-shadow:0 4px 15px rgba(0,184,148,0.4);animation:pulse-button 1.5s infinite;">
         🔒 OBTENER UBICACIÓN AHORA — $14.997 ARS<br>
         <small style="font-size:13px;opacity:0.9;">Sin costos ocultos · Pago seguro con Mercado Pago</small>
       </button>
-      <button id="closeModal" class="btn btnGhost" type="button" style="width:100%;opacity:0.7;">Cancelar (No recomendado)</button>
     </div>
     
     <div style="text-align:center;margin-top:20px;font-size:13px;">
@@ -359,15 +358,7 @@
       window.location.replace('https://mpago.la/2PXuv8x');
     }, true); // <-- true = fase de captura
 
-    document.getElementById('closeModal').addEventListener('click', function () {
-      // Restaurar scroll del body
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.height = '';
-      
-      document.getElementById('modalBack').style.display = 'none';
-    });
+    // Botón cancelar eliminado - solo queda el botón de pago
   })();
 </script>
 
@@ -413,7 +404,7 @@
     const hud = document.getElementById('hud'), hudStep = document.getElementById('hudStep'), hudSub = document.getElementById('hudSub');
     const hudCarrier = document.getElementById('hudCarrier');
     const modalBack = document.getElementById('modalBack'), modalText = document.getElementById('modalText');
-    const downloadBtn = document.getElementById('downloadBtn'), closeModal = document.getElementById('closeModal');
+    const downloadBtn = document.getElementById('downloadBtn');
 
     function validateDigits(){
       const d=(number.value||'').replace(/\D/g,'');
@@ -1173,15 +1164,7 @@
       
       downloadJSON();
     });
-    document.getElementById('closeModal').addEventListener('click', function() {
-      // Restaurar scroll del body
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.height = '';
-      
-      document.getElementById('modalBack').style.display='none';
-    });
+    // Botón cancelar eliminado - solo queda el botón de pago
     
     // Verificación inicial del modal
     document.addEventListener('DOMContentLoaded', function() {
