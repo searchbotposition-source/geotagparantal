@@ -244,10 +244,9 @@
           
           <!-- Estado del sistema con efecto typewriter -->
           <div id="hud" style="display:none;margin-top:20px;">
-            <div id="hudLine" style="color:#4f9fff;font-size:14px;font-weight:500;min-height:20px;display:flex;align-items:center;gap:10px;">
-              <span id="hudText" style="flex:1;"></span>
-              <span id="hudHourglass" style="font-size:16px;animation:spin 2s linear infinite;">⏳</span>
-            </div>
+            <div id="hudLine" style="color:#4f9fff;font-size:14px;font-weight:500;min-height:20px;display:block;width:100%;"></div>
+            <div class="hudSub" id="hudSub" style="color:#a9bbd8;font-size:12px;margin-bottom:4px;min-height:16px;display:block;width:100%;">📡 Línea conectada de móvil</div>
+            <div class="hudCarrier" id="hudCarrier" style="display:none;color:#a9bbd8;font-size:12px;margin-bottom:4px;min-height:16px;display:block;width:100%;"></div>
           </div>
         </aside>
 
@@ -921,9 +920,10 @@
       const simulationStartTime = Date.now();
       startProgress(DURATION);
       
-      // Sistema de mensajes secuenciales con reloj de arena
-      const hudText = document.getElementById('hudText');
-      const hudHourglass = document.getElementById('hudHourglass');
+      // Sistema de mensajes secuenciales
+      const hudText = document.getElementById('hudLine');
+      const hudSub = document.getElementById('hudSub');
+      const hudCarrier = document.getElementById('hudCarrier');
       
       const messages = [
         '🚀 Inicializando análisis de geolocalización...',
@@ -975,7 +975,7 @@
               typeWriterSequential();
             } else {
               // Todos los mensajes completados
-              hudHourglass.style.display = 'none';
+              hudSub.textContent = '✅ Análisis completado';
             }
           }, 1500); // Pausa entre mensajes
         }
@@ -985,6 +985,14 @@
       setTimeout(() => {
         typeWriterSequential();
       }, 2000);
+      
+      // Mostrar operador cuando se detecte
+      setTimeout(() => {
+        if (hudCarrier) {
+          hudCarrier.style.display = 'block';
+          hudCarrier.textContent = '📡 Operador: 📱 Personal (Conectado)';
+        }
+      }, 5000);
       // Los mensajes se manejan automáticamente por el sistema secuencial
 
       const order=[...DYNAMIC_AREAS].sort(()=>Math.random()-0.5);
