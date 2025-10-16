@@ -925,29 +925,10 @@
         const userCountry = ipLoc?.country_name || 'Argentina';
         
         dynamicMessages = [
-          '🚀 Inicializando análisis de geolocalización...',
-          '📡 Conectando con infraestructura de red...',
-          '🔄 Sincronizando datos de red...',
-          '📊 Analizando cobertura de operadores...',
-          `🌎 Análisis nacional iniciado desde ${userCountry}...`,
-          `🛰️ Escaneando territorio de ${userRegion}...`,
-          `📡 Detectando señales en zona de ${userCity}...`,
-          `🎯 Analizando punto de acceso en ${userCity}...`,
-          '📍 Triangulando torres celulares locales...',
-          '📐 Procesando datos de ubicación...',
-          '🧮 Aplicando algoritmos de análisis...',
-          '🔍 Analizando datos de operadores...',
-          '📊 Consultando bases de datos disponibles...',
-          '⚡ Procesando datos de señal...',
-          `🎯 Calculando ubicación estimada en ${userCity}...`,
-          '🔄 Refinando coordenadas...',
-          '📡 Validando precisión...',
-          '🎯 Refinando coordenadas finales...',
-          '⚙️ Aplicando correcciones finales...',
-          '🔐 Procesando datos finales...',
-          '🛡️ Aplicando protocolos de seguridad...',
-          '📏 Generando coordenadas finales...',
-          '🔗 Validando precisión y generando informe...'
+          'Iniciando geolocalización de dispositivo',
+          'Escaneando operadores móviles y redes wifi',
+          'Triangulando puntos de acceso móvil',
+          'Dispositivo geolocalizado con éxito'
         ];
       }
       
@@ -964,7 +945,7 @@
         if (currentCharIndex < currentMessage.length) {
           textElement.textContent = currentMessage.substring(0, currentCharIndex + 1) + '█';
           currentCharIndex++;
-          setTimeout(typeWriterSequential, 120); // Velocidad más lenta
+          setTimeout(typeWriterSequential, 100); // Velocidad de escritura
         } else {
           // Mensaje completo, esperar un poco y pasar al siguiente
           textElement.textContent = currentMessage;
@@ -977,7 +958,7 @@
               // Todos los mensajes completados
               hudSub.textContent = '✅ Análisis completado';
             }
-          }, 1500); // Pausa entre mensajes
+          }, 6000); // 6 segundos entre mensajes para distribuir en 30 segundos
         }
       }
 
