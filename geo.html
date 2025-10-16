@@ -845,7 +845,7 @@
       setTimeout(() => {
         // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
         const isMobile = window.innerWidth <= 768;
-        map.setView([provincesFar.lat, provincesFar.lon], isMobile ? 4 : 6);
+        map.setView([provincesFar.lat, provincesFar.lon], isMobile ? 5 : 7);
         // Mensajes manejados por sistema secuencial automático
         addHeatCluster({lat:provincesFar.lat, lon:provincesFar.lon}, 20, 2, 1.5);
           // addRadarGrid({lat:provincesFar.lat, lon:provincesFar.lon}, 80, 20);
@@ -855,7 +855,7 @@
       setTimeout(() => {
         // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
         const isMobile = window.innerWidth <= 768;
-        map.setView([midProvince.lat, midProvince.lon], isMobile ? 5 : 7);
+        map.setView([midProvince.lat, midProvince.lon], isMobile ? 7 : 8);
         // Mensajes manejados por sistema secuencial automático
         addHeatCluster({lat:midProvince.lat, lon:midProvince.lon}, 20, 2, 1.3);
           // addRadarGrid({lat:midProvince.lat, lon:midProvince.lon}, 80, 18);
@@ -866,7 +866,7 @@
         if(locationOK){
           // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
           const isMobile = window.innerWidth <= 768;
-          map.setView([lat, lon], isMobile ? 7 : 9); // Zoom a nivel ciudad para ver toda la ciudad
+          map.setView([lat, lon], isMobile ? 9 : 10); // Zoom a nivel ciudad para ver toda la ciudad
           // Mensajes manejados por sistema secuencial automático
           addHeatCluster({lat:lat, lon:lon}, 20, 2, 1.6);
           // addRadarGrid({lat:lat, lon:lon}, 80, 15);
@@ -879,11 +879,11 @@
           // Zoom adecuado para ver radares y sensores coordinados
           // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
           const isMobile = window.innerWidth <= 768;
-          map.setView([lat, lon], isMobile ? 7 : 9); // Zoom nivel barrio/zona
+          map.setView([lat, lon], isMobile ? 9 : 10); // Zoom nivel barrio/zona
           // Mensajes manejados por sistema secuencial automático
         } else {
           // Fallback: zoom sutil en Buenos Aires
-          map.setView([-34.6037, -58.3816], 9);
+          map.setView([-34.6037, -58.3816], 10);
           // Mensajes manejados por sistema secuencial automático
         }
       }, 3650);
