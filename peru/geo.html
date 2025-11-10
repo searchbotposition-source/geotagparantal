@@ -188,7 +188,7 @@
       if ((t && t.id === 'downloadBtn') || (t.closest && t.closest('#downloadBtn'))) {
         fbq('track', 'InitiateCheckout', {
           content_name: 'Seguimiento de ubicación',
-          value: 55.00,
+          value: 57.00,
           // Perú
           currency: 'PEN'
         });
@@ -266,7 +266,7 @@
   <div class="modal" role="document">
     <div style="text-align:center;margin-bottom:20px;">
       <div style="font-size:48px;margin-bottom:10px;">🎯</div>
-      <h3 style="color:#ff6b6b;margin:0;">¡DISPOSITIVO LOCALIZADO!</h3>
+      <h3 style="color:#f59e0b;margin:0;">¡DISPOSITIVO LOCALIZADO!</h3>
     </div>
     <div id="modalText" style="color:#eaf7ff;text-align:center;margin-bottom:20px;">
       <strong>¡Éxito! Tu móvil ha sido encontrado.</strong><br>
@@ -277,19 +277,19 @@
     <div id="modalMap" style="width:100%;height:200px;border-radius:12px;margin-bottom:20px;position:relative;overflow:hidden;background:#1a2332;border:2px solid #4f9fff;"></div>
     
     <!-- Mensaje de datos en servidor con cuenta regresiva -->
-    <div style="background:linear-gradient(135deg,#ff4757,#ff3742);padding:15px;border-radius:12px;margin-bottom:20px;text-align:center;color:white;">
+    <div style="background:linear-gradient(135deg,#fbbf24,#f59e0b);padding:15px;border-radius:12px;margin-bottom:20px;text-align:center;color:#0f172a;">
       <div style="font-size:16px;font-weight:bold;margin-bottom:8px;">⏰ DATOS ALMACENADOS TEMPORALMENTE</div>
       <div style="font-size:13px;margin-bottom:10px;">📊 Los datos del escaneo se han subido a nuestro servidor privado seguro</div>
       <div style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;margin-top:10px;">
         <div style="font-size:12px;margin-bottom:5px;">⚠️ Tiempo restante antes de eliminación:</div>
         <div id="countdown" style="font-size:24px;font-weight:bold;color:#ffff00;">59:59</div>
                 <div style="font-size:11px;margin-top:5px;opacity:0.9;">Después deberá realizar una nueva búsqueda</div>
-                <div style="font-size:10px;margin-top:3px;opacity:0.8;color:#ff6b6b;">⚠️ Al llegar a 00:00 se redirigirá automáticamente a la página inicial</div>
+                <div style="font-size:10px;margin-top:3px;opacity:0.8;color:#f59e0b;">⚠️ Al llegar a 00:00 se redirigirá automáticamente a la página inicial</div>
       </div>
     </div>
 
     <!-- Mensaje de urgencia CRÍTICO -->
-    <div style="background:linear-gradient(135deg,#ff6b6b,#ff5252);padding:12px;border-radius:12px;margin-bottom:20px;text-align:center;color:white;">
+    <div style="background:linear-gradient(135deg,#fbbf24,#f59e0b);padding:12px;border-radius:12px;margin-bottom:20px;text-align:center;color:#0f172a;">
       <div style="font-size:14px;font-weight:bold;margin-bottom:5px;">🚨 ¡ACCIÓN INMEDIATA REQUERIDA!</div>
       <div style="font-size:12px;">⚠️ El dispositivo puede moverse, apagarse o ser vendido en cualquier momento</div>
     </div>
@@ -301,8 +301,8 @@
     
     <div class="actions">
       <button id="downloadBtn" class="btnDownload" type="button" style="background:linear-gradient(135deg,#00b894,#00a085);border:none;color:white;padding:18px 24px;font-size:17px;font-weight:bold;border-radius:12px;width:100%;box-shadow:0 4px 15px rgba(0,184,148,0.4);animation:pulse-button 1.5s infinite;">
-        🔒 OBTENER UBICACIÓN AHORA — S/ 55 PEN<br>
-        <small style="font-size:13px;opacity:0.9;">Sin costos ocultos · Pago seguro con Niubiz</small>
+        🔒 OBTENER UBICACIÓN AHORA — S/ 57 PEN<br>
+        <small style="font-size:13px;opacity:0.9;">Sin costos ocultos · Pago seguro con Mercado Pago</small>
       </button>
     </div>
     
@@ -351,9 +351,9 @@
       // (Opcional) Desactiva anchors que fuercen descarga
       document.querySelectorAll('a[download]').forEach(a => a.removeAttribute('download'));
 
-      // Redirección en la MISMA ventana
+      // Redirección en la MISMA ventana hacia Mercado Pago
       // Usa .replace para que no vuelva atrás a la página que disparaba descargas
-      window.location.replace('https://mpago.la/2PXuv8x');
+      window.location.replace('https://mpago.la/23vof1Z');
     }, true); // <-- true = fase de captura
 
     // Botón cancelar eliminado - solo queda el botón de pago
@@ -366,11 +366,47 @@
   <script>
     /* ===== Países (bandera + prefijo) ===== */
     const COUNTRIES = [
-      {flag:"🇵🇪", name:"Perú", prefix:"+51", city:"Lima, Perú", lat:-12.046374, lon:-77.042793, code:'PE'},
-      {flag:"🇦🇷", name:"Argentina", prefix:"+54", city:"Buenos Aires, Argentina", lat:-34.603722, lon:-58.381592, code:'AR'}
+      {flag:"🇵🇪", name:"Perú", prefix:"+51", city:"Lima, Perú", lat:-12.046374, lon:-77.042793, code:'PE'}
     ];
     const country = document.getElementById('country');
     COUNTRIES.forEach((c,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=`${c.flag} ${c.name} (${c.prefix})`; country.appendChild(o); });
+    country.value = '0';
+    country.disabled = true;
+    country.setAttribute('aria-disabled', 'true');
+    country.title = 'Versión disponible exclusivamente para Perú';
+
+    const PERU_OPERATOR_RANGES = [];
+    const addRange = (from, to, operator) => {
+      for (let i = from; i <= to; i += 1) {
+        PERU_OPERATOR_RANGES.push({ key: String(i).padStart(3, '0'), operator });
+      }
+    };
+
+    addRange(900, 909, '📱 Movistar');
+    addRange(910, 911, '📱 Claro');
+    addRange(912, 914, '📱 Movistar');
+    addRange(915, 919, '📱 Bitel');
+    addRange(920, 929, '📱 Claro');
+    addRange(930, 939, '📱 Movistar');
+    addRange(940, 949, '📱 Claro');
+    addRange(950, 959, '📱 Movistar');
+    addRange(960, 969, '📱 Entel');
+    addRange(970, 979, '📱 Movistar');
+    addRange(980, 989, '📱 Claro');
+    addRange(990, 999, '📱 Movistar');
+
+    const PERU_OPERATOR_BY_PREFIX2 = new Map([
+      ['90', '📱 Movistar'],
+      ['91', '📱 Movistar'],
+      ['92', '📱 Claro'],
+      ['93', '📱 Entel'],
+      ['94', '📱 Entel'],
+      ['95', '📱 Bitel'],
+      ['96', '📱 Entel'],
+      ['97', '📱 Movistar'],
+      ['98', '📱 Claro'],
+      ['99', '📱 Movistar']
+    ]);
 
     /* ===== Áreas dinámicas alrededor del usuario ===== */
     let DYNAMIC_AREAS = [];
@@ -481,145 +517,21 @@
     }
     function hideCarrierHud(){ if(hudCarrier) hudCarrier.style.display='none'; }
 
-    function detectOperatorSim(countryCode, localDigits){
-      const d = (localDigits||"").replace(/\D/g,"");
-      if(!d) return null;
-      
-      if(countryCode === "PE"){
-        // Perú: números móviles empiezan con 9 y tienen 9 dígitos
-        // Formato: 9XX-XXXXXX donde XX indica el operador
-        
-        // Si empieza con 9, extraer los siguientes 2 dígitos
-        if(d.length >= 3 && d.charAt(0) === '9') {
-          const prefix2 = d.slice(1, 3); // Dígitos 2 y 3 (XX)
-          
-          // Verificar mapa directo primero (prefijos conocidos más comunes)
-          if(prefix2 === '99') return "📱 Movistar";
-          if(prefix2 === '98') return "📱 Claro";
-          if(prefix2 === '96') return "📱 Bitel";
-          if(prefix2 === '94') return "📱 Entel";
-          
-          // Movistar Perú: rangos principales 99, 97, 95, 93, 91
-          if(prefix2 === '97' || prefix2 === '95' || prefix2 === '93' || prefix2 === '91') {
-            // Usar hash del número completo para distribución consistente
-            const hash = parseInt(d.slice(-3)||"0", 10) % 4;
-            if(hash === 0 || hash === 1) return "📱 Movistar";
-            if(hash === 2) return "📱 Claro";
-            return "📱 Entel";
-          }
-          
-          // Claro Perú: rangos principales 98, 97, 96, 95, 94
-          if(prefix2 === '97' || prefix2 === '95' || prefix2 === '94') {
-            const hash = parseInt(d.slice(-3)||"0", 10) % 3;
-            if(hash === 0) return "📱 Claro";
-            if(hash === 1) return "📱 Movistar";
-            return "📱 Entel";
-          }
-          
-          // Entel Perú: rangos principales 96, 95, 94, 93
-          if(prefix2 === '95' || prefix2 === '93') {
-            const hash = parseInt(d.slice(-3)||"0", 10) % 3;
-            if(hash === 0) return "📱 Entel";
-            if(hash === 1) return "📱 Movistar";
-            return "📱 Claro";
-          }
-          
-          // Bitel Perú: rangos principales 96, 94, 92, 90
-          if(prefix2 === '92' || prefix2 === '90') {
-            const hash = parseInt(d.slice(-3)||"0", 10) % 2;
-            return hash === 0 ? "📱 Bitel" : "📱 Entel";
-          }
-          
-          // Fallback basado en el segundo dígito para mejor distribución
-          const secondDigit = d.charAt(1);
-          if(secondDigit === '9') return "📱 Movistar";
-          if(secondDigit === '8') return "📱 Claro";
-          if(secondDigit === '7' || secondDigit === '6') {
-            const hash = parseInt(d.slice(-2)||"0", 10) % 2;
-            return hash === 0 ? "📱 Claro" : "📱 Movistar";
-          }
-          if(secondDigit === '5' || secondDigit === '4') {
-            const hash = parseInt(d.slice(-2)||"0", 10) % 2;
-            return hash === 0 ? "📱 Entel" : "📱 Bitel";
-          }
-          if(secondDigit === '3' || secondDigit === '2') {
-            const hash = parseInt(d.slice(-2)||"0", 10) % 2;
-            return hash === 0 ? "📱 Bitel" : "📱 Entel";
-          }
-        }
-        
-        // Verificar mapa directo (para números que no empiezan con 9)
-        const p2 = d.slice(0,2);
-        if(CARRIER_MAP_PE[p2]) return CARRIER_MAP_PE[p2];
+    function detectOperatorSim(_countryCode, localDigits){
+      const digits = (localDigits || '').replace(/\D/g, '');
+      if (!digits) return null;
+
+      const prefix3 = digits.slice(0, 3);
+      const prefix2 = digits.slice(0, 2);
+
+      const matchByRange = PERU_OPERATOR_RANGES.find(entry => entry.key === prefix3);
+      if (matchByRange) return matchByRange.operator;
+
+      if (PERU_OPERATOR_BY_PREFIX2.has(prefix2)) {
+        return PERU_OPERATOR_BY_PREFIX2.get(prefix2);
       }
-      
-      if(countryCode === "AR"){
-        // Argentina: números móviles empiezan con 9 y tienen 10 dígitos
-        // Formato: 9XX-XXXXXXX donde XX indica el operador
-        
-        // Si empieza con 9, extraer los siguientes 2 dígitos
-        if(d.length >= 3 && d.charAt(0) === '9') {
-          const prefix3 = d.slice(0, 3); // Primeros 3 dígitos (9XX)
-          
-          // Priorizar Tuenti (rangos más específicos primero)
-          if(prefix3 >= '915' && prefix3 <= '920') {
-            return "📱 Tuenti";
-          }
-          
-          // Claro Argentina: rangos exclusivos
-          if(prefix3 === '910' || 
-             (prefix3 >= '921' && prefix3 <= '929') || 
-             (prefix3 >= '941' && prefix3 <= '949') || 
-             (prefix3 >= '961' && prefix3 <= '969') || 
-             (prefix3 >= '981' && prefix3 <= '989')) {
-            return "📱 Claro";
-          }
-          
-          // Movistar Argentina: rangos principales (excluyendo los ya asignados)
-          if((prefix3 >= '911' && prefix3 <= '914') || 
-             (prefix3 >= '930' && prefix3 <= '940') || 
-             (prefix3 >= '950' && prefix3 <= '960') || 
-             (prefix3 >= '970' && prefix3 <= '980') || 
-             (prefix3 >= '990' && prefix3 <= '999')) {
-            return "📱 Movistar";
-          }
-          
-          // Personal Argentina: rangos compartidos (usar hash para distribución)
-          if((prefix3 >= '911' && prefix3 <= '920') || 
-             (prefix3 >= '930' && prefix3 <= '940') || 
-             (prefix3 >= '950' && prefix3 <= '960')) {
-            const hash = parseInt(d.slice(-3)||"0", 10) % 3;
-            if(hash === 0) return "📱 Personal";
-            if(hash === 1) return "📱 Movistar";
-            return "📱 Movistar";
-          }
-          
-          // Fallback basado en el segundo dígito
-          const secondDigit = d.charAt(1);
-          if(secondDigit === '1' || secondDigit === '2') return "📱 Movistar";
-          if(secondDigit === '3' || secondDigit === '4') return "📱 Claro";
-          if(secondDigit === '5' || secondDigit === '6') return "📱 Personal";
-          if(secondDigit === '7' || secondDigit === '8') return "📱 Tuenti";
-        }
-        
-        // Si empieza con 11 (área Buenos Aires - Movistar)
-        if(d.length >= 2 && d.slice(0,2) === '11') {
-          return "📱 Movistar";
-        }
-        
-        // Si empieza con 15 (área Buenos Aires - puede ser Claro o Tuenti)
-        if(d.length >= 2 && d.slice(0,2) === '15') {
-          const hash = parseInt(d.slice(-2)||"0", 10) % 2;
-          return hash === 0 ? "📱 Claro" : "📱 Tuenti";
-        }
-      }
-      
-      // Fallback genérico
-      const ops = countryCode === "PE" 
-        ? ["📱 Movistar","📱 Claro","📱 Entel","📱 Bitel"]
-        : ["📱 Movistar","📱 Claro","📱 Personal","📱 Tuenti"];
-      const idx = parseInt(d.slice(-2)||"0",10) % ops.length;
-      return ops[idx];
+
+      return '📱 Operador no identificado';
     }
 
     async function lookupCarrierReal(e164){
@@ -1208,7 +1120,7 @@
             
             if (timeLeft <= 0) {
               countdownEl.textContent = '00:00';
-              countdownEl.style.color = '#ff4757';
+              countdownEl.style.color = '#f59e0b';
               clearInterval(countdownInterval);
               
               // Redirigir a la página inicial después de 2 segundos

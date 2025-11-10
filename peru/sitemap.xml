@@ -1,49 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://geotagparantal.vercel.app/</loc>
+    <loc>https://geotagparantal.vercel.app/peru/</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://geotagparantal.vercel.app/geosim.html</loc>
+    <loc>https://geotagparantal.vercel.app/geo1/</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://geotagparantal.vercel.app/geo.html</loc>
+    <loc>https://geotagparantal.vercel.app/peru/locatorperu.html</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://geotagparantal.vercel.app/locatorthanks.html</loc>
+    <loc>https://geotagparantal.vercel.app/peru/terminos.html</loc>
     <lastmod>2025-01-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://geotagparantal.vercel.app/terminos.html</loc>
+    <loc>https://geotagparantal.vercel.app/peru/terminos-completos.html</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://geotagparantal.vercel.app/terminos-completos.html</loc>
+    <loc>https://geotagparantal.vercel.app/peru/privacidad.html</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://geotagparantal.vercel.app/privacidad.html</loc>
-    <lastmod>2025-01-14</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://geotagparantal.vercel.app/descargos.html</loc>
+    <loc>https://geotagparantal.vercel.app/peru/descargos.html</loc>
     <lastmod>2025-01-14</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
