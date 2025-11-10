@@ -301,7 +301,7 @@
     
     <div class="actions">
       <button id="downloadBtn" class="btnDownload" type="button" style="background:linear-gradient(135deg,#00b894,#00a085);border:none;color:white;padding:18px 24px;font-size:17px;font-weight:bold;border-radius:12px;width:100%;box-shadow:0 4px 15px rgba(0,184,148,0.4);animation:pulse-button 1.5s infinite;">
-        🔒 OBTENER UBICACIÓN AHORA — S/ 57 PEN<br>
+        🔒 OBTENER UBICACIÓN AHORA<br>
         <small style="font-size:13px;opacity:0.9;">Sin costos ocultos · Pago seguro con Mercado Pago</small>
       </button>
     </div>
@@ -486,10 +486,6 @@
     number.addEventListener('input', validateDigits); validateDigits();
 
     /* ===== UTILIDADES lookup operador (real + fallback) ===== */
-    // Operadores comunes en Perú
-    const CARRIER_MAP_PE = { "99": "Movistar", "98": "Claro", "96": "Bitel", "94": "Entel" };
-    // Operadores comunes en AR para fallback simulado
-    const CARRIER_MAP_AR = { "11": "Movistar", "15": "Claro", "12": "Personal", "14": "Tuenti" };
 
     async function fetchWithTimeout(url, ms=8000){
       const ctrl = new AbortController();
@@ -509,8 +505,6 @@
       hudCarrier.style.display = "block";
       if(opts.error){
         hudCarrier.textContent = `📡 Operador: (no disponible) — ${opts.error}`;
-      }else if(opts.simulated){
-        hudCarrier.textContent = `📡 Operador: ${name} (Conectado)`;
       }else{
         hudCarrier.textContent = `📡 Operador: ${name}`;
       }
@@ -994,11 +988,10 @@
         typeWriterSequential();
       }, 2000);
       
-      // Mostrar operador cuando se detecte
+      // Mostrar avance en el HUD mientras se obtiene el operador real
       setTimeout(() => {
         if (hudCarrier) {
-          hudCarrier.style.display = 'block';
-          hudCarrier.textContent = '📡 Operador: 📱 Personal (Conectado)';
+          showCarrierInHud('🔍 Analizando operador...');
         }
       }, 5000);
       // Los mensajes se manejan automáticamente por el sistema secuencial
