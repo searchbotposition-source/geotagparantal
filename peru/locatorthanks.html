@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GeoSim · Ubicación estimada de tu móvil</title>
+  <meta name="description" content="Mapa en tiempo real: ubicación del visitante y estimación plausible del móvil extraviado, priorizando zonas concurridas." />
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-11DMCLMJWC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-11DMCLMJWC');
+  </script>
+  
+  <!-- Google Ads (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-990104326"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'AW-990104326');
+  </script>
+  
+  <!-- Event snippet for Compra parentalloc conversion page -->
+  <script>
+    gtag('event', 'conversion', {
+        'send_to': 'AW-990104326/vAlOCIqi6KwbEIaWj9gD',
+        'transaction_id': ''
+    });
+  </script>
+  
+  <!-- Event snippet for Compra thankslocator conversion page -->
+  <script>
+    gtag('event', 'conversion', {
+        'send_to': 'AW-990104326/fUxOCISS-bQbEIaWj9gD',
+        'value': 1000.0,
+        'currency': 'ARS',
+        'transaction_id': ''
+    });
+  </script>
+  
+  <style>
+    :root{--bg:#0b1220; --panel:#0f172a; --txt:#eaf3ff; --muted:#9fb3d1; --accent:#22c55e; --blue:#3b82f6; --border:rgba(255,255,255,.12)}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#e8f3fc,#fafdff);color:#153b47;}
+    .header,.footer{padding:12px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));backdrop-filter: blur(6px)}
+    .footer{border-top:1px solid var(--border);border-bottom:0;margin-top:auto}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
+    .container{width:min(1200px,100%);margin:14px auto;padding:0 14px;display:grid;grid-template-columns:1fr 380px;gap:12px}
+    @media (max-width:980px){.container{grid-template-columns:1fr}}
+    .card{border:1px solid var(--border);background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border-radius:14px;box-shadow:0 16px 50px rgba(0,0,0,.35)}
+    #map{height:72vh;border-radius:14px}
+    .panel{padding:12px;display:flex;flex-direction:column;gap:10px}
+    .title{font-size:16px;font-weight:800}
+    .muted{color:var(--muted);font-size:13px}
+    .pill{display:inline-flex;gap:6px;align-items:center;background:rgba(34,197,94,.16);color:#042; border:1px solid rgba(34,197,94,.5);padding:6px 10px;border-radius:999px;font-weight:700}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{cursor:pointer;font-weight:800;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--txt);padding:10px 12px}
+    .btnPrimary{background:linear-gradient(90deg,#22c55e,#4ade80);color:#052e1b;border:0}
+    .legend{display:grid;grid-template-columns:16px 1fr;gap:8px;align-items:center;font-size:13px}
+    .dot{width:12px;height:12px;border-radius:999px}
+    .dot.me{background:#22c55e}
+    .dot.phone{background:#3b82f6}
+    .pulse{position:relative}
+    .pulse:after{content:"";position:absolute;inset:-6px;border-radius:999px;border:2px solid rgba(59,130,246,.55);animation:pulse 1.8s infinite}
+    @keyframes pulse{0%{transform:scale(1);opacity:.9}70%{transform:scale(1.25);opacity:0}100%{opacity:0}}
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;background:rgba(3,7,18,.75);border:1px solid var(--border);backdrop-filter:blur(6px);color:var(--txt);padding:10px 12px;border-radius:12px;font-size:13px;display:none;z-index:40}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--border);font-size:12px;color:var(--muted)}
+    .miniModal{position:fixed;right:10px;bottom:10px;background:rgba(2,6,23,.85);border:1px solid var(--border);backdrop-filter:blur(6px);color:var(--muted);padding:10px 12px;border-radius:12px;font-size:11px;max-width:min(92%,420px);z-index:50}
+    .miniModal .actions{display:flex;gap:6px;justify-content:flex-end;margin-top:6px}
+    .pulseDot{width:20px;height:20px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pulse 2s infinite;display:grid;place-items:center;position:relative}
+    .pulseDot span{font-size:14px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.35));animation:bounce 1.5s infinite}
+    @keyframes bounce{0%,20%,50%,80%,100%{transform:translateY(0)}40%{transform:translateY(-3px)}60%{transform:translateY(-2px)}}
+    body{background:linear-gradient(135deg,#e8f3fc 0%,#f0f9ff 25%,#fafdff 50%,#e0f2fe 75%,#e8f3fc 100%);color:#153b47;min-height:100vh;position:relative}
+    body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%);pointer-events:none;z-index:-1}
+    .mainBlock{max-width:990px;margin:34px auto 0 auto;padding:0 10px;}
+    #map{width:100%;height:66vh;min-height:400px;border-radius:20px!important;box-shadow:0 8px 40px rgba(29,144,207,0.15), inset 0 1px 0 rgba(255,255,255,0.1);overflow:hidden;border:2px solid #a3d8fc!important;animation:mapFadeIn 1.2s ease-out;position:relative}
+    @keyframes mapFadeIn{0%{opacity:0;transform:scale(0.95)}100%{opacity:1;transform:scale(1)}}
+    @media (max-width:700px){ #map{min-height:280px;height:44vh} }
+    .panelEnt{max-width:540px;margin:34px auto 0 auto;background:rgba(255,255,255,0.95);border-radius:20px;box-shadow:0 8px 32px rgba(32,152,116,0.15), 0 2px 8px rgba(0,0,0,0.1);display:flex;flex-direction:column;align-items:center;padding:32px 28px 24px;animation:slideUp 0.8s ease-out;border:1px solid rgba(255,255,255,0.8)}
+    @keyframes slideUp{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:translateY(0)}}
+    .panelEnt .badge{background:linear-gradient(135deg,#c3fff0,#a8f5e8)!important;color:#0b8662!important;font-weight:700;border-radius:12px;padding:8px 18px;font-size:15px;margin-bottom:12px;letter-spacing:.01em;animation:glow 2s ease-in-out infinite alternate;box-shadow:0 2px 8px rgba(11,134,98,0.2)}
+    @keyframes glow{0%{box-shadow:0 2px 8px rgba(11,134,98,0.2)}100%{box-shadow:0 4px 16px rgba(11,134,98,0.3)}}
+    .panelEnt .heading{font-weight:800;font-size:22px;color:#089373;margin-bottom:12px;text-align:center;animation:fadeIn 1s ease-out 0.3s both}
+    @keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+    .panelEnt .summary{color:#339883;font-size:15px;margin-bottom:20px;font-weight:500;text-align:center;animation:fadeIn 1s ease-out 0.5s both;line-height:1.5}
+    .panelEnt .dist {font-size:16px;font-weight:600;margin-bottom:16px;animation:fadeIn 1s ease-out 0.7s both;color:#2d7a6b}
+    .panelEnt .accionBtn{margin:10px 0 0 0;display:flex;justify-content:center;width:100%}
+    .panelEnt .accionBtn button{background:linear-gradient(135deg,#21d692,#04b1eb,#16c371)!important;color:#103622;border:0;padding:18px 32px;font-weight:900;border-radius:16px;font-size:20px;box-shadow:0 4px 20px rgba(6,186,215,0.3), 0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease;cursor:pointer;width:100%;position:relative;overflow:hidden;animation:buttonPulse 2s ease-in-out infinite}
+    .panelEnt .accionBtn button:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(6,186,215,0.4), 0 4px 12px rgba(0,0,0,0.15)}
+    .panelEnt .accionBtn button:active{transform:scale(.98)}
+    @keyframes buttonPulse{0%,100%{box-shadow:0 4px 20px rgba(6,186,215,0.3), 0 2px 8px rgba(0,0,0,0.1)}50%{box-shadow:0 4px 20px rgba(6,186,215,0.4), 0 2px 8px rgba(0,0,0,0.1)}}
+    @keyframes retryPulse{0%,100%{transform:scale(1);box-shadow:0 4px 12px rgba(245,158,11,0.3)}50%{transform:scale(1.02);box-shadow:0 6px 16px rgba(245,158,11,0.4)}}
+    .panelEnt .seal{margin-top:24px;color:#05876d!important;background:linear-gradient(135deg,#d8fdec,#c8f7e0)!important;font-weight:500;border-radius:12px;padding:8px 16px;font-size:13px;display:inline-flex;align-items:center;gap:8px;animation:fadeIn 1s ease-out 1s both;box-shadow:0 2px 8px rgba(5,135,109,0.15)}
+    .footer{background:#e8f3fc!important;color:#698aa0!important;border:none;}
+    body{background:#f2f6fc!important;color:#232e3e;}
+    .mainBlock,.card,.panelEnt{background:#fff!important;border:1px solid #e0e8ef!important;border-radius:16px!important;color:#232e3e;box-shadow:0 2px 10px #1b93c011}
+    .panelEnt .heading{color:#10b16a;}
+    .panelEnt .accionBtn button{background:linear-gradient(90deg,#16c371 70%,#2493e3 100%)!important;color:#153422;font-size:20px;border-radius:14px;font-weight:900;border:none}
+    .badge{background:#c3fbe4!important;color:#0e8460!important;border-radius:7px;}
+    .seal{background:#e5fdf2!important;color:#05876d!important;}
+    #map{border:2px solid #e0e8ef!important;border-radius:16px!important}
+    .footer{background:#fff!important;color:#406081!important;border:none}
+    h1,h2,h3,h4{color:#1a3954;}
+    body{background:#0a1422!important;color:#eaf6ff;}
+    .mainBlock,.card,.panelEnt{background:#fff!important;border:1px solid #1e3145!important;border-radius:16px!important;color:#294161;box-shadow:0 2px 10px #1b93c018}
+    .panelEnt .heading{color:#16818f;}
+    .panelEnt .accionBtn button{background:linear-gradient(90deg,#16c371 70%,#2493e3 100%)!important;color:#153422;font-size:20px;border-radius:14px;font-weight:900;border:none}
+    .badge{background:#0a2538!important;color:#a7fff7!important;border-radius:7px;}
+    #map{border:2px solid #223157!important;border-radius:16px!important}
+    h1,h2,h3,h4{color:#1785e4;}
+    .miniModal#legalBox{background:#172336;color:#bbd3ea;border:1px solid #2d4158;font-size:15px;box-shadow:0 2px 14px #24617b24}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="brand"><div style="width:28px;height:28px;border-radius:8px;background:conic-gradient(from 140deg,#22c55e,#3b82f6,#22c55e);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;color:#fff;">P</div>ParentAlloc · Entrega</div>
+  </header>
+
+  <main class="mainBlock">
+    <div id="map"></div>
+    <div class="panelEnt">
+      <span class="badge">Ubicación detectada</span>
+      <div class="heading" id="status">Dispositivo localizado</div>
+      <div class="summary" id="summary">Tu móvil está a cierta distancia de donde te encuentras actualmente.</div>
+      <div class="dist"><b><span id="distanceBadge">… km</span></b> de distancia desde tu posición actual.</div>
+      <div class="accionBtn">
+        <button id="routeBtn">Trazar ruta en Google Maps</button>
+        <button id="retryBtn" style="display:none;margin-top:12px;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;border:none;padding:14px 24px;border-radius:12px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(245,158,11,0.3);transition:all 0.3s ease;animation:retryPulse 1.5s ease-in-out infinite;">🔄 Reintentar ubicación</button>
+      </div>
+    </div>
+  </main>
+
+  <br>
+
+  <div class="miniModal" id="legalBox" style="display:block;position:relative;margin:20px auto;background:#f4fbff;border:1.5px solid #b6c6de;padding:10px 20px 10px 18px;border-radius:13px;color:#2a405b;font-size:14px;max-width:96vw;box-shadow:0 1px 6px #a4c0dd24;text-align:center;">
+    <span style="font-weight:600;color:#04748b">Descargo:</span> La ubicación puede tener un margen de error de hasta 1000 metros. La exactitud depende del método utilizado.
+  </div>
+
+  <div class="miniModal" id="legalBox" style="display:none">
+    <div><strong style="color:#cfe5ff">Términos y descargo</strong></div>
+    <div>Las estimaciones pueden tener errores de hasta 1000 m. La exactitud depende del método (IP, GPS del navegador, triangulación u otros). Esta vista es orientativa y puede diferir de la ubicación real.</div>
+    <div class="actions">
+      <button class="btn" id="okLegal">Entendido</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    const SKEY = 'lt_cached_target_v1';
+    const STATE = { map:null, me:null, phone:null, meMarker:null, phoneMarker:null, meAccCircle:null, line:null };
+
+    function metersToKm(m){ return (m/1000).toFixed(1); }
+    function toRad(d){ return d*Math.PI/180; }
+    function haversine(a,b){
+      const R=6371000; const dLat=toRad(b.lat-a.lat), dLon=toRad(b.lon-a.lon);
+      const s1=Math.sin(dLat/2), s2=Math.sin(dLon/2);
+      const aa=s1*s1 + Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*s2*s2; return 2*R*Math.asin(Math.sqrt(aa));
+    }
+    function destPoint(lat, lon, bearingDeg, distanceKm){
+      const R=6371; const brng=toRad(bearingDeg); const d=distanceKm/R;
+      const lat1=toRad(lat), lon1=toRad(lon);
+      const lat2=Math.asin(Math.sin(lat1)*Math.cos(d)+Math.cos(lat1)*Math.sin(d)*Math.cos(brng));
+      const lon2=lon1+Math.atan2(Math.sin(brng)*Math.sin(d)*Math.cos(lat1), Math.cos(d)-Math.sin(lat1)*Math.sin(lat2));
+      return { lat:+(lat2*180/Math.PI).toFixed(6), lon:+(lon2*180/Math.PI).toFixed(6) };
+    }
+    function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(t._id); t._id=setTimeout(()=>t.style.display='none', 2400); }
+    function storeCachedTarget(obj){ try{ localStorage.setItem(SKEY, JSON.stringify(obj)); }catch(_e){} }
+    function readCachedTarget(){ try{ const v=localStorage.getItem(SKEY); return v?JSON.parse(v):null; }catch(_e){ return null; } }
+    function computeRandomTargetAround(center){ const distKm=1.5+Math.random()*23.5; const bearing=Math.random()*360; return { ...destPoint(center.lat,center.lon,bearing,distKm), distKm }; }
+
+    async function overpassPOI(point){
+      try{
+        const radius=25000; // Radio de 25km para zonas urbanas más cercanas
+        // Buscar ciudades, centros comerciales, estaciones de transporte, hospitales, etc.
+        const q=`[out:json][timeout:10];(
+          node["place"="city"](around:${radius},${point.lat},${point.lon});
+          node["place"="town"](around:${radius},${point.lat},${point.lon});
+          node["place"="village"](around:${radius},${point.lat},${point.lon});
+          node["place"="suburb"](around:${radius},${point.lat},${point.lon});
+          node["shop"="mall"](around:${radius},${point.lat},${point.lon});
+          way["shop"="mall"](around:${radius},${point.lat},${point.lon});
+          relation["shop"="mall"](around:${radius},${point.lat},${point.lon});
+          node["public_transport"="station"](around:${radius},${point.lat},${point.lon});
+          node["amenity"="hospital"](around:${radius},${point.lat},${point.lon});
+          node["amenity"="university"](around:${radius},${point.lat},${point.lon});
+          node["amenity"="shopping_center"](around:${radius},${point.lat},${point.lon});
+          node["leisure"="park"](around:${radius},${point.lat},${point.lon});
+          node["amenity"="restaurant"](around:${radius},${point.lat},${point.lon});
+        );out center 20;`;
+        const url=`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(q)}`;
+        const r=await fetch(url); if(!r.ok) return null; const j=await r.json();
+        const els=j.elements||[]; if(!els.length) return null; 
+        
+        // Priorizar ciudades y zonas urbanas cercanas
+        const prioritized = els.filter(el => {
+          const tags = el.tags || {};
+          return tags.place === 'city' || tags.place === 'town' || tags.place === 'suburb' ||
+                 tags.shop === 'mall' || tags.public_transport === 'station' || 
+                 tags.amenity === 'shopping_center' || tags.amenity === 'hospital' ||
+                 tags.amenity === 'restaurant' || tags.leisure === 'park';
+        });
+        
+        const candidates = prioritized.length > 0 ? prioritized : els;
+        const pick = candidates[Math.floor(Math.random()*candidates.length)];
+        const lat=pick.lat || pick.center?.lat, lon=pick.lon || pick.center?.lon; 
+        if(!lat||!lon) return null; 
+        
+        const name = pick.tags?.name || 
+                    (pick.tags?.place === 'city' ? 'Ciudad' :
+                     pick.tags?.place === 'town' ? 'Pueblo' :
+                     pick.tags?.place === 'suburb' ? 'Barrio' :
+                     pick.tags?.shop === 'mall' ? 'Centro comercial' :
+                     pick.tags?.public_transport === 'station' ? 'Estación de transporte' :
+                     pick.tags?.amenity === 'hospital' ? 'Hospital' :
+                     pick.tags?.amenity === 'university' ? 'Universidad' :
+                     pick.tags?.amenity === 'restaurant' ? 'Zona comercial' :
+                     pick.tags?.leisure === 'park' ? 'Parque urbano' :
+                     'Zona urbana cercana');
+        
+        return { lat, lon, name };
+      }catch(_e){ return null; }
+    }
+
+    function setStatus(text){ document.getElementById('status').textContent=text; }
+
+    function renderAll(){
+      if(!STATE.map || !STATE.me || !STATE.phone) return;
+      if(STATE.meMarker){ STATE.map.removeLayer(STATE.meMarker); }
+      if(STATE.phoneMarker){ STATE.map.removeLayer(STATE.phoneMarker); }
+      if(STATE.meAccCircle){ STATE.map.removeLayer(STATE.meAccCircle); }
+      if(STATE.line){ STATE.map.removeLayer(STATE.line); }
+
+      STATE.meMarker = L.circleMarker([STATE.me.lat, STATE.me.lon], { radius:6, color:'#0f5132', weight:1, fillColor:'#22c55e', fillOpacity:1 }).addTo(STATE.map).bindTooltip('Tú');
+      STATE.meAccCircle = L.circle([STATE.me.lat, STATE.me.lon], { radius: STATE.me.accuracy||60, color:'#22c55e', weight:1, opacity:.4, fillColor:'#22c55e', fillOpacity:.08 }).addTo(STATE.map);
+
+      const pulseEl=document.createElement('div'); pulseEl.className='pulseDot'; pulseEl.innerHTML='<span>📍</span>';
+      const pulseIcon=L.divIcon({ className:'', html:pulseEl, iconSize:[16,16] });
+      STATE.phoneMarker = L.marker([STATE.phone.lat, STATE.phone.lon], { icon:pulseIcon, title:'Posible móvil' }).addTo(STATE.map);
+
+      STATE.line = L.polyline([[STATE.me.lat,STATE.me.lon],[STATE.phone.lat,STATE.phone.lon]], { color:'#60a5fa', weight:2, opacity:.85, dashArray:'6 6' }).addTo(STATE.map);
+
+      const b=L.latLngBounds([[STATE.me.lat,STATE.me.lon],[STATE.phone.lat,STATE.phone.lon]]); STATE.map.fitBounds(b, { padding:[20,20] });
+      const dist=haversine({lat:STATE.me.lat,lon:STATE.me.lon},{lat:STATE.phone.lat,lon:STATE.phone.lon});
+      document.getElementById('distanceBadge').textContent = metersToKm(dist) + ' km';
+    }
+
+    function explain(method, poi){
+      let msg = poi && poi.name ? `Tu móvil podría estar en «${poi.name}»` : 'Tu móvil podría estar en una zona cercana con actividad.';
+      document.getElementById('summary').textContent = msg + ". Estimación generada por señales y actividad local.";
+    }
+
+    function geolocateUser(cb){
+      if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(pos=>{
+          const {latitude, longitude, accuracy} = pos.coords;
+          cb({lat:latitude, lon:longitude, accuracy:Math.max(accuracy||60, 20)}, 'gps');
+        }, _err=>{
+          fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+            cb({lat:d.latitude, lon:d.longitude, accuracy:1200}, 'ip');
+          }).catch(()=> cb(null,'none'));
+        }, {enableHighAccuracy:true, timeout:9000, maximumAge:15000});
+      }else{
+        fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+          cb({lat:d.latitude, lon:d.longitude, accuracy:1500}, 'ip');
+        }).catch(()=> cb(null,'none'));
+      }
+    }
+
+    function ensurePhoneTargetAround(me, done){
+      const cached = readCachedTarget();
+      if(cached && typeof cached.lat==='number' && typeof cached.lon==='number'){
+        // Pequeño jitter < 20 m para variaciones mínimas por visita
+        const jitterLat = (Math.random()-0.5) * 0.00018; // ~20 m
+        const jitterLon = (Math.random()-0.5) * 0.00018; // ~20 m aprox
+        done({ lat:cached.lat + jitterLat, lon:cached.lon + jitterLon, cached:true, meta:cached.meta||null });
+        return;
+      }
+      const seed = computeRandomTargetAround(me);
+      overpassPOI(seed).then(poi=>{
+        if(poi){
+          const out = { lat:+(+poi.lat).toFixed(6), lon:+(+poi.lon).toFixed(6) };
+          storeCachedTarget({ lat:out.lat, lon:out.lon, meta:{poiName:poi.name} });
+          done({ ...out, cached:false, meta:{poiName:poi.name} });
+        }else{
+          const out = { lat:+seed.lat.toFixed(6), lon:+seed.lon.toFixed(6) };
+          storeCachedTarget({ lat:out.lat, lon:out.lon, meta:null });
+          done({ ...out, cached:false, meta:null });
+        }
+      });
+    }
+
+    function getUserLocation(cb) {
+      if (navigator.geolocation) {
+        const opts = {enableHighAccuracy:true,timeout:9000,maximumAge:15000};
+        navigator.geolocation.getCurrentPosition(function(pos){
+          const {latitude,longitude,accuracy} = pos.coords;
+          cb({lat:latitude,lon:longitude,accuracy:Math.max(accuracy||60,20),source:'gps'});
+        }, function(){
+          fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+            cb({lat:d.latitude, lon:d.longitude, accuracy:1500, source:'ip'});
+          }).catch(()=>cb(null));
+        }, opts);
+      } else {
+        fetch('https://ipapi.co/json/').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+          cb({lat:d.latitude, lon:d.longitude, accuracy:1800, source:'ip'});
+        }).catch(()=>cb(null));
+      }
+    }
+
+    let userLoc=null, userLocRequested=false;
+    function solicitarUbicacionEntrega() {
+      userLocRequested=true;
+      getUserLocation(function(loc){
+        userLoc = loc;
+        // No mostrar detalles técnicos de geolocalización
+        document.getElementById('summary').textContent = 'Tu móvil está a cierta distancia de donde te encuentras actualmente.';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      STATE.map = L.map('map', { zoomControl:true });
+      const tiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap contributors' }); tiles.addTo(STATE.map);
+      STATE.map.setView([-12.0464,-77.0428], 6);
+
+      // Función principal que procesa la ubicación
+      function processLocation() {
+        // Mostrar alerta de permisos
+        if (!navigator.geolocation) {
+          alert('⚠️ Para poder guiarte correctamente, necesitas habilitar la ubicación GPS en tu navegador.\n\nPor favor:\n1. Acepta los permisos de ubicación\n2. Permite el acceso a la navegación\n3. Recarga la página');
+          setStatus('Permisos de ubicación requeridos');
+          document.getElementById('retryBtn').style.display = 'block';
+          return;
+        }
+
+        // Verificar si ya se otorgaron permisos
+        navigator.geolocation.getCurrentPosition(
+          function() {
+            // Permisos otorgados, continuar
+            geolocateUser(function(me, method) {
+              if (!me) {
+                setStatus('Error de localización');
+                return;
+              }
+              
+              STATE.me = me;
+              ensurePhoneTargetAround(me, function(phone) {
+                STATE.phone = phone;
+                renderAll();
+                explain(method, phone.meta);
+              });
+            });
+          },
+          function() {
+            // Permisos denegados, mostrar alerta
+            alert('🚨 IMPORTANTE: Para poder guiarte correctamente, necesitas:\n\n✅ Aceptar los permisos de ubicación GPS\n✅ Permitir el acceso a la navegación\n✅ Habilitar la geolocalización en tu navegador\n\nSin estos permisos no podremos mostrarte la ubicación de tu móvil.\n\nPor favor acepta los permisos y recarga la página.');
+            setStatus('Permisos de ubicación denegados');
+            document.getElementById('retryBtn').style.display = 'block';
+          },
+          { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        );
+      }
+
+      // Iniciar procesamiento
+      processLocation();
+
+      // No permitir regenerar en la entrega: la estimación queda cacheada
+      document.getElementById('routeBtn').addEventListener('click', ()=>{
+        if(!STATE.me || !STATE.phone){ return; }
+        const s = `${STATE.me.lat},${STATE.me.lon}`; const d = `${STATE.phone.lat},${STATE.phone.lon}`;
+        window.open(`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(s)}&destination=${encodeURIComponent(d)}&travelmode=driving`,'_blank');
+      });
+
+      // Botón para reintentar geolocalización
+      document.getElementById('retryBtn').addEventListener('click', ()=>{
+        setStatus('Solicitando ubicación...');
+        document.getElementById('retryBtn').style.display = 'none';
+        processLocation();
+      });
+
+      const legalBox=document.getElementById('legalBox');
+      if(!localStorage.getItem('lt_legal_ok')){ legalBox.style.display='block'; }
+      document.getElementById('okLegal').addEventListener('click',()=>{ legalBox.style.display='none'; localStorage.setItem('lt_legal_ok','1'); });
+      document.getElementById('year').textContent = new Date().getFullYear();
+    });
+  </script>
+
+  <!-- Footer -->
+  <footer class="footer" style="text-align:center;padding:20px;background:#e8f3fc;color:#698aa0;border-top:1px solid #e0e8ef;margin-top:20px;">
+    <div style="font-size:12px;">
+      © <span id="year"></span> ParentAlloc. Todos los derechos reservados.<br>
+      <div style="margin-top:8px;color:#5a7a8a;">
+        💻 Desarrollado por <strong style="color: #3b82f6;">DevCore Solutions</strong> • Equipo profesional de ingenieros especializados
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
+
+

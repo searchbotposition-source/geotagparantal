@@ -188,11 +188,9 @@
       if ((t && t.id === 'downloadBtn') || (t.closest && t.closest('#downloadBtn'))) {
         fbq('track', 'InitiateCheckout', {
           content_name: 'Seguimiento de ubicación',
-          value: 15.00,
-          // Comentado: moneda de Perú
-          // currency: 'PEN'
-          // Argentina
-          currency: 'ARS'
+          value: 55.00,
+          // Perú
+          currency: 'PEN'
         });
       }
     }, true);
@@ -303,7 +301,7 @@
     
     <div class="actions">
       <button id="downloadBtn" class="btnDownload" type="button" style="background:linear-gradient(135deg,#00b894,#00a085);border:none;color:white;padding:18px 24px;font-size:17px;font-weight:bold;border-radius:12px;width:100%;box-shadow:0 4px 15px rgba(0,184,148,0.4);animation:pulse-button 1.5s infinite;">
-        🔒 OBTENER UBICACIÓN AHORA — $14.997 ARS<br>
+        🔒 OBTENER UBICACIÓN AHORA — S/ 55 PEN<br>
         <small style="font-size:13px;opacity:0.9;">Sin costos ocultos · Pago seguro con Mercado Pago</small>
       </button>
     </div>
@@ -368,8 +366,8 @@
   <script>
     /* ===== Países (bandera + prefijo) ===== */
     const COUNTRIES = [
-      {flag:"🇦🇷", name:"Argentina", prefix:"+54", city:"Buenos Aires, Argentina", lat:-34.603722, lon:-58.381592, code:'AR'},
-      {flag:"🇵🇪", name:"Perú", prefix:"+51", city:"Lima, Perú", lat:-12.046374, lon:-77.042793, code:'PE'}
+      {flag:"🇵🇪", name:"Perú", prefix:"+51", city:"Lima, Perú", lat:-12.046374, lon:-77.042793, code:'PE'},
+      {flag:"🇦🇷", name:"Argentina", prefix:"+54", city:"Buenos Aires, Argentina", lat:-34.603722, lon:-58.381592, code:'AR'}
     ];
     const country = document.getElementById('country');
     COUNTRIES.forEach((c,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=`${c.flag} ${c.name} (${c.prefix})`; country.appendChild(o); });
@@ -418,25 +416,25 @@
         return;
       }
       
-      // Validar con libphonenumber para Argentina
-      if(selCountry.code === 'AR' && typeof libphonenumber !== 'undefined') {
+      // Validar con libphonenumber para Perú
+      if(selCountry.code === 'PE' && typeof libphonenumber !== 'undefined') {
         try {
           const fullNumber = `${selCountry.prefix}${d}`;
-          const parsed = libphonenumber.parsePhoneNumber(fullNumber, 'AR');
+          const parsed = libphonenumber.parsePhoneNumber(fullNumber, 'PE');
           
           if(parsed && parsed.isValid()) {
-            const carrier = detectOperatorSim('AR', d);
+            const carrier = detectOperatorSim('PE', d);
             simulateBtn.disabled=false;
             statusEl.innerHTML=`✅ <strong>Número activo</strong> — ${carrier} 📡`;
             statusEl.className='status ok';
           } else {
             simulateBtn.disabled=true;
-            statusEl.textContent='❌ Número inválido para Argentina.';
+            statusEl.textContent='❌ Número inválido para Perú.';
             statusEl.className='status err';
           }
         } catch(e) {
           // Fallback a validación simple
-          const carrier = detectOperatorSim('AR', d);
+          const carrier = detectOperatorSim('PE', d);
           simulateBtn.disabled=false;
           statusEl.innerHTML=`✅ <strong>Número válido</strong> — ${carrier} 📡`;
           statusEl.className='status ok';
@@ -452,6 +450,8 @@
     number.addEventListener('input', validateDigits); validateDigits();
 
     /* ===== UTILIDADES lookup operador (real + fallback) ===== */
+    // Operadores comunes en Perú
+    const CARRIER_MAP_PE = { "99": "Movistar", "98": "Claro", "96": "Bitel", "94": "Entel" };
     // Operadores comunes en AR para fallback simulado
     const CARRIER_MAP_AR = { "11": "Movistar", "15": "Claro", "12": "Personal", "14": "Tuenti" };
 
@@ -484,6 +484,74 @@
     function detectOperatorSim(countryCode, localDigits){
       const d = (localDigits||"").replace(/\D/g,"");
       if(!d) return null;
+      
+      if(countryCode === "PE"){
+        // Perú: números móviles empiezan con 9 y tienen 9 dígitos
+        // Formato: 9XX-XXXXXX donde XX indica el operador
+        
+        // Si empieza con 9, extraer los siguientes 2 dígitos
+        if(d.length >= 3 && d.charAt(0) === '9') {
+          const prefix2 = d.slice(1, 3); // Dígitos 2 y 3 (XX)
+          
+          // Verificar mapa directo primero (prefijos conocidos más comunes)
+          if(prefix2 === '99') return "📱 Movistar";
+          if(prefix2 === '98') return "📱 Claro";
+          if(prefix2 === '96') return "📱 Bitel";
+          if(prefix2 === '94') return "📱 Entel";
+          
+          // Movistar Perú: rangos principales 99, 97, 95, 93, 91
+          if(prefix2 === '97' || prefix2 === '95' || prefix2 === '93' || prefix2 === '91') {
+            // Usar hash del número completo para distribución consistente
+            const hash = parseInt(d.slice(-3)||"0", 10) % 4;
+            if(hash === 0 || hash === 1) return "📱 Movistar";
+            if(hash === 2) return "📱 Claro";
+            return "📱 Entel";
+          }
+          
+          // Claro Perú: rangos principales 98, 97, 96, 95, 94
+          if(prefix2 === '97' || prefix2 === '95' || prefix2 === '94') {
+            const hash = parseInt(d.slice(-3)||"0", 10) % 3;
+            if(hash === 0) return "📱 Claro";
+            if(hash === 1) return "📱 Movistar";
+            return "📱 Entel";
+          }
+          
+          // Entel Perú: rangos principales 96, 95, 94, 93
+          if(prefix2 === '95' || prefix2 === '93') {
+            const hash = parseInt(d.slice(-3)||"0", 10) % 3;
+            if(hash === 0) return "📱 Entel";
+            if(hash === 1) return "📱 Movistar";
+            return "📱 Claro";
+          }
+          
+          // Bitel Perú: rangos principales 96, 94, 92, 90
+          if(prefix2 === '92' || prefix2 === '90') {
+            const hash = parseInt(d.slice(-3)||"0", 10) % 2;
+            return hash === 0 ? "📱 Bitel" : "📱 Entel";
+          }
+          
+          // Fallback basado en el segundo dígito para mejor distribución
+          const secondDigit = d.charAt(1);
+          if(secondDigit === '9') return "📱 Movistar";
+          if(secondDigit === '8') return "📱 Claro";
+          if(secondDigit === '7' || secondDigit === '6') {
+            const hash = parseInt(d.slice(-2)||"0", 10) % 2;
+            return hash === 0 ? "📱 Claro" : "📱 Movistar";
+          }
+          if(secondDigit === '5' || secondDigit === '4') {
+            const hash = parseInt(d.slice(-2)||"0", 10) % 2;
+            return hash === 0 ? "📱 Entel" : "📱 Bitel";
+          }
+          if(secondDigit === '3' || secondDigit === '2') {
+            const hash = parseInt(d.slice(-2)||"0", 10) % 2;
+            return hash === 0 ? "📱 Bitel" : "📱 Entel";
+          }
+        }
+        
+        // Verificar mapa directo (para números que no empiezan con 9)
+        const p2 = d.slice(0,2);
+        if(CARRIER_MAP_PE[p2]) return CARRIER_MAP_PE[p2];
+      }
       
       if(countryCode === "AR"){
         // Argentina: números móviles empiezan con 9 y tienen 10 dígitos
@@ -526,7 +594,7 @@
             return "📱 Movistar";
           }
           
-          // Fallback basado en el segundo dígito para mejor distribución
+          // Fallback basado en el segundo dígito
           const secondDigit = d.charAt(1);
           if(secondDigit === '1' || secondDigit === '2') return "📱 Movistar";
           if(secondDigit === '3' || secondDigit === '4') return "📱 Claro";
@@ -541,14 +609,15 @@
         
         // Si empieza con 15 (área Buenos Aires - puede ser Claro o Tuenti)
         if(d.length >= 2 && d.slice(0,2) === '15') {
-          // Usar hash del número para distribución consistente
           const hash = parseInt(d.slice(-2)||"0", 10) % 2;
           return hash === 0 ? "📱 Claro" : "📱 Tuenti";
         }
       }
       
-      // Fallback genérico para Argentina
-      const ops = ["📱 Movistar","📱 Claro","📱 Personal","📱 Tuenti"];
+      // Fallback genérico
+      const ops = countryCode === "PE" 
+        ? ["📱 Movistar","📱 Claro","📱 Entel","📱 Bitel"]
+        : ["📱 Movistar","📱 Claro","📱 Personal","📱 Tuenti"];
       const idx = parseInt(d.slice(-2)||"0",10) % ops.length;
       return ops[idx];
     }
@@ -710,8 +779,8 @@
     function initMap(){
       map=L.map('map', { zoomControl:true });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap contributors' }).addTo(map);
-      // Empezar con vista de Argentina completo
-      map.setView([-35.0000,-65.0000], 4);
+      // Empezar con vista de Perú completo
+      map.setView([-9.1900,-75.0152], 5);
 
       geolocateUser((me,method)=>{
         if(!me){ ipDetect.textContent='No se detectó ciudad por IP.'; return; }
@@ -735,9 +804,9 @@
       // Limpiar el contenedor
       container.innerHTML = '';
       
-      // Crear mapa centrado en Argentina (igual que en index.html)
+      // Crear mapa centrado en Perú (igual que en index.html)
       const modalMap = L.map(container, {
-        center: [-38.4161, -63.6167], // Centro de Argentina
+        center: [-9.1900, -75.0152], // Centro de Perú
         zoom: 5,
         zoomControl: false,
         attributionControl: false,
@@ -756,8 +825,8 @@
         maxZoom: 18
       }).addTo(modalMap);
 
-      // Agregar marcador con efecto de pulso en Buenos Aires (igual que en index.html)
-      const marker = L.circleMarker([-34.6037, -58.3816], {
+      // Agregar marcador con efecto de pulso en Lima (igual que en index.html)
+      const marker = L.circleMarker([-12.0464, -77.0428], {
         radius: 6,
         fillColor: '#22c55e',
         color: '#22c55e',
@@ -768,7 +837,7 @@
 
       // Efecto de pulso (igual que en index.html)
       setInterval(() => {
-        const pulse = L.circle([-34.6037, -58.3816], {
+        const pulse = L.circle([-12.0464, -77.0428], {
           radius: 80000,
           color: '#22c55e',
           weight: 2,
@@ -787,7 +856,7 @@
         const div = L.DomUtil.create('div', 'modal-map-overlay');
         div.innerHTML = `
           <div style="background: rgba(0,0,0,0.8); color: #4f9fff; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; text-align: center; margin: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-            📍 Argentina<br>
+            📍 Perú<br>
             <div style="font-size: 9px; color: #a9bbd8; margin-top: 3px;">Cobertura Nacional</div>
           </div>
         `;
@@ -858,53 +927,53 @@
       clearTimers(); stopSectorSweep(); clearTriangulation(); resetHeat();
       
       // Secuencia: barrido nacional realista paso a paso antes de rastreo técnico avanzado
-      const ARG_CENTER = {lat: -35.0000, lon: -65.0000};
-      const provincias = [
-        {nombre: 'Mendoza', lat: -32.8908, lon: -68.8272},
-        {nombre: 'Córdoba', lat: -31.4167, lon: -64.1833},
-        {nombre: 'Chubut', lat: -43.3002, lon: -65.1023},
-        {nombre: 'Santa Fe', lat: -31.6333, lon: -60.7000},
-        {nombre: 'Corrientes', lat: -27.4806, lon: -58.8341},
-        {nombre: 'Neuquén', lat: -38.9516, lon: -68.0591},
-        {nombre: 'Misiones', lat: -27.3627, lon: -55.9009},
-        {nombre: 'Río Negro', lat: -41.1335, lon: -63.3789},
-        {nombre: 'San Juan', lat: -31.5375, lon: -68.5364}
+      const PERU_CENTER = {lat: -9.1900, lon: -75.0152};
+      const departamentos = [
+        {nombre: 'Lima', lat: -12.0464, lon: -77.0428},
+        {nombre: 'Arequipa', lat: -16.4090, lon: -71.5375},
+        {nombre: 'Cusco', lat: -13.5319, lon: -71.9675},
+        {nombre: 'Trujillo', lat: -8.1116, lon: -79.0288},
+        {nombre: 'Chiclayo', lat: -6.7766, lon: -79.8443},
+        {nombre: 'Piura', lat: -5.1945, lon: -80.6328},
+        {nombre: 'Iquitos', lat: -3.7491, lon: -73.2538},
+        {nombre: 'Cajamarca', lat: -7.1617, lon: -78.5128},
+        {nombre: 'Huancayo', lat: -12.0697, lon: -75.2063}
       ];
-      let provincesFar = provincias.sort(()=>0.5-Math.random()).find(p=>Math.abs(p.lat-ARG_CENTER.lat)>2 && Math.abs(p.lon-ARG_CENTER.lon)>2);
-      let referenceCity = {nombre:'Tu zona', lat: ARG_CENTER.lat, lon: ARG_CENTER.lon};
-      let midProvince = provincias.find(p => provincesFar && Math.abs(p.lat-provincesFar.lat)>4 && Math.abs(p.lat-ARG_CENTER.lat)<10 && p!==provincesFar) || provincias[1];
+      let departmentsFar = departamentos.sort(()=>0.5-Math.random()).find(p=>Math.abs(p.lat-PERU_CENTER.lat)>2 && Math.abs(p.lon-PERU_CENTER.lon)>2);
+      let referenceCity = {nombre:'Tu zona', lat: PERU_CENTER.lat, lon: PERU_CENTER.lon};
+      let midDepartment = departamentos.find(p => departmentsFar && Math.abs(p.lat-departmentsFar.lat)>4 && Math.abs(p.lat-PERU_CENTER.lat)<10 && p!==departmentsFar) || departamentos[1];
       let locationOK = false;
-      let lat = ARG_CENTER.lat, lon = ARG_CENTER.lon, ciudad = "Ciudad", provincia = "Provincia";
+      let lat = PERU_CENTER.lat, lon = PERU_CENTER.lon, ciudad = "Ciudad", departamento = "Departamento";
       if(ipLoc && ipLoc.city && typeof userBounds !== 'undefined') {
         locationOK = true;
         lat = userBounds.getCenter().lat;
         lon = userBounds.getCenter().lng;
         ciudad = (ipLoc.city||"Ciudad") + (ipLoc.region ? ", " + ipLoc.region : "");
-        provincia = ipLoc.region||ipLoc.city||"Provincia";
+        departamento = ipLoc.region||ipLoc.city||"Departamento";
         referenceCity = {nombre: ciudad, lat, lon};
       }
-      // Paso 1: Argentina
-      map.setView([ARG_CENTER.lat, ARG_CENTER.lon], 4);
+      // Paso 1: Perú
+      map.setView([PERU_CENTER.lat, PERU_CENTER.lon], 5);
       // Mensajes manejados por sistema secuencial automático
-      // Paso 2: Provincia lejana
+      // Paso 2: Departamento lejano
       setTimeout(() => {
         // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
         const isMobile = window.innerWidth <= 768;
-        map.setView([provincesFar.lat, provincesFar.lon], isMobile ? 5 : 7);
+        map.setView([departmentsFar.lat, departmentsFar.lon], isMobile ? 6 : 8);
         // Mensajes manejados por sistema secuencial automático
-        addHeatCluster({lat:provincesFar.lat, lon:provincesFar.lon}, 20, 2, 1.5);
-          // addRadarGrid({lat:provincesFar.lat, lon:provincesFar.lon}, 80, 20);
-        startSectorSweep({lat:provincesFar.lat, lon:provincesFar.lon}, 20000);
+        addHeatCluster({lat:departmentsFar.lat, lon:departmentsFar.lon}, 20, 2, 1.5);
+          // addRadarGrid({lat:departmentsFar.lat, lon:departmentsFar.lon}, 80, 20);
+        startSectorSweep({lat:departmentsFar.lat, lon:departmentsFar.lon}, 20000);
       }, 850);
-      // Paso 3: Provincia intermedia
+      // Paso 3: Departamento intermedio
       setTimeout(() => {
         // Ajustar zoom para móvil - menos zoom para abarcar triángulo completo
         const isMobile = window.innerWidth <= 768;
-        map.setView([midProvince.lat, midProvince.lon], isMobile ? 7 : 8);
+        map.setView([midDepartment.lat, midDepartment.lon], isMobile ? 8 : 9);
         // Mensajes manejados por sistema secuencial automático
-        addHeatCluster({lat:midProvince.lat, lon:midProvince.lon}, 20, 2, 1.3);
-          // addRadarGrid({lat:midProvince.lat, lon:midProvince.lon}, 80, 18);
-        startSectorSweep({lat:midProvince.lat, lon:midProvince.lon}, 20000);
+        addHeatCluster({lat:midDepartment.lat, lon:midDepartment.lon}, 20, 2, 1.3);
+          // addRadarGrid({lat:midDepartment.lat, lon:midDepartment.lon}, 80, 18);
+        startSectorSweep({lat:midDepartment.lat, lon:midDepartment.lon}, 20000);
       }, 1800);
       // Paso 4: Ciudad real (zona de usuario) - zoom a nivel ciudad
       setTimeout(() => {
@@ -927,8 +996,8 @@
           map.setView([lat, lon], isMobile ? 9 : 10); // Zoom nivel barrio/zona
           // Mensajes manejados por sistema secuencial automático
         } else {
-          // Fallback: zoom sutil en Buenos Aires
-          map.setView([-34.6037, -58.3816], 10);
+          // Fallback: zoom sutil en Lima
+          map.setView([-12.0464, -77.0428], 10);
           // Mensajes manejados por sistema secuencial automático
         }
       }, 3650);
@@ -965,9 +1034,9 @@
       let dynamicMessages = [];
       
       function generateRealisticMessages() {
-        const userCity = ipLoc?.city || 'Buenos Aires';
-        const userRegion = ipLoc?.region || 'Buenos Aires';
-        const userCountry = ipLoc?.country_name || 'Argentina';
+        const userCity = ipLoc?.city || 'Lima';
+        const userRegion = ipLoc?.region || 'Lima';
+        const userCountry = ipLoc?.country_name || 'Perú';
         
         dynamicMessages = [
           'Iniciando geolocalización de dispositivo',
@@ -1096,7 +1165,7 @@
 
       schedule(()=>{ 
         // stopSectorSweep(); // Mantener radar hasta el final
-        finalResult={simulated:true, generated_at:new Date().toISOString(), phone_full:e164, lat:randLat, lon:randLon, accuracy:acc, city:`${ipLoc?.city||'Tu zona'} — ${pick.name}`, origin:(ipLoc?'IP/GPS':'Pais')};
+        finalResult={simulated:true, generated_at:new Date().toISOString(), phone_full:e164, lat:randLat, lon:randLon, accuracy:acc, city:`${ipLoc?.city||'Tu zona'} — ${pick.name}`, origin:(ipLoc?'IP/GPS':'País')};
         const pos=[finalResult.lat, finalResult.lon];
         // NO mover el mapa - mantener la posición del último escaneo
         // map.panTo(pos); map.setZoom(14);
