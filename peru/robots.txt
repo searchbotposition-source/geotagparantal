@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://parentalloc.lat/sitemap.xml
+Sitemap: https://geotagparantal.vercel.app/sitemap.xml
 
 # Security and privacy
 Disallow: /api/
